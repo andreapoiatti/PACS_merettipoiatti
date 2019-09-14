@@ -1,0 +1,28 @@
+	
+	edges_ 		= INTEGER(VECTOR_ELT(mesh_, 6)); 
+	VECTOR_ELT estrae l'elemento 7 dalla lista e lo mette come puntatore, in questo caso come puntatore a intero 
+
+
+num_nodes_ = INTEGER(Rf_getAttrib(VECTOR_ELT(mesh_, 0), R_DimSymbol))[0]; //get length->il [0] serve perchè è un punatore e voglio invece l'elemento semplice
+
+		
+
+
+UInt num_int_nodes = Rf_length(RGlobalVector)/4;
+
+neumann nulle al bordo
+
+std::for_each(bc_indices_.begin(), bc_indices_.end(), [](int& i){i-=1;}); //R parte da 1, passo la lambda function per tornare a numerazione c++ da 0 
+
+REAL, INTEGER, ecc restituiscono array!!!!! del tipo che è indicato in maiuscolo
+
+n_ = INTEGER(Rf_getAttrib(Rcovariates, R_DimSymbol))[0]; //_se è un vettore uso Rf_length, essendo una matrice, uso questa formulazione per avere le due lunghezze, righe, colonne
+
+
+???cosa è il bool _DOFS??? fa calcolarei deg of freedon se è true
+
+
+IN R usa edf in cui c'è il valore dei degrees of freedom
+
+
+\frac{dL}{d\theta} = \sum_i \frac{dA_{ii}}{d\theta} = \text{Tr} (\frac{dA_{ij}}{dtheta})
