@@ -471,20 +471,20 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDeg
 			isRcomputed_ = true;
 			Eigen::SparseLU<SpMat> solver;
 			solver.compute(R0_);
-			auto X2 = solver.solve(R1_);
-			R_ = R1_.transpose() * X2;
+			auto X2 = solver.solve(R1_); //_R0\R1
+			R_ = R1_.transpose() * X2; //_R1^T*R0\R1
 		}
 
-		MatrixXr X3 = X1 + lambda * R_;
+		MatrixXr X3 = X1 + lambda * R_; //_psi^T*Q*Psi+lambda*R1^T*R0\R1
 		Eigen::LDLT<MatrixXr> Dsolver(X3);
 
-		auto k = regressionData_.getObservationsIndices();
-
-		if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) {
-			degrees += regressionData_.getCovariates().cols();
+		auto k = regressionData_.getObservationsIndices(); (//_cerco gl indici delle locations: pur coincidendo con le locations, i nodi possono avere indici diversi)
+//NB migliorabile: nel caso isLocationsByNodes()==true, non ha senso aver usato psi, è l'identità, si possono risparmiare passaggi
+		if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) { //_number of rows of covariates, serve solo per controllo, verifico che ci siano covariate
+			degrees += regressionData_.getCovariates().cols();  //_calcola q+tr(S), questo è q, numero di covariate, numero colonne della matrice delle covariate
 
 			// Setup rhs B
-			MatrixXr B;
+			MatrixXr B; //_NB: se i nodi coincidono con i pi, la matrice Psi è l'identità, perchè diventa psi_i(p_j)=delta_ij
 			B = MatrixXr::Zero(nnodes,nlocations);
 			// B = I(:,k) * Q
 			for (auto i=0; i<nlocations;++i) {
@@ -492,34 +492,38 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDeg
 				ei(i) = 1;
 				VectorXr Qi = LeftMultiplybyQ(ei);
 				for (int j=0; j<nlocations; ++j) {
-					B(k[i], j) = Qi(j);
+					B(k[i], j) = Qi(j); //_riempio i nodi, dove ho anche le locations, che possono avere indici diversi rispetto ai nodi
 				}
 			}
 			// Solve the system TX = B
+			//_B=Q (PSI è l'identità)
 			MatrixXr X;
-			X = Dsolver.solve(B);
-			// Compute trace(X(k,:))
+			X = Dsolver.solve(B); //_X3^-1*B (psi identità)
+			// Compute trace(X)->ovviamente uso k,i come indici perchè gugarda i nodi con la location nell'ordine dei location
 			for (int i = 0; i < k.size(); ++i) {
 				degrees += X(k[i], i);
 			}
 		}
 
-		if (!regressionData_.isLocationsByNodes()){
+		if (!regressionData_.isLocationsByNodes()){ //_ora psi non è l'identità!! (nb stu-hunter SAngalli pdf da pag10 in poi)
+		//_usa la proprietà della traccia: tr(psi*(X3^-1)*psi^T*Q)=tr((X3^-1)*psi^T*Q*psi), quindi
+		//_calcola (X3^-1)*psi^T*Q*psi=(X3^-1)*X1 così ha già calcolato il pezzo psi^T*Q*psi in calcolo precedente
+
 			MatrixXr X;
-			X = Dsolver.solve(MatrixXr(X1));
+			X = Dsolver.solve(MatrixXr(X1)); //_X3^-1*X1
 
 			if (regressionData_.getCovariates().rows() != 0) {
-				degrees += regressionData_.getCovariates().cols();
+				degrees += regressionData_.getCovariates().cols();  //_calcola q+tr(S), questo è q, numero di covariate, numero colonne della matrice delle covariate
 			}
 			for (int i = 0; i<nnodes; ++i) {
-				degrees += X(i,i); //_computes the trace of the matrix S
+				degrees += X(i,i); //_computes the trace of the matrix S (il +q è già stato calcolato)
 			}
 		}
 	}
 	_dof[output_index] = degrees;
 }
 
-//_credo (verificare) che la stocastic si usi se non hai le locations (e usa i nodi come locations)
+//_Verificare a cosa seve la stochastic???
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDegreesOfFreedomStochastic(UInt output_index, Real lambda)
@@ -542,7 +546,7 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDeg
 			}
 		}
 	}
-//_IN Negri la Q è l'identità 
+//_IN Negri la Q è l'identità
 	// Define the first right hand side : | I  0 |^T * psi^T * Q * u
 	MatrixXr b = MatrixXr::Zero(2*nnodes,u.cols());
 	b.topRows(nnodes) = psi_.transpose()* LeftMultiplybyQ(u);
@@ -629,6 +633,44 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::apply(EO
 	}
 }
 
+//_computation of GCV (possibile implementazione)
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
+Real MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::computeGCV(UInt output_index)
+{ //_da modificare il fatto che _dof sia un vettore, serve un solo valore, non serve output index!!
+  //_trovare modo efficiente di calcolare le zhat, come (I-Q+QS)*z oppure posso usare la Hat matrix...cercare metdo efficiente
+	UInt s;
+	//_UInt q=regressionData_.getCovariates().cols(); //_serve se si vuole usare l'articolo di stuHuntersangalli, è già implicito nel degrees of freedom
+	VectorXr z,zhat;
+	if(regressionData_.isLocationsByNodes())
+	{
+		s= this->mesh_.num_nodes(); //_vuol dire che il numero di locations (e quindi il numero di osservazioni, coincide col numero di nodi e le posizioni sono esattamente quelle dei nodi)
+    //_s è la n dell'articolo stuHuntersangalli pdf pag.12, numero locations, dove ho le osservazioni
+		z=VectorXr::Zero(s);
+		for(auto i=0;i<regressionData_.getObservationsIndices().size();i++)
+			z(regressionData_.getObservationsIndices()[i])=regressionData_.getObservationData()[i]; //_mette i valori nei nodi in cui si pongono le locations (nodi coincidono con le location, ma le locations possono avere ordini di numerazione diversi!!
+	} else {
+		s= regressionData_.getNumberofObservations();
+		z=regressionData_.getObservationData();
+	}
+	//_calcolo z_hat, suppongo di avere i valori come per z
+	Real norm_squared=(z-zhat).transpose()*(z-zhat);
+	if(s-dof_[output_index]<0){ //_dof_ non servirà, sarà un valore unico!
+		#ifdef R_VERSION_
+			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->fpcaData_.getLambda()[output_index]);
+			#else
+			std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is:" << this->fpcaData_.getLambda()[output_index] <<"\n";
+			#endif
+			}
+	Real stderror=norm_squared/(s-dof_[output_index]);
+
+	return (s/(s-dof_[output_index]))*stderror; //_Calcolo della GCV come s*(z-zhat)^T*(z-zhat)/(s-(q+trS))^2
+
+}
+
+
+
+
+
 
 
 template<typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
@@ -639,7 +681,9 @@ public:
 
 	void apply()
 	{
-		typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+		typedef EOExpr<Stiff> ETStiff;
+		Stiff EStiff;
+		ETStiff stiff(EStiff);
 	    MixedFERegressionBase<RegressionData, Integrator, ORDER, mydim, ndim>::apply(stiff);
 	}
 };
