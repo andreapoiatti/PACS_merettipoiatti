@@ -26,3 +26,27 @@ IN R usa edf in cui c'è il valore dei degrees of freedom
 
 
 \frac{dL}{d\theta} = \sum_i \frac{dA_{ii}}{d\theta} = \text{Tr} (\frac{dA_{ij}}{dtheta})
+
+
+possibile futuro formaggesco: factories per gestire quale metodo usare
+
+
+riprodurre classe fpcaData, usando la regression data
+
+
+??? compute degrees of freedom stochastic cosa sono??
+
+?? parte mumps come calcola??
+
+	//! A method returning TRUE if the observations are located in the nodes of the mesh or FALSE otherwise
+		inline bool isLocationsByNodes() const {return locations_by_nodes_;}
+
+
+//_Verificare a cosa seve la stochastic per i degrees of freedom
+
+NB se islocationbynodes è true, la matrice psi è identità
+
+
+Da fare:
+rendere scalare _dof e gcv 
+e cercare metodo ottimale per calcolare le z_hat (o uso la H hat matrix e i valori di fn ecc oppure uso (I-Q+QS)*z
