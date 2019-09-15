@@ -450,7 +450,7 @@ void MixedFEFPCAGCV<Integrator,ORDER, mydim, ndim>::computeDegreesOfFreedomExact
 			MatrixXr X;
 			X = Dsolver.solve(MatrixXr(X1));
 			for (int i = 0; i<nnodes; ++i) {
-				degrees += X(i,i);
+				degrees += X(i,i); //_non considera q
 			}
 		}
 	}
@@ -555,7 +555,7 @@ void MixedFEFPCAGCV<Integrator,ORDER, mydim, ndim>::computeGCV(FPCAObject& FPCAi
 		s= this->mesh_.num_nodes();
 		zhat=VectorXr::Zero(s);
 		for(auto i=0;i<this->fpcaData_.getObservationsIndices().size();i++)
-			zhat(this->fpcaData_.getObservationsIndices()[i])=FPCAinput.getObservationData()[i];
+			zhat(this->fpcaData_.getObservationsIndices()[i])=FPCAinput.getObservationData()[i]; //_uses the information from FPCA intput
 	} else {
 		s= this->fpcaData_.getNumberofObservations();
 		zhat=FPCAinput.getObservationData();
