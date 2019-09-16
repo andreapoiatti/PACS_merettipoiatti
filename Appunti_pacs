@@ -50,3 +50,29 @@ NB se islocationbynodes è true, la matrice psi è identità
 Da fare:
 rendere scalare _dof e gcv 
 e cercare metodo ottimale per calcolare le z_hat (o uso la H hat matrix e i valori di fn ecc oppure uso (I-Q+QS)*z
+
+
+Nel codice R, lui calcola esternamentente la GCV, aspetta di avere il risultato completo in bogso, da cui estrae i deg of freedom, edf, usati poi nel resto, caclolando esplicitamente i  beta_hat, z-hat ecc nella get_GCV
+Big sol usa la funzione c++ che scrive dentro i risultati
+
+
+
+
+//_NB compute dof semplicemente dice se dovrà calcolare i dof o meno, se è true, ci mette il calcolo, che è tr(S)+q
+
+
+//DA fare:
+non serve più calcolare i dofs e esportarli nella bigsol, basta tenerli internamente (ottimizzazione), la gcv interna deve ricalcolare gli z_hat.
+NOn servirà più nemmeno usare il vettore (lista) dei dofs, perchè la lambda sarà una sola
+NB attenzione a capire come funziona il caclolo con MUMPS e i deg of freedom stochastic
+
+possibile ripartizione del lavoro:
+Io mi potrei occupare di caclolare GCV e sua derivata come funzioni, Giorgio potrebbe implementare il metodo di newton base 
+
+
+
+
+
+
+
+
