@@ -82,8 +82,8 @@ bool Element<NNODES, 2, 2>::isPointInside(const Point & point) const
 	Eigen::Matrix<Real, 3, 1> lambda = getBaryCoordinates(point);
 
 	return ((-tolerance <= lambda[0]) &&
-				  (-tolerance <= lambda[1]) &&
-				  (-tolerance <= lambda[2]) );
+	        (-tolerance <= lambda[1]) &&
+		(-tolerance <= lambda[2]) );
 }
 
 // TO BE FIXED: if one dir -1, try with others
@@ -234,7 +234,7 @@ bool Element<NNODES, 2, 3>::isPointInside(const Point & point) const
 	err = A*sol-b;
 
 	Real tolerance = (A(0,0)*A(0,0) + A(1,0)*A(1,0) + A(2,0)*A(2,0) +
-	 									A(0,1)*A(0,1) + A(1,1)*A(1,1) + A(2,1)*A(2,1))/4;
+	 		  A(0,1)*A(0,1) + A(1,1)*A(1,1) + A(2,1)*A(2,1))/4;
 
 	if((err(0)*err(0) + err(1)*err(1) + err(2)*err(2)) < tolerance)
 	{
