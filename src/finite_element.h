@@ -18,15 +18,15 @@
  * the order is the polynomial order needed [r], mydim the dimension of the element
  * ndim the dimension of the space in which t is embedded [d]
  *
- * Here are also computed values for the final integration in particular:
- * -> the evaluation of phi in the integration nodes
- * -> the evaluation of the gradient of phi in the integration NODES
+ * Here are also computed values for the integration matrices R0 and R1, in particular:
+ * 1) the evaluation of \hat{phi} in the integration nodes
+ * 2) the evaluation of the gradient of \hat{phi} in the integration NODES
  * If we consider, on a generic node, I := int_{Omega}(<grad(phi_i(p)), grad(phi_j(p))> dp)
  * Letting T: Omega_Master -> Omega s.t p = T(p_hat), (here linear) and invertible
  * Then I ==
  * int{Omega_Master}(<J_{T^-1}^t * grad(\hat{phi}_i(p_hat)), J_{T^-1}^t * grad(\hat{phi}_j(p_hat))> * det(J_{T}) dp_hat)
  * Thus we also compute:
- * -> J_{T^-1}^t * grad(\hat{phi}_i(p_hat)) for all i in 1:mydim
+ * 3) J_{T^-1}^t * grad(\hat{phi}_i(p_hat)) for all i in 1:mydim
  */
 template <class Integrator, UInt ORDER, UInt mydim, UInt ndim>
 class FiniteElement
@@ -44,11 +44,11 @@ class FiniteElement<Integrator, ORDER, 2, 2>
                 Element<3*ORDER, 2, 2> t_;
 
                 // Matrices of evaluations on the master element:
-                // of the i-th phi on the iq-th integration node
-                // ex i-row: [phi_i(qn_1), ...,  phi_i(qn_NNODES)]
+                // of the i-th \hat{phi} on the iq-th integration node
+                // ex i-row: [\hat{phi}_i(qn_1), ...,  \hat{phi}_i(qn_NNODES)]
                 Eigen::Matrix<Real, 3*ORDER, Integrator::NNODES>   phiMapMaster_;
-                // of the i-th (phi_x, phi_y) on the iq-th integration node
-                // ex i-row: [phi_x_i(qn_1), phi_y_i(qn_1), ..., phi_x_i(qn_NNODES), phi_y_i(qn_NNODES)]
+                // of the i-th (\hat{phi}_x, \hat{phi}_y) on the iq-th integration node (grad_hat(\hat{phi}))
+                // ex i-row: [\hat{phi}_x_i(qn_1), \hat{phi}_y_i(qn_1), ..., \hat{phi}_x_i(qn_NNODES), \hat{phi}_y_i(qn_NNODES)]
                 Eigen::Matrix<Real, 3*ORDER, Integrator::NNODES*2> phiDerMapMaster_;
                 // of the i-th (J_{T^-1}^t*\hat{phi}_x, J_{T^-1}^t*\hat{phi}_y) on the iq-th integration node
                 // ex i-row: [J_{T^-1}^t*\hat{phi}_x_i(qn_1), J_{T^-1}^t*\hat{phi}_y_i(qn_1), ..., J_{T^-1}^t*\hat{phi}_x_i(qn_NNODES), J_{T^-1}^t*\hat{phi}_y_i(qn_NNODES)]
@@ -62,15 +62,15 @@ class FiniteElement<Integrator, ORDER, 2, 2>
                 // Constructor
                 //! This is an empty constructor
                 /*!
-                For efficiency and Expression Templates organization of the
-                code, the use of this class is based on the updateElement class
+                * For efficiency and Expression Templates organization of the
+                * code, the use of this class is based on the updateElement class
                 */
                 FiniteElement();
 
                 // Updater
                 //! A member updating the Finite Element properties
                 /*!
-                \param t an element from which to update the finite element properties
+                * \param t an element from which to update the finite element properties
                 */
                 void updateElement(const Element<3*ORDER, 2, 2> & t);
 
@@ -106,11 +106,11 @@ class FiniteElement<Integrator, ORDER, 2, 3>{
                 Element<3*ORDER, 2, 3> t_;
 
                 // Matrices of evaluations on the master element:
-                // of the i-th phi on the iq-th integration node
-                // ex i-row: [phi_i(qn_1), ...,  phi_i(qn_NNODES)]
+                // of the i-th \hat{phi} on the iq-th integration node
+                // ex i-row: [\hat{phi}_i(qn_1), ...,  \hat{phi}_i(qn_NNODES)]
                 Eigen::Matrix<Real, 3*ORDER, Integrator::NNODES>       phiMapMaster_;
-                // of the i-th (phi_x, phi_y) on the iq-th integration node
-                // ex i-row: [phi_x_i(qn_1), phi_y_i(qn_1), ..., phi_x_i(qn_NNODES), phi_y_i(qn_NNODES)]
+                // of the i-th (\hat{phi}_x, \hat{phi}_y) on the iq-th integration node (grad_hat(\hat{phi}))
+                // ex i-row: [\hat{phi}_x_i(qn_1), \hat{phi}_y_i(qn_1), ..., \hat{phi}_x_i(qn_NNODES), \hat{phi}_y_i(qn_NNODES)]
                 Eigen::Matrix<Real, 3*ORDER, Integrator::NNODES*2>     phiDerMapMaster_;
 
                 // Problem of invertibility of T... to be fixed
@@ -134,7 +134,7 @@ class FiniteElement<Integrator, ORDER, 2, 3>{
                 // Updater
                 //! A member updating the Finite Element properties
                 /*!
-                \param t an element from which to update the finite element properties
+                * \param t an element from which to update the finite element properties
                 */
                 void updateElement(const Element<3*ORDER, 2, 3> & t);
 
@@ -151,83 +151,82 @@ class FiniteElement<Integrator, ORDER, 2, 3>{
 
                 UInt getGlobalIndex(UInt iq) {return Integrator::NNODES * t_.getId() + iq;}
 
+                // Access
                 //Returns \hat{phi}
-                Real phiMaster(UInt i, UInt iq)             const;
+                Real phiMaster(UInt i, UInt iq)                   const;
                 //Returns \nabla \hat{phi}
-                Real phiDerMaster(UInt i, UInt ic, UInt iq) const;
+                Real phiDerMaster(UInt i, UInt ic, UInt iq)       const;
                 //Returns J^{-1} \nabla \hat{phi}
                 //[TODO]: still to be implemented
-                //Real invTrJPhiDerMaster(UInt i, UInt ic, UInt iq) const;
-                Eigen::Matrix<Real,2,2> metric()            const {return metric_;};
+              //Real invTrJPhiDerMaster(UInt i, UInt ic, UInt iq) const;
+                // Metric
+                Eigen::Matrix<Real,2,2> metric()                  const {return metric_;};
 };
 
-
-
-//Implementazione FiniteElement con mydim=3 e ndim=3
+// *** TETRAHEDRON ***
+//Implementation FiniteElement with mydim == 3 & ndim == 3
 template <class Integrator ,UInt ORDER>
-class FiniteElement<Integrator, ORDER, 3,3>{
-private:
-  Element<6*ORDER-2,3,3> reference_;
-  Element<6*ORDER-2,3,3> t_;
-  Eigen::Matrix<Real,6*ORDER-2, Integrator::NNODES> phiMapMaster_;
-  //Numero basi locali x Num coordinate x numero nodi integrazione
-  Eigen::Matrix<Real,6*ORDER-2, Integrator::NNODES*3> phiDerMapMaster_;
-  Eigen::Matrix<Real,6*ORDER-2, Integrator::NNODES*3> invTrJPhiDerMapMaster_;
-  Eigen::Matrix<Real,3,3> metric_;
+class FiniteElement<Integrator, ORDER, 3, 3>{
+        private:
+                Element<6*ORDER-2, 3, 3> reference_;
+                Element<6*ORDER-2, 3, 3> t_;
 
-  void setPhiMaster();
-  void setPhiDerMaster();
-  void setInvTrJPhiDerMaster();
+                // Matrices of evaluations on the master element:
+                // of the i-th \hat{phi} on the iq-th integration node
+                // ex i-row: [\hat{phi}_i(qn_1), ...,  \hat{phi}_i(qn_NNODES)]
+                Eigen::Matrix<Real, 6*ORDER-2, Integrator::NNODES>      phiMapMaster_;
+                // of the i-th (\hat{phi}_x, \hat{phi}_y) on the iq-th integration node (grad_hat(\hat{phi}))
+                // ex i-row: [\hat{phi}_x_i(qn_1), \hat{phi}_y_i(qn_1), \hat{phi}_z(qn_i) ..., \hat{phi}_x_i(qn_NNODES), \hat{phi}_y_i(qn_NNODES), \hat{phi}_z_i(qn_NNODES)]
+                Eigen::Matrix<Real, 6*ORDER-2, Integrator::NNODES*3>    phiDerMapMaster_;
+                // of the i-th (J_{T^-1}^t*\hat{phi}_x, J_{T^-1}^t*\hat{phi}_y,  J_{T^-1}^t*\hat{phi}_z) on the iq-th integration node
+                // ex i-row: [J_{T^-1}^t*\hat{phi}_x_i(qn_1), J_{T^-1}^t*\hat{phi}_y_i(qn_1), J_{T^-1}^t*\hat{phi}_z_i(qn_1), ..., J_{T^-1}^t*\hat{phi}_x_i(qn_NNODES), J_{T^-1}^t*\hat{phi}_y_i(qn_NNODES), J_{T^-1}^t*\hat{phi}_z_i(qn_NNODES)]
+                Eigen::Matrix<Real, 6*ORDER-2, Integrator::NNODES*3>    invTrJPhiDerMapMaster_;
+                Eigen::Matrix<Real, 3, 3> metric_;
 
+                // Setters for constructor
+                void setPhiMaster();
+                void setPhiDerMaster();
+                void setInvTrJPhiDerMaster();
 
-public:
+        public:
+                // Constructor
+                //! This is an empty constructor
+                /*!
+                * For efficiency and Expression Templates organization of the
+                * code, the use of this class is based on the updateElement class
+                */
+                FiniteElement();
 
-  //! This is an empty constructor
-    /*!
-        For efficiency and Expression Templates organization of the
-        code, the use of this class is based on the updateElement class
-    */
-  FiniteElement();
+                //Updater
+                //! A member updating the Finite Element properties
+                /*!
+                * \param t an element from which to update the finite element properties
+                */
+                void updateElement(const Element<6*ORDER-2, 3, 3> & t);
 
-  //! A member updating the Finite Element properties
-    /*!
-      \param t an element from which to update the finite element properties
-    */
-  void updateElement(const Element<6*ORDER-2,3,3> &t);
+                // Getters
+                Real getVolumeReference()       {return reference_.getVolume();}
+                Real getDet()                   {return t_.getDetJ();}
 
-  Real getVolumeReference()
-  {
-    return reference_.getVolume();
-  }
+                // General utilities
+                Point coorQuadPt(UInt iq)
+                {
+                return Point(   t_.getM_J()(0,0)*Integrator::NODES[iq][0] + t_.getM_J()(0,1)*Integrator::NODES[iq][1]+t_.getM_J()(0,2)*Integrator::NODES[iq][2] + t_[0][0],
+                                t_.getM_J()(1,0)*Integrator::NODES[iq][0] + t_.getM_J()(1,1)*Integrator::NODES[iq][1]+t_.getM_J()(1,2)*Integrator::NODES[iq][2] + t_[0][1],
+                                t_.getM_J()(2,0)*Integrator::NODES[iq][0] + t_.getM_J()(2,1)*Integrator::NODES[iq][1]+t_.getM_J()(2,2)*Integrator::NODES[iq][2] + t_[0][2]);
+                }
 
-  Real getDet()
-  {
-    return t_.getDetJ();
-  }
+                UInt getGlobalIndex(UInt iq) {return Integrator::NNODES * t_.getId() + iq;}
 
-  Point coorQuadPt(UInt iq)
-  {
-    return Point(t_.getM_J()(0,0)*Integrator::NODES[iq][0] + t_.getM_J()(0,1)*Integrator::NODES[iq][1]+t_.getM_J()(0,2)*Integrator::NODES[iq][2] + t_[0][0],
-        t_.getM_J()(1,0)*Integrator::NODES[iq][0] + t_.getM_J()(1,1)*Integrator::NODES[iq][1]+t_.getM_J()(1,2)*Integrator::NODES[iq][2] + t_[0][1],
-        t_.getM_J()(2,0)*Integrator::NODES[iq][0] + t_.getM_J()(2,1)*Integrator::NODES[iq][1]+t_.getM_J()(2,2)*Integrator::NODES[iq][2] + t_[0][2]);
-  }
-
-  UInt getGlobalIndex(UInt iq)
-  {
-    return Integrator::NNODES * t_.getId() + iq;
-  }
-
-  //Returns \hat{phi}
-  Real phiMaster(UInt i, UInt iq) const;
-
-  //Returns \nabla \hat{phi}
-  Real phiDerMaster(UInt i, UInt ic, UInt iq) const;
-
-  //Returns J^{-1} \nabla \hat{phi}
-  Real invTrJPhiDerMaster(UInt i, UInt ic, UInt iq) const;
-
-  Eigen::Matrix<Real,3,3> metric()const {return metric_;};
-
+                // Access
+                //Returns \hat{phi}
+                Real phiMaster(UInt i, UInt iq)                   const;
+                //Returns \nabla \hat{phi}
+                Real phiDerMaster(UInt i, UInt ic, UInt iq)       const;
+                //Returns J^{-1} \nabla \hat{phi}
+                Real invTrJPhiDerMaster(UInt i, UInt ic, UInt iq) const;
+                // Metric
+                Eigen::Matrix<Real, 3, 3> metric()                const {return metric_;};
 };
 
 #include "finite_element_imp.h"
