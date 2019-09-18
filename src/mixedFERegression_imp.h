@@ -107,7 +107,7 @@ MatrixXr MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::Left
 			isWTWfactorized_=true;
 		}
 		MatrixXr Pu= W*WTWinv_.solve(W.transpose()*u);
-		return u-Pu;
+		return u-Pu; //_più efficiente che non usare la Q direttamente, la vedo come ortogonale alla proiezione con P
 	}
 
 }
@@ -466,21 +466,24 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDeg
 	// Case 2: Eigen
 	else{
 		MatrixXr X1 = psi_.transpose() * LeftMultiplybyQ(psi_);
-
+                MatrixXr Aux=MatrixXr::Identity(nlocations,nlocations)-Q_; //_used for z_hat
 		if (isRcomputed_ == false ){
 			isRcomputed_ = true;
 			Eigen::SparseLU<SpMat> solver;
 			solver.compute(R0_);
-			auto X2 = solver.solve(R1_); //_R0\R1
-			R_ = R1_.transpose() * X2; //_R1^T*R0\R1
+			auto X2 = solver.solve(R1_); //_R0^-1*R1
+			R_ = R1_.transpose() * X2; //_R1^T*R0^-1*R1
 		}
 
 		MatrixXr X3 = X1 + lambda * R_; //_psi^T*Q*Psi+lambda*R1^T*R0\R1
+                SS_=X3; //to store for derivative of GCV
 		Eigen::LDLT<MatrixXr> Dsolver(X3);
 
-		auto k = regressionData_.getObservationsIndices(); (//_cerco gl indici delle locations: pur coincidendo con le locations, i nodi possono avere indici diversi)
-//NB migliorabile: nel caso isLocationsByNodes()==true, non ha senso aver usato psi, è l'identità, si possono risparmiare passaggi
-		if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) { //_number of rows of covariates, serve solo per controllo, verifico che ci siano covariate
+		auto k = regressionData_.getObservationsIndices(); //_cerco gl indici delle locations: pur coincidendo con le locations, i nodi possono avere indici diversi)
+//NB migliorabile: nel caso isLocationsByNodes()==true, non ha senso aver usato psi, è l'identità, si possono risparmiare passaggi-> anche se le locations possono essere meno dei nodi!!!
+		if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0)
+		{
+		 //_number of rows of covariates, serve solo per controllo, verifico che ci siano covariate
 			degrees += regressionData_.getCovariates().cols();  //_calcola q+tr(S), questo è q, numero di covariate, numero colonne della matrice delle covariate
 
 			// Setup rhs B
@@ -499,23 +502,38 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER,mydim,ndim>::computeDeg
 			//_B=Q (PSI è l'identità)
 			MatrixXr X;
 			X = Dsolver.solve(B); //_X3^-1*B (psi identità)
+			V_=X; //è già quella che cerco!
 			// Compute trace(X)->ovviamente uso k,i come indici perchè gugarda i nodi con la location nell'ordine dei location
 			for (int i = 0; i < k.size(); ++i) {
 				degrees += X(k[i], i);
 			}
 		}
+	             VectorXr z;
+    	   	if(regressionData_.isLocationsByNodes())
+    	   	{
+    		   z=VectorXr::Zero(nlocations);
+    		   for(auto i=0;i<regressionData_.getObservationsIndices().size();i++)
+    			   z(regressionData_.getObservationsIndices()[i])=regressionData_.getObservationData()[i]; //_mette i valori nei nodi in cui si pongono le locations (nodi coincidono con le location, ma le locations possono avere ordini di numerazione diversi!!
+    	   	}
+    	   	else {
+    		   	z=regressionData_.getObservationData();
+    		    	}
 
 		if (!regressionData_.isLocationsByNodes()){ //_ora psi non è l'identità!! (nb stu-hunter SAngalli pdf da pag10 in poi)
 		//_usa la proprietà della traccia: tr(psi*(X3^-1)*psi^T*Q)=tr((X3^-1)*psi^T*Q*psi), quindi
 		//_calcola (X3^-1)*psi^T*Q*psi=(X3^-1)*X1 così ha già calcolato il pezzo psi^T*Q*psi in calcolo precedente
 
-			MatrixXr X;
-			X = Dsolver.solve(MatrixXr(X1)); //_X3^-1*X1
-
+			MatrixXr X, X4; //_needed the correct formulation of S, not the computation for the trace
+			//X = Dsolver.solve(MatrixXr(X1)); //_X3^-1*X1
+                        X4=LeftMultiplybyQ(psi_.transpose());
+			X = Dsolver.solve(MatrixXr(X4)); //_X3^-1*X4
+                        V_=X;
+			X=psi_*X; //_ora X è la S!
+			z_hat_=(Aux+LeftMultiplybyQ(X))*z;
 			if (regressionData_.getCovariates().rows() != 0) {
 				degrees += regressionData_.getCovariates().cols();  //_calcola q+tr(S), questo è q, numero di covariate, numero colonne della matrice delle covariate
 			}
-			for (int i = 0; i<nnodes; ++i) {
+			for (int i = 0; i<nnodes; ++i) { //_???perchè nnodes e non nlocations? S è nxn!! (forse n<nnodes e quindi è lo stesso, aggiungo zeri)
 				degrees += X(i,i); //_computes the trace of the matrix S (il +q è già stato calcolato)
 			}
 		}
@@ -612,7 +630,7 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::apply(EO
 	this->_solution.resize(regressionData_.getLambda().size());
 	this->_dof.resize(regressionData_.getLambda().size());
 
-	for(UInt i = 0; i<regressionData_.getLambda().size(); ++i)
+	for(UInt i = 0; i<regressionData_.getLambda().size(); ++i) //_cacloal già per tutte le lambda e passa all'esterno, poi via R si usa la getGCV e si ottiene il calcolo
 	{
 		Real lambda = regressionData_.getLambda()[i];
 		SpMat R1_lambda = (-lambda)*R1_;
@@ -626,12 +644,21 @@ void MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::apply(EO
 
 		system_factorize();
 		_solution[i] = this->template system_solve(this->_b);
-		if(regressionData_.computeDOF())
-			computeDegreesOfFreedom(i,lambda);
+		if(regressionData_.computeDOF())  //_NB compute dof semplicemente dice se dovrà calcolare i dof o meno, se è true, ci mette il calcolo, che è tr(S)+q
+			{
+				computeDegreesOfFreedom(i,lambda);
+				computeGCV(i); //_to check if it's correct, stampa il valore della GCV
+                                computeGCV_derivative(i); //_to check if it's correct, stampa il valore della derivata dGCV/dlambda
+                                //NB ovviamente non si userà più il vettore dei dofs.
+				//NB fare confronto di questi valori della GCV con quelli calcolati tramite R
+			 }
+
+
 		else
 			_dof[i] = -1;
+
 	}
-}
+} //_calcola già il vettore completo dei dofs( uno per ogni lambda), che sono i valori della tr(S)+q, che poi passa esternamente a R che le usa nella getGCV
 
 //_computation of GCV (possibile implementazione)
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
@@ -640,30 +667,106 @@ Real MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::computeG
   //_trovare modo efficiente di calcolare le zhat, come (I-Q+QS)*z oppure posso usare la Hat matrix...cercare metdo efficiente
 	UInt s;
 	//_UInt q=regressionData_.getCovariates().cols(); //_serve se si vuole usare l'articolo di stuHuntersangalli, è già implicito nel degrees of freedom
-	VectorXr z,zhat;
+	VectorXr z;
+	s= regressionData_.getNumberofObservations(); //_così ho anche il caso in uci ho meno locations dei nodi (pur coincidenti)
 	if(regressionData_.isLocationsByNodes())
 	{
-		s= this->mesh_.num_nodes(); //_vuol dire che il numero di locations (e quindi il numero di osservazioni, coincide col numero di nodi e le posizioni sono esattamente quelle dei nodi)
+		//s= this->mesh_.num_nodes(); //_vuol dire che il numero di locations (e quindi il numero di osservazioni, coincide col numero di nodi e le posizioni sono esattamente quelle dei nodi)
     //_s è la n dell'articolo stuHuntersangalli pdf pag.12, numero locations, dove ho le osservazioni
 		z=VectorXr::Zero(s);
 		for(auto i=0;i<regressionData_.getObservationsIndices().size();i++)
 			z(regressionData_.getObservationsIndices()[i])=regressionData_.getObservationData()[i]; //_mette i valori nei nodi in cui si pongono le locations (nodi coincidono con le location, ma le locations possono avere ordini di numerazione diversi!!
 	} else {
-		s= regressionData_.getNumberofObservations();
+
 		z=regressionData_.getObservationData();
 	}
 	//_calcolo z_hat, suppongo di avere i valori come per z
-	Real norm_squared=(z-zhat).transpose()*(z-zhat);
-	if(s-dof_[output_index]<0){ //_dof_ non servirà, sarà un valore unico!
+	Real norm_squared=(z-z_hat_).transpose()*(z-z_hat_);
+	if (s-dof_[output_index]<0) { //_dof_ non servirà, sarà un valore unico!
 		#ifdef R_VERSION_
-			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->fpcaData_.getLambda()[output_index]);
+			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->regressionData_.getLambda()[output_index]);
 			#else
-			std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is:" << this->fpcaData_.getLambda()[output_index] <<"\n";
+			std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is:" << this->regressionData_.getLambda()[output_index] <<"\n";
 			#endif
 			}
-	Real stderror=norm_squared/(s-dof_[output_index]);
+	Real stderror=norm_squared/(s-dof_[output_index]); //così è ancora fatta sul vettore
+        Real GCV_val=(s/(s-dof_[output_index]))*stderror;
+	#ifdef R_VERSION_
+		Rprintf("GCV=%f\n",GCV_val);
+	#else
+		std::cout << "GCV value="<<GCV_val<<std::endl;
+	#endif
 
-	return (s/(s-dof_[output_index]))*stderror; //_Calcolo della GCV come s*(z-zhat)^T*(z-zhat)/(s-(q+trS))^2
+	return GCV_val; //_Calcolo della GCV come s*(z-zhat)^T*(z-zhat)/(s-(q+trS))^2
+
+}
+
+
+//_computation of GCV_derivative (possibile implementazione)
+template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
+Real MixedFERegressionBase<InputHandler,Integrator,ORDER, mydim, ndim>::computeGCV_derivative(UInt output_index)
+{ //_da modificare il fatto che _dof sia un vettore, serve un solo valore, non serve output index!!
+  //_trovare modo efficiente di calcolare le zhat, come (I-Q+QS)*z oppure posso usare la Hat matrix...cercare metdo efficiente
+	UInt s;
+	//_UInt q=regressionData_.getCovariates().cols(); //_serve se si vuole usare l'articolo di stuHuntersangalli, è già implicito nel degrees of freedom
+	VectorXr z;
+	s= regressionData_.getNumberofObservations(); //_così ho anche il caso in uci ho meno locations dei nodi (pur coincidenti)
+	if(regressionData_.isLocationsByNodes())
+	{
+		//s= this->mesh_.num_nodes(); //_vuol dire che il numero di locations (e quindi il numero di osservazioni, coincide col numero di nodi e le posizioni sono esattamente quelle dei nodi)
+    //_s è la n dell'articolo stuHuntersangalli pdf pag.12, numero locations, dove ho le osservazioni
+		z=VectorXr::Zero(s);
+		for(auto i=0;i<regressionData_.getObservationsIndices().size();i++)
+			z(regressionData_.getObservationsIndices()[i])=regressionData_.getObservationData()[i]; //_mette i valori nei nodi in cui si pongono le locations (nodi coincidono con le location, ma le locations possono avere ordini di numerazione diversi!!
+	}
+	 else
+	 {
+
+		z=regressionData_.getObservationData();
+	  }
+
+	//NB _questo caso è ok se i nodi non coincidono con le location, è ridondante (migliorabile!!) se coindicono, perchè psi è l'identitò (si può fare come nel calcolo dei deg of freedom per essere più efficiente)
+	Real norm_squared=(z-z_hat_).transpose()*(z-z_hat_);
+        Real trace_=0.0;
+if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) //da controllare per questione matrie identità psi che usa o meno
+
+{       auto k = regressionData_.getObservationsIndices();
+	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
+	MatrixXr d_S=-Dsolver.solve( R_*V_ ); //_psi è identità //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
+	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
+
+	for (int i = 0; i < k.size(); ++i)
+	{
+		trace_ += dS_(k[i], i);
+ 	}
+}
+else
+       {
+	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
+	MatrixXr d_S=-psi_*Dsolver.solve( R_*V_ ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
+	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
+
+
+        for (Uint i=0; i<mesh_.num_nodes(); i++) //_anche se sarebbe più corretto il numero di osservazioni, è nxn
+		trace_+=d_S(i,i); //_tr(dS/dlambda)=d(tr(S))/dlambda
+	}
+
+	if(s-dof_[output_index]<0){ //_dof_ non servirà, sarà un valore unico!
+		#ifdef R_VERSION_
+			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->regressionData_.getLambda()[output_index]);
+			#else
+			std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is:" << this->regressionData_.getLambda()[output_index] <<"\n";
+			#endif
+			}
+	Real stderror=norm_squared/(s-dof_[output_index]); //così è ancora fatta sul vettore
+	Real GCV_der_val=2*(s/((s-dof_[output_index]) * (s-dof_[output_index])))*stderror*trace_;
+	#ifdef R_VERSION_
+		Rprintf("GCV=%f\n",GCV_der_val);
+	#else
+		std::cout << "GCV value="<<GCV_der_val<<std::endl;
+	#endif
+
+	return GCV_der_val; //_Calcolo della derivata della GCV
 
 }
 
