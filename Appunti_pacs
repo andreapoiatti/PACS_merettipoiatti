@@ -72,7 +72,11 @@ Io mi potrei occupare di caclolare GCV e sua derivata come funzioni, Giorgio pot
 
 
 
+ogttimizzazioni: meshobject.h funzione inutile che calcola phi e moltiplica per coeff, inutile
+inversa di S con metodo MIDA o simili
+storage dei valori di R1 ecc per averli già anche per la derivata
+nel computedeoffreedom parte in cui usa Qe_i per trovare la colonna i-esima si potrebbbe evitare e usare Q[]
 
-
+???controllare perchè la traccia è calcolata su num nodes e non num locations?? forse perchè nnodes>num locations e dove non c'è mette zero?
 
 
