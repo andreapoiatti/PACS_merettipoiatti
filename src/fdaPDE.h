@@ -1,43 +1,50 @@
 #ifndef FDAPDE_H_
 #define FDAPDE_H_
 
-// Insert principal libraries
+// Libraries
+// R
 #ifdef R_VERSION_
-#define R_NO_REMAP
-#include <R.h>
-#include <Rdefines.h>
-#include <Rinternals.h> 
+        #define  R_NO_REMAP
+        #include <R.h>
+        #include <Rdefines.h>
+        #include <Rinternals.h>
 #endif
 
-#include <stdint.h>
-#include <iostream>
-
+// C/C++
 #include <cstdlib>
-//#include <iomanip>
+#include <iostream>
 #include <limits>
+#include <stdint.h>
 #include <vector>
+// #include <iomanip>
 
-// For debugging purposes
-//#include <Eigen/StdVector>
-//#include "Eigen/Eigen/Sparse"
-//#include "Eigen/Eigen/Dense"
-//#define  EIGEN_MPL2_ONLY
-
+// EIGEN
 //Take the code from the linked RcppEigen
-#include <Eigen/StdVector>
-#include <Eigen/Sparse>
+#define  EIGEN_MPL2_ONLY
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
-#define  EIGEN_MPL2_ONLY
+#include <Eigen/Sparse>
+#include <Eigen/StdVector>
 
-typedef double Real;
-typedef int UInt;
+// For debugging purposes
+// #define  EIGEN_MPL2_ONLY
+// #include "Eigen/Eigen/Dense"
+// #include "Eigen/Eigen/Sparse"
+// #include <Eigen/StdVector>
 
-typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixXr;
-typedef Eigen::Matrix<Real,Eigen::Dynamic,1> VectorXr;
-typedef Eigen::Matrix<UInt,Eigen::Dynamic,1> VectorXi;
-typedef Eigen::SparseMatrix<Real> SpMat;
-typedef Eigen::SparseVector<Real> SpVec;
-typedef Eigen::Triplet<Real> coeff;
+//----------------------------------------------------------------------------//
+
+// Typedefs
+// C++
+typedef double  Real;
+typedef int     UInt;
+
+// EIGEN
+typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>     MatrixXr;
+typedef Eigen::Matrix<Real, Eigen::Dynamic, 1>                  VectorXr;
+typedef Eigen::Matrix<UInt, Eigen::Dynamic, 1>                  VectorXi;
+typedef Eigen::SparseMatrix<Real>                               SpMat;
+typedef Eigen::SparseVector<Real>                               SpVec;
+typedef Eigen::Triplet<Real>                                    coeff;
 
 #endif /* FDAPDE_H_ */

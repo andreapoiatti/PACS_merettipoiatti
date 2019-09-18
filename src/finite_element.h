@@ -100,7 +100,8 @@ class FiniteElement<Integrator, ORDER, 2, 2>
 // Remark in a triangle in d_master == 2 the relationship between N_r and r is (r+1)*(r+2)/2
 // that in our case r = 1,2 can be simplified with N_r == 3*r [not extendable!!]
 template <class Integrator ,UInt ORDER>
-class FiniteElement<Integrator, ORDER, 2, 3>{
+class FiniteElement<Integrator, ORDER, 2, 3>
+{
         private:
                 Element<3*ORDER, 2, 2> reference_; // reference [master] element
                 Element<3*ORDER, 2, 3> t_;
@@ -166,7 +167,8 @@ class FiniteElement<Integrator, ORDER, 2, 3>{
 // *** TETRAHEDRON ***
 //Implementation FiniteElement with mydim == 3 & ndim == 3
 template <class Integrator ,UInt ORDER>
-class FiniteElement<Integrator, ORDER, 3, 3>{
+class FiniteElement<Integrator, ORDER, 3, 3>
+{
         private:
                 Element<6*ORDER-2, 3, 3> reference_;
                 Element<6*ORDER-2, 3, 3> t_;
@@ -211,12 +213,12 @@ class FiniteElement<Integrator, ORDER, 3, 3>{
                 // General utilities
                 Point coorQuadPt(UInt iq)
                 {
-                return Point(   t_.getM_J()(0,0)*Integrator::NODES[iq][0] + t_.getM_J()(0,1)*Integrator::NODES[iq][1]+t_.getM_J()(0,2)*Integrator::NODES[iq][2] + t_[0][0],
-                                t_.getM_J()(1,0)*Integrator::NODES[iq][0] + t_.getM_J()(1,1)*Integrator::NODES[iq][1]+t_.getM_J()(1,2)*Integrator::NODES[iq][2] + t_[0][1],
-                                t_.getM_J()(2,0)*Integrator::NODES[iq][0] + t_.getM_J()(2,1)*Integrator::NODES[iq][1]+t_.getM_J()(2,2)*Integrator::NODES[iq][2] + t_[0][2]);
+                return Point(   t_.getM_J()(0,0)*Integrator::NODES[iq][0] + t_.getM_J()(0,1)*Integrator::NODES[iq][1] + t_.getM_J()(0,2)*Integrator::NODES[iq][2] + t_[0][0],
+                                t_.getM_J()(1,0)*Integrator::NODES[iq][0] + t_.getM_J()(1,1)*Integrator::NODES[iq][1] + t_.getM_J()(1,2)*Integrator::NODES[iq][2] + t_[0][1],
+                                t_.getM_J()(2,0)*Integrator::NODES[iq][0] + t_.getM_J()(2,1)*Integrator::NODES[iq][1] + t_.getM_J()(2,2)*Integrator::NODES[iq][2] + t_[0][2]);
                 }
 
-                UInt getGlobalIndex(UInt iq) {return Integrator::NNODES * t_.getId() + iq;}
+                UInt getGlobalIndex(UInt iq) {return Integrator::NNODES*t_.getId() + iq;}
 
                 // Access
                 //Returns \hat{phi}

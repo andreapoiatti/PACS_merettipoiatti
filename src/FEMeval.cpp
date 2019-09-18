@@ -5,159 +5,162 @@
  *      Author: eardi
  */
 
-
 #define R_VERSION_
 
+// Headers
 #include "fdaPDE.h"
-//#include "IO_handler.h"
 #include "mesh_objects.h"
 #include "mesh.h"
 #include "evaluator.h"
+//#include "IO_handler.h"
 
-extern "C" {
-//! This function manages the various option for the solution evaluation.
-/*!
-	This function is than one called from R code.
-	Call's the walking algoritm for efficient point location inside the mesh.
+// Dynamic evaluator
 
-	\param Rmesh an R-object containg the output mesh from Trilibrary
-	\param RX an R-vector containing the x coordinates of the points to be evaluated
-	\param RY an R-vector containing the y coordinates of the points to be evaluated
-	\param RZ an R-vector containing the z coordinates of the points to be evaluated
-	\param Rcoef an R-vector the coeficients of the solution
-	\param Rorder an R integer containg the order of the solution
-	\param Rfast an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes)
-*/
-
-/*
-SEXP eval_FEM_fd(SEXP Rmesh, SEXP RX, SEXP RY, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim)
+extern "C"
 {
-	//Declare pointer to access data from C++
+        //! This function manages the various option for the solution evaluation.
+        /*!
+        	This function is than one called from R code.
+        	Call's the walking algoritm for efficient point location inside the mesh.
 
-    double *X, *Y, *coef;
-	int order,mydim,ndim;
-	bool fast;
+        	\param Rmesh an R-object containg the output mesh from Trilibrary
+        	\param RX an R-vector containing the x coordinates of the points to be evaluated
+        	\param RY an R-vector containing the y coordinates of the points to be evaluated
+        	\param RZ an R-vector containing the z coordinates of the points to be evaluated
+        	\param Rcoef an R-vector the coeficients of the solution
+        	\param Rorder an R integer containg the order of the solution
+        	\param Rfast an R integer 0 for Naive location algorithm, 1 for Walking Algorithm (can miss location for non convex meshes)
+        */
 
-	//int n_coef 	= Rf_length(Rcoef);
-	int n_X 	= Rf_length(RX);
+        /* V0
+        SEXP eval_FEM_fd(SEXP Rmesh, SEXP RX, SEXP RY, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim)
+        {
+        	//Declare pointer to access data from C++
 
-    // Cast all computation parameters
-    X 			= REAL(RX);
-    Y 			= REAL(RY);
-    coef 		= REAL(Rcoef);
-    order 		= INTEGER(Rorder)[0];
-    fast 		= INTEGER(Rfast)[0];
-    mydim               = INTEGER(Rmydim)[0];
-    ndim                = INTEGER(Rndim)[0];
+            double *X, *Y, *coef;
+        	int order,mydim,ndim;
+        	bool fast;
 
-    SEXP result;
-	PROTECT(result=Rf_allocVector(REALSXP, n_X));
-	std::vector<bool> isinside(n_X);
-    //Set the mesh
-	//std::cout<<"Length "<<n_X<<"--X0 "<<X[0]<<"--Y0 "<<Y[0];
-    if(order == 1)
-    {
-    	MeshHandler<1,2,2> mesh(Rmesh);
-		Evaluator<1,2,2> evaluator(mesh);
-		//std::cout<<"Starting evaluation from FEMeval \n";
-		evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
-	}
-	else if(order == 2)
-	{
-    	MeshHandler<2,2,2> mesh(Rmesh);
-    	Evaluator<2,2,2> evaluator(mesh);
-		evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
-	}
+        	//int n_coef 	= Rf_length(Rcoef);
+        	int n_X 	= Rf_length(RX);
 
-    for (int i=0; i<n_X;++i)
-    {
-    	if(!(isinside[i]))
-    	{
-    		REAL(result)[i]=NA_REAL;
-    	}
+            // Cast all computation parameters
+            X 			= REAL(RX);
+            Y 			= REAL(RY);
+            coef 		= REAL(Rcoef);
+            order 		= INTEGER(Rorder)[0];
+            fast 		= INTEGER(Rfast)[0];
+            mydim               = INTEGER(Rmydim)[0];
+            ndim                = INTEGER(Rndim)[0];
 
-    }
+            SEXP result;
+        	PROTECT(result=Rf_allocVector(REALSXP, n_X));
+        	std::vector<bool> isinside(n_X);
+            //Set the mesh
+        	//std::cout<<"Length "<<n_X<<"--X0 "<<X[0]<<"--Y0 "<<Y[0];
+            if(order == 1)
+            {
+            	MeshHandler<1,2,2> mesh(Rmesh);
+        		Evaluator<1,2,2> evaluator(mesh);
+        		//std::cout<<"Starting evaluation from FEMeval \n";
+        		evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
+        	}
+        	else if(order == 2)
+        	{
+            	MeshHandler<2,2,2> mesh(Rmesh);
+            	Evaluator<2,2,2> evaluator(mesh);
+        		evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
+        	}
 
-	UNPROTECT(1);
-    // result list
-    return(result);
-}*/
+            for (int i=0; i<n_X;++i)
+            {
+            	if(!(isinside[i]))
+            	{
+            		REAL(result)[i]=NA_REAL;
+            	}
 
-SEXP eval_FEM_fd(SEXP Rmesh, SEXP RX, SEXP RY, SEXP RZ, SEXP Rcoef, SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim)
-{
-	//Declare pointer to access data from C++
+            }
 
-    	double *X, *Y, *Z, *coef;
-	int order,mydim,ndim;
-	bool fast;
+        	UNPROTECT(1);
+            // result list
+            return(result);
+        }*/
 
-	//int n_coef 	= Rf_length(Rcoef);
-	int n_X 	= Rf_length(RX);
+        SEXP eval_FEM_fd(SEXP Rmesh, SEXP RX, SEXP RY, SEXP RZ, SEXP Rcoef,
+                         SEXP Rorder, SEXP Rfast, SEXP Rmydim, SEXP Rndim)
+        {
+        	// Declare pointers to access data from C++
+            	double     *X, *Y, *Z, *coef;
+        	int        order, mydim, ndim;
+        	bool       fast;
 
-    // Cast all computation parameters
-    X 			= REAL(RX);
-    Y 			= REAL(RY);
-    Z 			= REAL(RZ);
-    coef 		= REAL(Rcoef);
-    order 		= INTEGER(Rorder)[0];
-    fast 		= INTEGER(Rfast)[0];
-    mydim               = INTEGER(Rmydim)[0];
-    ndim                = INTEGER(Rndim)[0];
+        	// int n_coef 	= Rf_length(Rcoef);
+        	int n_X 	= Rf_length(RX);
 
-    SEXP result;
-	PROTECT(result=Rf_allocVector(REALSXP, n_X));
-	std::vector<bool> isinside(n_X);
-    //Set the mesh
-	//std::cout<<"Length "<<n_X<<"--X0 "<<X[0]<<"--Y0 "<<Y[0];
-    if(order == 1 && ndim == 2)
-    {
-    	MeshHandler<1,2,2> mesh(Rmesh);
-		Evaluator<1,2,2> evaluator(mesh);
-		//std::cout<<"Starting evaluation from FEMeval \n";
-		evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
-	}
-    else if(order == 2 && mydim==2 && ndim == 2)
-	{
-    	MeshHandler<2,2,2> mesh(Rmesh);
-    	Evaluator<2,2,2> evaluator(mesh);
-		  evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
-	}
-    else if(order == 2 && mydim==2 && ndim == 3)
-	{
-    	MeshHandler<2,2,3> mesh(Rmesh);
-    	Evaluator<2,2,3> evaluator(mesh);
-		  evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
-	}
-    else if(order == 1 && mydim==2 && ndim == 3)
-	{ 
-    	MeshHandler<1,2,3> mesh(Rmesh);
-      //mesh.printTriangles(std::cout);
-      //mesh.printPoints(std::cout);
-    	Evaluator<1,2,3> evaluator(mesh);
-		  evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
-	}
-	
-    else if(order == 1 && mydim==3 && ndim == 3)
-	{ 
-    	MeshHandler<1,3,3> mesh(Rmesh);
-      //mesh.printTriangles(std::cout);
-      //mesh.printPoints(std::cout);
-    	Evaluator<1,3,3> evaluator(mesh);
-		  evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
-	}
+                // Cast all computation parameters
+                X 	= REAL   (RX);
+                Y 	= REAL   (RY);
+                Z 	= REAL   (RZ);
+                coef    = REAL   (Rcoef);
+                order 	= INTEGER(Rorder)[0];
+                fast 	= INTEGER(Rfast) [0];
+                mydim   = INTEGER(Rmydim)[0];
+                ndim    = INTEGER(Rndim) [0];
 
-    for (int i=0; i<n_X;++i)
-    {
-    	if(!(isinside[i]))
-    	{
-    		REAL(result)[i]=NA_REAL;
-    	}
+                // Returned info
+                SEXP result;
+                // If you don't protect the objects you create, the garbage collector
+                // may think they are unused and delete them, unprotect them before returning
+                PROTECT(result = Rf_allocVector(REALSXP, n_X));
 
-    }
+                // Vector o keep trace of eventual out of mesh
+                std::vector<bool> isinside(n_X);
 
-	UNPROTECT(1);
-    // result list
-    return(result);
-}
+                // Set the mesh
+                // std::cout << "Length " << n_X << "--X0 " << X[0] << "--Y0 " << Y[0];
+                if (order == 1 && ndim == 2)
+                {
+                	MeshHandler<1, 2, 2>   mesh(Rmesh);
+                	Evaluator<1, 2, 2>     evaluator(mesh);
+                	// std::cout << "Starting evaluation from FEMeval \n";
+                	evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
+                }
+                else if (order == 2 && mydim == 2 && ndim == 2)
+                {
+                	MeshHandler<2, 2, 2>   mesh(Rmesh);
+                	Evaluator<2, 2, 2>     evaluator(mesh);
+                	evaluator.eval(X, Y, n_X, coef, order, fast, REAL(result), isinside);
+                }
+                else if (order == 2 && mydim == 2 && ndim == 3)
+                {
+                	MeshHandler<2, 2, 3>   mesh(Rmesh);
+                	Evaluator<2, 2, 3>     evaluator(mesh);
+                	evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
+                }
+                else if (order == 1 && mydim == 2 && ndim == 3)
+                {
+                	MeshHandler<1, 2, 3>   mesh(Rmesh);
+                	Evaluator<1, 2, 3>     evaluator(mesh);
+                        // mesh.printTriangles(std::cout);
+                        // mesh.printPoints(std::cout);
+                	evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
+                }
+                else if (order == 1 && mydim == 3 && ndim == 3)
+                {
+                	MeshHandler<1, 3, 3>    mesh(Rmesh);
+                	Evaluator<1, 3, 3>      evaluator(mesh);
+                        // mesh.printTriangles(std::cout);
+                        // mesh.printPoints(std::cout);
+                	evaluator.eval(X, Y, Z, n_X, coef, order, fast, REAL(result), isinside);
+                }
 
+                // Check for not found values
+                for (int i = 0; i < n_X; ++i)
+                	if(!(isinside[i]))
+                		REAL(result)[i] = NA_REAL;
+
+                UNPROTECT(1);
+                // result list
+                return(result);
+        }
 }
