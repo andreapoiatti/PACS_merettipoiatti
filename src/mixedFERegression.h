@@ -21,20 +21,20 @@ protected:
 	const MeshHandler<ORDER, mydim, ndim> &mesh_;
 	const InputHandler& regressionData_;
 	std::vector<coeff> tripletsData_;
-	
-	SpMat A_;	// System matrix with psi^T*psi in north-west block
+
+	SpMat A_;	// System matrix, with psi^T*psi in north-west block
 	SpMat R1_;	// North-east block of system matrix A_
 	SpMat R0_;	// South-east block of system matrix A_
 	SpMat psi_;
 	MatrixXr U_;	// psi^T*W padded with zeros
-		
-		
+        VectorXr z_hat_; //_z_hat computed in Computedegreesoffreedomexact for the gcv
+
 	Eigen::SparseLU<SpMat> Adec_; // Stores the factorization of A_
 	Eigen::PartialPivLU<MatrixXr> Gdec_;	// Stores factorization of G =  C + [V * A^-1 * U]
 	Eigen::PartialPivLU<MatrixXr> WTWinv_;	// Stores the factorization of W^T * W
 	bool isWTWfactorized_;
 	bool isRcomputed_;
-	MatrixXr R_; //R1 ^T * R0^-1 * R1
+	MatrixXr R_; //R1 ^T * R0^-1 * R1  //_already stored
 
 	//SpMat NWblock_;
 	SpMat DMat_;
@@ -44,11 +44,11 @@ protected:
 	SpMat Psi_;
 	MatrixXr P_;
 	*/
-	
+
 	MatrixXr Q_;
  	MatrixXr H_;
-	
-	
+        MatrixXr V_; //_stores the values of (psi^T*Q*Psi+lambda*R1^T*R0\R1)^(-1)*Psi^T*Q
+        MatrixXr SS_; //_stores psi^T*Q*Psi+lambda*R1^T*R0\R1
 
 	SpMat _coeffmatrix;        //!A Eigen::VectorXr: Stores the system right hand side.
 	VectorXr _b;                     //!A Eigen::VectorXr: Stores the system right hand side.
@@ -57,7 +57,7 @@ protected:
 
 	//void computeBasisEvaluations();
 	//void computeProjOnCovMatrix();
-	
+
 	void setPsi();
 	void buildA(const SpMat& Psi,  const SpMat& R1,  const SpMat& R0);
 	MatrixXr LeftMultiplybyQ(const MatrixXr& u);
@@ -72,27 +72,29 @@ protected:
 	void computeDegreesOfFreedom(UInt output_index, Real lambda);
 	void computeDegreesOfFreedomExact(UInt output_index, Real lambda);
 	void computeDegreesOfFreedomStochastic(UInt output_index, Real lambda);
+        Real computeGCV(UInt output_index); //_usarla in apply, per testare se va, facendo stampare qualcosa
+	Real computeGCV_derivative(UInt output_index); //_usarla in apply, per testare se va, facendo stampare qualcosa
 
 	void system_factorize();
 	template<typename Derived>
 	MatrixXr system_solve(const Eigen::MatrixBase<Derived>&);
-	
+
 	void getDataMatrix(SpMat& DMat);
  	void getDataMatrixByIndices(SpMat& DMat);
-	
+
 	//! A normal member taking two arguments: Dirichlet Boundary condition
 	/*!
 	 * This member applies Dirichlet boundary conditions on the linear system with the penalization method.
 	  \param bcindex is a const reference to vector<int> : the global indexes of the nodes to which the boundary condition has to be applied.
 	  \param bcvalues is a const reference to vector<double> : the values of the boundary conditions relative to bcindex.
 	*/
-	
+
 	/*void applyDirichletBC(const vector<int>& bcindex, const vector<Real>& bcvalues);
 	void computeDataMatrix(SpMat& DMat);
 	void computeDataMatrixByIndices(SpMat& DMat);
 	void computeRightHandData(VectorXr& rightHandData);
 	void computeDegreesOfFreedom(UInt output_index);
-	
+
 	//! A template for the system resolution: SpLu, SpQR, SpCholesky,SpConjGrad
 	template<typename P>
 	void solve(UInt output_index);
@@ -103,10 +105,10 @@ public:
 
 	template<typename A>
 	void apply(EOExpr<A> oper);
-	
+
 	//! A inline member that returns a VectorXr, returns the whole solution_.
 	inline std::vector<VectorXr> const & getSolution() const{return _solution;};
-	inline std::vector<Real> const & getDOF() const{return _dof;};
+	inline std::vector<Real> const & getDOF() const{return _dof;}; //_serve solo se si caclola la GCV in esterno a C++, noi possiamo non esportare per risparmiare
 };
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
