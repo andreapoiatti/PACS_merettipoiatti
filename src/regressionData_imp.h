@@ -55,9 +55,8 @@ RegressionData::RegressionData(SEXP Rlocations, SEXP Robservations, SEXP Rorder,
 
 	// Definition and conversion between R indices and c++ indices and values in bc
 	bc_values_.assign( REAL(RBCValues),     REAL(RBCValues)     + Rf_length(RBCIndices));
-	bc_indices_.assign(INTEGER(RBCIndices), INTEGER(RBCIndices) +  length_indexes);
+	bc_indices_.assign(INTEGER(RBCIndices), INTEGER(RBCIndices) + length_indexes);
 	std::for_each(bc_indices_.begin(), bc_indices_.end(), [](int& i){i-=1;});
-
 
 	UInt length_lambda = Rf_length(Rlambda);
 	for (UInt i = 0; i < length_lambda; ++i)
@@ -80,7 +79,7 @@ RegressionDataElliptic::RegressionDataElliptic(SEXP Rlocations, SEXP Robservatio
 	}
 
 	beta_.resize(2);
-	for (auto i = 0; i<2 ; ++i)
+	for (auto i = 0; i < 2 ; ++i)
 	{
 		beta_(i) = REAL(Rbeta)[i];
 	}
@@ -129,7 +128,7 @@ void RegressionData::setObservations(SEXP Robservations)
 	else
 	{
 		locations_by_nodes_ = false;
-		for(auto i = 0; i < n_obs_; ++i)
+		for (auto i = 0; i < n_obs_; ++i)
 		{
 			observations_[i] = REAL(Robservations)[i];
 		}
@@ -151,6 +150,7 @@ void RegressionData::setCovariates(SEXP Rcovariates)
 	{
 		for(auto j = 0; j < p_ ; ++j)
 		{
+			// Stored by columns
 			covariates_(i,j) = REAL(Rcovariates)[i + n_*j];
 		}
 	}
@@ -158,10 +158,10 @@ void RegressionData::setCovariates(SEXP Rcovariates)
 
 void RegressionData::setLocations(SEXP Rlocations)
 {
-	n_ = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[0];
+	n_ = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[0];  // number of points
 	if (n_ > 0)
 	{
-		int ndim = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[1];
+		int ndim = INTEGER(Rf_getAttrib(Rlocations, R_DimSymbol))[1];  // number of coordinates
 		if (ndim == 2)
 		{
 			for (auto i = 0; i < n_; ++i)

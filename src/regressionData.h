@@ -18,8 +18,8 @@ class  RegressionData
 	private:
 		// Locations related data
 		std::vector<Point> 	locations_;		// Vector of points where we have measurements
-		VectorXr 		observations_;		// Vector of samplings at the points [z]
-		std::vector<UInt> 	observations_indices_;	// [???]
+		VectorXr 		observations_;		// Vector of samplings at the points [z], some might be NA
+		std::vector<UInt> 	observations_indices_;	// Keeping track of the non NA observations indices
 		bool 			locations_by_nodes_;	// The points are used as nodes? [Y/n]
 
 		//Design matrix related data
@@ -40,7 +40,7 @@ class  RegressionData
 		//
 		bool 			DOF_;			// bool inputType [???];
 
-		// Setters
+		// Setters for constructor
 		#ifdef R_VERSION_
 		void setLocations(SEXP Rlocations);
 		void setObservations(SEXP Robservations);
@@ -108,9 +108,9 @@ class  RegressionData
 class  RegressionDataElliptic: public RegressionData
 {
 	private:
-		Eigen::Matrix<Real, 2, 2> K_;
-		Eigen::Matrix<Real, 2, 1> beta_;
-		Real c_;
+		Eigen::Matrix<Real, 2, 2> 	K_;	// Diffusivity
+		Eigen::Matrix<Real, 2, 1> 	beta_;	// Advection
+		Real 				c_;	// Reaction
 
 	public:
 		// Constructors
@@ -148,10 +148,10 @@ class  RegressionDataElliptic: public RegressionData
 class RegressionDataEllipticSpaceVarying: public RegressionData
 {
 	private:
-		Diffusivity K_;
-		Advection beta_;
-		Reaction c_;
-		ForcingTerm u_;
+		Diffusivity 	K_;
+		Advection 	beta_;
+		Reaction 	c_;
+		ForcingTerm 	u_;
 
 	public:
 		// Constructors
