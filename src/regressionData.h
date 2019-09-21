@@ -18,9 +18,12 @@ class  RegressionData
 	private:
 		// Locations related data
 		std::vector<Point> 	locations_;		// Vector of points where we have measurements
-		VectorXr 		observations_;		// Vector of samplings at the points [z], some might be NA
-		std::vector<UInt> 	observations_indices_;	// Keeping track of the non NA observations indices
-		bool 			locations_by_nodes_;	// The points are used as nodes? [Y/n]
+		VectorXr 		observations_;		// Vector of samplings at the points [z]: NAs are discarded
+		bool 			locations_by_nodes_;	// The points are to be found among the nodes? [Y/n]
+		std::vector<UInt> 	observations_indices_;	// If locations_by_nodes_== true, some nodes might not be
+								// realated to a location: observations_indices_ has the
+								// same size as observations_ and tells the node associated to the correponding
+								// selected values; if locations_by_nodes_ == false it's useless, thus empty
 
 		//Design matrix related data
 		MatrixXr 		covariates_;		// Design matrix [W] is an [n]x[p] matrix
@@ -37,8 +40,8 @@ class  RegressionData
 		std::vector<Real> 	bc_values_;		// Values to apply for Dirichlet Conditions (for correponding indices next vector)
 		std::vector<UInt> 	bc_indices_;		// Indexes of the nodes for which is needed to apply Dirichlet Conditions
 
-		//
-		bool 			DOF_;			// bool inputType [???];
+		// Dof
+		bool 			DOF_;			// bool compute DOF or not;
 
 		// Setters for constructor
 		#ifdef R_VERSION_
