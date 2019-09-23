@@ -566,7 +566,8 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 			        }
 		        }
 			// Solve the system TX = B
-			MatrixXr X,S(nlocations,nlocations);
+			MatrixXr X;
+			MatrixXr(nlocations,nlocations);
 
 			X = Dsolver.solve(B); //_X3^-1*B
 			V_ = X;
@@ -585,11 +586,10 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 			for (int i = 0; i < k.size(); ++i)
 			    for (int j = 0; j < k.size(); ++j)
 			 {
-				S(i,j) = X(k[i], j);
+				S_(i,j) = X(k[i], j);
 			}
-		       ; //_ora X è la S!
-                X=S;
-		z_hat_ 	= (H_+LeftMultiplybyQ(X))*z;
+
+		z_hat_ 	= (H_+LeftMultiplybyQ(S_))*z;
 		//z_hat_ 	= (I_-LeftMultiplybyQ(I_))*z;
 
 
@@ -616,8 +616,8 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 			X4 	= LeftMultiplybyQ(psi_.transpose());
 			X 	= Dsolver.solve(MatrixXr(X4)); //_X3^-1*X4
 			V_	= X;
-			X 	= psi_*X; //_ora X è la S!
-			z_hat_ 	= (H_+LeftMultiplybyQ(X))*z;
+			S_ 	= psi_*X;
+			z_hat_ 	= (H_+LeftMultiplybyQ(S_))*z;
 			//z_hat_ 	= (I_-LeftMultiplybyQ(I_))*z;
 
 
@@ -888,42 +888,50 @@ Real MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 
 	z=regressionData_.getObservations();
 	  //}
-
+        MatrixXr I=MatrixXr::Identity(s,s);
 	//NB _questo caso è ok se i nodi non coincidono con le location, è ridondante (migliorabile!!) se coindicono, perchè psi è l'identitò (si può fare come nel calcolo dei deg of freedom per essere più efficiente)
 	Real norm_squared=(z-z_hat_).transpose()*(z-z_hat_);
         Real trace_=0.0;
+	MatrixXr dS_(s,s); //S derivative dlambda
 if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) //da controllare per questione matrie identità psi che usa o meno
 
 {       auto k = regressionData_.getObservationsIndices();
 	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
-	MatrixXr dS_=-Dsolver.solve( R_*V_ ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
+
+	MatrixXr dS_aux=-Dsolver.solve( MatrixXr(R_*V_) ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
 	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
 
-	for (UInt i = 0; i < k.size(); ++i)
+	for (UInt i = 0; i < s; ++i)
+	    for (UInt j = 0; j < s; ++j)
 	{
-		trace_ += dS_(k[i], i); //considero il prodotto per la psi, diventa permutazione, prende righe corrisponednti ai k[i] e calcola traccia
- 	}
+		dS_(i,j) += dS_aux(k[i], j); //considero il prodotto per la psi, diventa permutazione, prende righe corrisponednti ai k[i] e calcola traccia
+	}
+
 }
-else
+else //If not locationbynodes
        {
 	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
-	MatrixXr dS_=-psi_*Dsolver.solve( R_*V_ ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
+	dS_=-psi_*Dsolver.solve( MatrixXr(R_*V_) ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
 	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
 
 
-        for (UInt i=0; i<mesh_.num_nodes(); i++) //_anche se sarebbe più corretto il numero di osservazioni, è nxn
-		trace_+=dS_(i,i); //_tr(dS/dlambda)=d(tr(S))/dlambda
+        //for (UInt i=0; i<mesh_.num_nodes(); i++) //_anche se sarebbe più corretto il numero di osservazioni, è nxn
+
 	}
+	for (UInt i=0; i<s; i++)
+		trace_+=dS_(i,i); //_tr(dS/dlambda)=d(tr(S))/dlambda
 
 	if(s-_dof[output_index]<0){ //_dof_ non servirà, sarà un valore unico!
 		#ifdef R_VERSION_
 			Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is: %d \n", this->regressionData_.getLambda()[output_index]);
-			#else
+ 			#else
 			std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'.Value of 'lambda' that produces an error is:" << this->regressionData_.getLambda()[output_index] <<"\n";
 			#endif
 			}
 	Real stderror=norm_squared/(s-_dof[output_index]); //così è ancora fatta sul vettore
-	Real GCV_der_val=2*(s/((s-_dof[output_index]) * (s-_dof[output_index])))*stderror*trace_;
+	VectorXr second_=s/((s-_dof[output_index])*(s-_dof[output_index]))*(z.transpose()*(-dS_.transpose())*LeftMultiplybyQ(MatrixXr(I-S_))*z+z.transpose()*(I-S_.transpose())*LeftMultiplybyQ(MatrixXr(-dS_))*z); //prodotto per matrici può essere un vettore, non un Real->estraggo la componente 0
+	Real first_=2*(s/((s-_dof[output_index]) * (s-_dof[output_index])))*stderror*trace_;
+	Real GCV_der_val=first_+second_[0];
 	#ifdef R_VERSION_
 		Rprintf("GCV_derivative=%f\n",GCV_der_val);
 	#else
