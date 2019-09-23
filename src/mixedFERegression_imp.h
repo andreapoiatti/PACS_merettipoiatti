@@ -567,7 +567,7 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 		        }
 			// Solve the system TX = B
 			MatrixXr X;
-			MatrixXr(nlocations,nlocations);
+			S_=MatrixXr(nlocations,nlocations);
 
 			X = Dsolver.solve(B); //_X3^-1*B
 			V_ = X;
@@ -893,23 +893,7 @@ Real MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 	Real norm_squared=(z-z_hat_).transpose()*(z-z_hat_);
         Real trace_=0.0;
 	MatrixXr dS_(s,s); //S derivative dlambda
-if(regressionData_.isLocationsByNodes() && regressionData_.getCovariates().rows() != 0) //da controllare per questione matrie identità psi che usa o meno
-
-{       auto k = regressionData_.getObservationsIndices();
-	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
-
-	MatrixXr dS_aux=-Dsolver.solve( MatrixXr(R_*V_) ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
-	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
-
-	for (UInt i = 0; i < s; ++i)
-	    for (UInt j = 0; j < s; ++j)
-	{
-		dS_(i,j) += dS_aux(k[i], j); //considero il prodotto per la psi, diventa permutazione, prende righe corrisponednti ai k[i] e calcola traccia
-	}
-
-}
-else //If not locationbynodes
-       {
+       //al più si può migliorare evitando l'ultimo prodotto per psi e ragionando con la k
 	Eigen::LDLT<MatrixXr> Dsolver( SS_ );
 	dS_=-psi_*Dsolver.solve( MatrixXr(R_*V_) ); //_se dà errore, provare MatrixXr(R_*V_), per ricreare al più la matrice
 	//_d_S=-psi*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*R1*R0^(-1)*R1*(psi^T*Q*psi+lambda*R1*R0^-1*R1)^(-1)*psi^T*Q
@@ -917,7 +901,6 @@ else //If not locationbynodes
 
         //for (UInt i=0; i<mesh_.num_nodes(); i++) //_anche se sarebbe più corretto il numero di osservazioni, è nxn
 
-	}
 	for (UInt i=0; i<s; i++)
 		trace_+=dS_(i,i); //_tr(dS/dlambda)=d(tr(S))/dlambda
 
@@ -929,6 +912,7 @@ else //If not locationbynodes
 			#endif
 			}
 	Real stderror=norm_squared/(s-_dof[output_index]); //così è ancora fatta sul vettore
+       //uso la proprietà di simmetri e idempotenza di Q, ho Q^T*Q=Q*Q=Q
 	VectorXr second_=s/((s-_dof[output_index])*(s-_dof[output_index]))*(z.transpose()*(-dS_.transpose())*LeftMultiplybyQ(MatrixXr(I-S_))*z+z.transpose()*(I-S_.transpose())*LeftMultiplybyQ(MatrixXr(-dS_))*z); //prodotto per matrici può essere un vettore, non un Real->estraggo la componente 0
 	Real first_=2*(s/((s-_dof[output_index]) * (s-_dof[output_index])))*stderror*trace_;
 	Real GCV_der_val=first_+second_[0];
