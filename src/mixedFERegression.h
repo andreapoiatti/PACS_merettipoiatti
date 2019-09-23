@@ -41,7 +41,7 @@ class MixedFERegressionBase
 		MatrixXr 	R_; 				// R1^t * R0^{-1} * R1  already stored
 		MatrixXr 	SS_; 				//_stores Psi^t*Q*Psi+lambda*R
 		MatrixXr 	V_; 				//_stores the values of SS^{-1}*Psi^t*Q
-
+                MatrixXr        S_;                             //_matrix S of Stu-Hunter Sangalli
 		// [[old deprecated matrices]]
 		// SpMat 	Psi_;
 		// SpMat 	NWblock_;
