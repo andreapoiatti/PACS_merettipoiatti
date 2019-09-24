@@ -613,7 +613,7 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 
 			MatrixXr X, X4; //_needed the correct formulation of S, not the computation for the trace
 			//X = Dsolver.solve(MatrixXr(X1)); //_X3^-1*X1
-			X4 	= LeftMultiplybyQ(psi_.transpose());
+			X4 	= psi_.transpose()*Q_;
 			X 	= Dsolver.solve(MatrixXr(X4)); //_X3^-1*X4
 			V_	= X;
 			S_ 	= psi_*X;
@@ -628,7 +628,7 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::comput
 			for (int i = 0; i<nnodes; ++i) //_???perchè nnodes e non nlocations? S è nxn!! (forse n<nnodes e quindi è lo stesso, aggiungo zeri)
 							//[[Concordo penso che sia un errore]] [[POSSIBILE ERRORE]]
 			{
-				degrees += X(i,i); //_computes the trace of the matrix S (il +q è già stato calcolato)
+				degrees += S_(i,i); //_computes the trace of the matrix S (il +q è già stato calcolato)
 			}
 		}
    }
