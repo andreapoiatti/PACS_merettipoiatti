@@ -128,10 +128,24 @@ if(class(FEMbasis$mesh) == 'MESH2D'){
 	  numnodes = FEMbasis$mesh$nnodes
   }
 
-  f = bigsol[[1]][1:numnodes]
-  g = bigsol[[1]][(numnodes+1):(2*numnodes)]
+  f = bigsol[[1]][1:numnodes,]
+  g = bigsol[[1]][(numnodes+1):(2*numnodes),]
 
-  return(f)
+  # Make Functional objects object
+  fit.FEM  = FEM(f, FEMbasis)
+  PDEmisfit.FEM = FEM(g, FEMbasis)
+
+  reslist = NULL
+  beta = getBetaCoefficients(locations, observations, fit.FEM, covariates, CPP_CODE,ndim,mydim)
+  if(GCV == TRUE)
+  {
+    seq=getGCV(locations = locations, observations = observations, fit.FEM = fit.FEM, covariates = covariates, edf = bigsol[[2]],ndim,mydim)
+    reslist=list(fit.FEM=fit.FEM,PDEmisfit.FEM=PDEmisfit.FEM, beta = beta, edf = bigsol[[2]], stderr = seq$stderr, GCV = seq$GCV)
+  }else{
+    reslist=list(fit.FEM=fit.FEM,PDEmisfit.FEM=PDEmisfit.FEM, beta = beta)
+  }
+
+  return(reslist)
 }
 
 #' Spatial regression with differential regularization: anysotropic case (elliptic PDE)

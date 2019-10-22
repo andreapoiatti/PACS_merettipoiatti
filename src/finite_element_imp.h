@@ -129,7 +129,7 @@ FiniteElement<Integrator, ORDER, 2, 3>::FiniteElement()
 }
 
 template <class Integrator, UInt ORDER>
-void FiniteElement<Integrator, ORDER, 2, 3>::updateElement(const Element<3*ORDER, 2, 3> & t)
+void FiniteElement<Integrator, ORDER,2,3>::updateElement(const Element<3*ORDER,2,3> &t)
 {
 	t_ = t;
 
@@ -180,13 +180,13 @@ void FiniteElement<Integrator, ORDER, 2 ,3>::setPhiDerMaster()
 }
 
 template <class Integrator, UInt ORDER>
-Real FiniteElement<Integrator, ORDER, 2, 3>::phiMaster(UInt i, UInt iq) const
+Real FiniteElement<Integrator, ORDER,2,3>::phiMaster(UInt i, UInt iq) const
 {
 	return phiMapMaster_(i, iq);
 }
 
 template <class Integrator, UInt ORDER>
-Real FiniteElement<Integrator, ORDER, 2, 3>::phiDerMaster(UInt i, UInt ic, UInt iq) const
+Real FiniteElement<Integrator, ORDER,2,3>::phiDerMaster(UInt i, UInt ic, UInt iq) const
 {
 	return phiDerMapMaster_(i, iq*2 + ic);
 }
@@ -273,7 +273,7 @@ void FiniteElement<Integrator, ORDER, 3, 3>::setPhiDerMaster()
 	for (auto i = 0; i < 6*ORDER-2; i++)
 	{
 		// coeffiecents (actually coefficents_i) is the vector of all zeros but the i-th coordinate
-		coefficients = MatrixXr::Zero(6*ORDER-2, 1);
+		coefficients = MatrixXr::Zero(6*ORDER-2,1);
 		coefficients(i) = 1;
 
 		for (auto iq = 0; iq < Integrator::NNODES; iq++)

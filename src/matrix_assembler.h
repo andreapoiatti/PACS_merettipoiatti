@@ -244,7 +244,7 @@ class Mass
                 * returns a double.
                 */
                 template <class Integrator ,UInt ORDER>
-                inline Real operator() (FiniteElement<Integrator, ORDER,  2, 3> & currentfe_, UInt i, UInt j, UInt iq, UInt ic = 0)
+                inline Real operator() (FiniteElement<Integrator, ORDER  2, 3> & currentfe_, UInt i, UInt j, UInt iq, UInt ic = 0)
                 {
                 	return currentfe_.phiMaster(i, iq) * currentfe_.phiMaster(j, iq);
                 }

@@ -116,7 +116,7 @@ class FiniteElement<Integrator, ORDER, 2, 3>
 
                 // Problem of invertibility of T... to be fixed
                 // [TODO] Eigen::Matrix<Real,3*ORDER, Integrator::NNODES*2> invTrJPhiDerMapMaster_;
-                Eigen::Matrix<Real, 2, 2> metric_;
+                Eigen::Matrix<Real,2,2> metric_;
 
                 // Setters for constructor
                 void setPhiMaster();
@@ -161,12 +161,12 @@ class FiniteElement<Integrator, ORDER, 2, 3>
                 //[TODO]: still to be implemented
               //Real invTrJPhiDerMaster(UInt i, UInt ic, UInt iq) const;
                 // Metric
-                Eigen::Matrix<Real, 2, 2> metric()                const {return metric_;};
+                Eigen::Matrix<Real,2,2> metric()                  const {return metric_;};
 };
 
 // *** TETRAHEDRON ***
 //Implementation FiniteElement with mydim == 3 & ndim == 3
-template <class Integrator, UInt ORDER>
+template <class Integrator ,UInt ORDER>
 class FiniteElement<Integrator, ORDER, 3, 3>
 {
         private:

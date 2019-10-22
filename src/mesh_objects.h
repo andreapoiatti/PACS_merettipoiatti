@@ -193,13 +193,13 @@ class Element<NNODES, 2, 2>: public Identifier
 			\return a Real value representing the area of the triangle from which we updated the element
 			\sa  updateElement(Element<Integrator::NNODES> t)
 		*/
-		Real getArea() const {return (std::abs(detJ_)/2);}
+		Real getArea() const {return (0.5 * detJ_);}
 		//! A member that computes the barycentric coordinates.
 		/*!
 			\param point a Point object
 			\return The three baricentric coordinates of the point
 		*/
-		Eigen::Matrix<Real, 3, 1> getBaryCoordinates(const Point & point) const;
+		Eigen::Matrix<Real,3,1> getBaryCoordinates(const Point & point) const;
 		//! A member that verifies which edge separates the Triangle from a Point.
 		/*!
 			\param point a Point object.
@@ -270,7 +270,7 @@ class Element<NNODES, 2, 3> : public Identifier
 			{points_.resize(NNODES);}
 
 		//! This constructor creates an Element, given its Id and an std array with the three object Point the will define the Element
-    		Element(Id id, const std::vector<Point> & points):
+    		Element(Id id, const std::vector<Point> points):
 		 	Identifier(id), points_(points)
 			{this->computeProperties();}
 
@@ -287,7 +287,7 @@ class Element<NNODES, 2, 3> : public Identifier
 		Real 					getDetJ()   const {return detJ_;}
 		const Eigen::Matrix<Real, 3, 2> & 	getM_J()    const {return M_J_;}
 		const Eigen::Matrix<Real, 2, 2> & 	getMetric() const {return metric_;} //inv(MJ^t*MJ)
-		Real 					getArea()   const {return (std::sqrt(detJ_)/2);} //sqrt(det(MJ^t*MJ))
+		Real 					getArea()   const {return (std::sqrt(detJ_));} //sqrt(det(MJ^t*MJ))
 
 		// General utilities
 		//! A member that computes the barycentric coordinates.
@@ -295,7 +295,7 @@ class Element<NNODES, 2, 3> : public Identifier
 		      \param point a Point object
 		      \return The three baricentric coordinates of the point
 		    */
-		Eigen::Matrix<Real, 3, 1> getBaryCoordinates(const Point & point) const; //! DA VEDERE
+		Eigen::Matrix<Real,3,1> getBaryCoordinates(const Point & point) const; //! DA VEDERE
 
 		//! A member that tests if a Point is located inside a Triangle.
 		    /*!
@@ -345,17 +345,17 @@ class Element<NNODES, 3, 3> : public Identifier
 
 		//! This constructor creates a Tetrahedron, given its Id and an std::array with
 		//! the three object Point the will define the Tetrahedron
-	  	Element(Id id, const std::vector<Point> & points):
+	  	Element(Id id, const std::vector<Point> points):
 			Identifier(id), points_(points)
 			{this->computeProperties();}
 
 		// Operators
 		//! Overloading of the operator [],  taking the Node number and returning a node as Point object.
-		/*!
-		 * For node numbering convention see:
-		   \param i an integer argument.
-		   \return the Point object
-		*/
+    /*!
+     * For node numbering convention see:
+      \param i an integer argument.
+      \return the Point object
+    */
 		Point operator[](UInt i) const {return points_[i];}
 
 		// Getters
@@ -528,7 +528,7 @@ inline Eigen::Matrix<Real, 2, 1> evaluate_der_point<6, 2, 2>(const Element<6, 2,
 		t[2][0] - t[1][0], t[0][0] - t[2][0], t[1][0] - t[0][0];
 	B1 = B1 / (2 * t.getArea());
 
-	Eigen::Matrix<Real, 3, 6> B2;
+	Eigen::Matrix<Real,3,6> B2;
 	B2 << 	  4*L[0]-1, 0       , 0       , 0        , 4*L[2], 4*L[1],
 		  0       , 4*L[1]-1, 0       , 4*L[2]   , 0     , 4*L[0],
 		  0       , 0       , 4*L[2]-1, 4*L[1]   , 4*L[0], 0     ;

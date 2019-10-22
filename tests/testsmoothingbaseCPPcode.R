@@ -25,7 +25,5 @@ output_CPP = smooth.FEM.basis(locations  = as.matrix(locations),
                               covariates = covariates, 
                               GCV = TRUE,
                               CPP_CODE = TRUE)
-# GCVmethod=1
 
-output_CPP
-
+print(output_CPP$fit.FEM$coeff)

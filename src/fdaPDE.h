@@ -20,11 +20,11 @@
 
 // EIGEN
 //Take the code from the linked RcppEigen
+#define  EIGEN_MPL2_ONLY
 #include <Eigen/Dense>
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/Sparse>
 #include <Eigen/StdVector>
-#define  EIGEN_MPL2_ONLY
 
 // For debugging purposes
 // #define  EIGEN_MPL2_ONLY
