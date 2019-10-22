@@ -8,6 +8,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, lambda, covari
   FEMbasis$mesh$edges = FEMbasis$mesh$edges - 1
   FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] = FEMbasis$mesh$neighbors[FEMbasis$mesh$neighbors != -1] - 1
   
+  print(covariates)
   if(is.null(covariates))
   {
     covariates<-matrix(nrow = 0, ncol = 1)
@@ -57,6 +58,8 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, lambda, covari
   storage.mode(GCVmethod) = "integer"
   
   ## Call C++ function
+  print(covariates)
+  print(locations)
   bigsol <- .Call("regression_Laplace", locations, observations, FEMbasis$mesh, 
                   FEMbasis$order, mydim, ndim, lambda, covariates,
                   BC$BC_indices, BC$BC_values, GCV,GCVmethod, nrealizations,

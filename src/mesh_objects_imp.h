@@ -14,7 +14,7 @@ void Element<NNODES, 2, 2>::computeProperties()
 	* 		 *_________\*
 	* 		1    d1   /  2
  	*/
-	Element<NNODES,2,2> & t = *this;
+	Element<NNODES, 2, 2> & t = *this;
 	Point d1(t[1][0]-t[0][0], t[1][1]-t[0][1]);
 	Point d2(t[2][0]-t[0][0], t[2][1]-t[0][1]);   //Point d2 = t[2] - t[0]; reimplementare sottrazione
 
@@ -88,7 +88,7 @@ bool Element<NNODES, 2, 2>::isPointInside(const Point & point) const
 
 // TO BE FIXED: if one dir -1, try with others
 template <UInt NNODES>
-int Element<NNODES,2,2>::getPointDirection(const Point & point) const
+int Element<NNODES, 2, 2>::getPointDirection(const Point & point) const
 {
 	Real eps       = 2.2204e-016;
 	Real tolerance = 10 * eps;
@@ -288,9 +288,9 @@ void Element<NNODES,3,3>::computeProperties()
 	M_J_(2,2) = d3[2];			// (z4-z1)
 
 	// detMJ_ = det(M_J_)
-	Real detMJ_ = M_J_(0,0) * (M_J_(1,1) * M_J_(2,2) - M_J_(1,2) * M_J_(2,1)) -
-		M_J_(0,1) * (M_J_(1,0) * M_J_(2,2) - M_J_(1,2) * M_J_(2,0)) +
-		M_J_(0,2) * (M_J_(1,0) * M_J_(2,1) - M_J_(1,1) * M_J_(2,0));
+	Real detMJ_ = 	M_J_(0,0) * (M_J_(1,1) * M_J_(2,2) - M_J_(1,2) * M_J_(2,1)) -
+			M_J_(0,1) * (M_J_(1,0) * M_J_(2,2) - M_J_(1,2) * M_J_(2,0)) +
+			M_J_(0,2) * (M_J_(1,0) * M_J_(2,1) - M_J_(1,1) * M_J_(2,0));
 
 	// idetMJ = inverse det(M_J_)
 	Real idetMJ = 1. / detMJ_;
@@ -330,9 +330,9 @@ void Element<NNODES,3,3>::computeProperties()
 	// Volume computation
 	Eigen::Matrix<Real,4,4> m;
 	m(0,0) = 1;
-	m(1,0) = 1;
-	m(2,0) = 1;
-	m(3,0) = 1;
+	m(0,1) = 1;
+	m(0,2) = 1;
+	m(0,3) = 1;
 	m(1,0) = t[0][0];
 	m(1,1) = t[1][0];
 	m(1,2) = t[2][0];

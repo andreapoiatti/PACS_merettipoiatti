@@ -12,6 +12,11 @@
 #include "FPCAData.h"
 #include "FPCAObject.h"
 #include "solverdefinitions.h"
+#include "lambda_optimizer.h"
+#include "function_variadic.h"
+//#include "opt_mehods_factory.h"
+#include "newton.h"
+
 //#include <chrono>
 
 #include "mixedFEFPCA.h"
@@ -22,31 +27,48 @@ template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UIn
 SEXP regression_skeleton(InputHandler &regressionData, SEXP Rmesh) //_funzione usata da regression_Laplace per calcolare tutto e poi passarlo a R (eg in big sol ristrovo la soluzione, vedi dove usa la getGCV in R)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
-	MixedFERegression<InputHandler, Integrator,ORDER, mydim, ndim> regression(mesh,regressionData);
+	Rprintf("WARNING:\n");
+
+	MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim> regression(mesh,regressionData);
+	Rprintf("WARNING:\n");
 
 	regression.apply(); //_qui calcola tutto il risultato, ci ho aggiunto per prova la GCV e la derivata da fare print
+	Rprintf("WARNING:\n");
 
-	const std::vector<VectorXr>& solution = regression.getSolution();
-	const std::vector<Real>& dof = regression.getDOF();
+
+	GCV_Exact<InputHandler, Integrator, ORDER, mydim, ndim, 1> GCV_ex(regression);
+	Rprintf("o_o:\n");
+
+	Function_Wrapper<Real, Real, Real, Real, GCV_Exact<InputHandler, Integrator, ORDER, mydim, ndim, 1>> Fun(GCV_ex);
+	Newton<Real, Real, GCV_Exact<InputHandler, Integrator, ORDER, mydim, ndim, 1>> nw(Fun);
+
+	Checker ch;
+	Rprintf("o_o:\n");
+
+
+	std::pair<Real, UInt> lambda_couple = nw.compute(regression.getlambda_(), 1e-3, 100, ch);
+
+	std::cout << lambda_couple.first  << std::endl;
+	std::cout << lambda_couple.second << std::endl;
+
+	regression.set_lambda(lambda_couple.first);
+	regression.apply_2();
+
+	VectorXr solution = regression.getSolution();
+
   //NB_i DOF sono tr(S)+q, servono per il calcolo (che fa esternamente) della GCV
 
 	//Copy result in R memory
 	SEXP result = NILSXP;
-	result = PROTECT(Rf_allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution[0].size(), solution.size()));
-	SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, solution.size()));
+	result = PROTECT(Rf_allocVector(VECSXP, 1));
+	SET_VECTOR_ELT(result, 0, Rf_allocVector(REALSXP, solution.size()));
 	Real *rans = REAL(VECTOR_ELT(result, 0));
 	for(UInt j = 0; j < solution.size(); j++)
 	{
-		for(UInt i = 0; i < solution[0].size(); i++)
-			rans[i + solution[0].size()*j] = solution[j][i];
+		rans[j] = solution[j];
 	}
+	Rprintf("WARNING:\n");
 
-	Real *rans2 = REAL(VECTOR_ELT(result, 1));
-	for(UInt i = 0; i < solution.size(); i++)
-	{
-		rans2[i] = dof[i];
-	}
 	UNPROTECT(1);
 	return(result);
 }
