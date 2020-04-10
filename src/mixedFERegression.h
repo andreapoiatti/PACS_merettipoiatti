@@ -1,152 +1,129 @@
 #ifndef __MIXEDFEREGRESSION_HPP__
 #define __MIXEDFEREGRESSION_HPP__
 
-// Headers
 #include "fdaPDE.h"
 #include "finite_element.h"
 #include "matrix_assembler.h"
 #include "mesh.h"
 #include "param_functors.h"
 #include "regressionData.h"
+#include "optimizationData.h"
 #include "solver.h"
+#include "integratePsi.h"
+#include "auxiliary_optimizer.h"
 #include <memory>
 
-// Classes
-//! A LinearSystem class: A class for the linear system construction and resolution.
+/*! A base class for the smooth regression.
+*/
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 class MixedFERegressionBase
 {
 	protected:
-		// *** DATA ***
-		// Techinical coefficients
-		static constexpr Real dirichlet_penalization 	= 10e18;
-		static constexpr Real pruning_coeff 		= 2.2204e-013;
-
-		// Mesh related data
+		// Fundamental data
 		const MeshHandler<ORDER, mydim, ndim> & mesh_;
-		const InputHandler & 			regressionData_;
-		std::vector<coeff> 			tripletsData_;
+		const InputHandler & regressionData_;
+		const OptimizationData & optimizationData_;
 
-		// Matrices for linar system and estimates
-		SpMat 		A_;				// System matrix, with psi^T*psi in north-west block
-		SpMat 		R1_;				// North-east block of system matrix A_
-		SpMat 		R0_;				// South-east block of system matrix A_
-		SpMat 		psi_;				// Psi(p): num_nodes x [n] matrix
-		MatrixXr 	U_;				// Psi^t*W padded with zeros
-	        VectorXr 	z_hat_; 			// [z_hat] computed in Computedegreesoffreedomexact for the gcv
+		//  system matrix = 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
+		//	                |     R1        | R0	       |      |         O             |  O |
 
-		// Other utility matrices
-		MatrixXr 	H_;				// Hat matrix, Col(W) projector:. W*(W^t*W)^{-1}*W^t
-		MatrixXr 	Q_;				// Orth(Col(W)) projector = Identity-H_
-		MatrixXr 	R_; 				// R1^t * R0^{-1} * R1  already stored
-		MatrixXr 	SS_; 				//_stores Psi^t*Q*Psi+lambda*R
-		MatrixXr 	V_; 				//_stores the values of SS^{-1}*Psi^t*Q
-                MatrixXr        S_;                             //_matrix S of Stu-Hunter Sangalli
-		// [[old deprecated matrices]]
-		// SpMat 	Psi_;
-		// SpMat 	NWblock_;
-		// MatrixXr 	P_;
+		// Data matrices
+		SpMat 		matrixNoCov_;	//! System matrix with psi^T*psi [ptw data] or psi^T*A*psi [areal data] in north-west block  (full system matrix in case of no covariates)
+		SpMat		R1_;		//! North-east block of system matrix matrixNoCov_
+		SpMat 		R0_;		//! South-east block of system matrix matrixNoCov_
+		SpMat 		psi_;		//! Psi matrix of the model
+		SpMat 		psi_t_; 	//! Transpose o Psi matrix of the model
+		MatrixXr 	H_; 		//! The hat matrix of the regression
+		MatrixXr	Q_; 		//! Identity - H, projects onto the orthogonal subspace
+		VectorXr 	A_; 		//! A_.asDiagonal() = diag(|D_1|,...,|D_N|) areal matrix, = identity nnodesxnnodes if pointwise data
+		MatrixXr 	U_;		//! psi^T * W [prw] or psi^T * A * W [areal] padded with zeros, needed for Woodbury decomposition
+		MatrixXr 	V_;   		//! W^T*psi, if pointwise data is U^T, needed for Woodbury decomposition
 
-		// Sparse matrices for fast solution
-		SpMat 			DMat_;			// Data matrix: top-left block of coeffmatrix_
-		SpMat 			AMat_;			// Data matrix: diagonal of coeffmatrix_
-		SpMat 			MMat_;			// Data matrix: down-right block of coeffmatrix_
+		// Factorizaions
+		Eigen::SparseLU<SpMat> matrixNoCovdec_; // Stores the factorization of matrixNoCov_
+		Eigen::PartialPivLU<MatrixXr> Gdec_;	// Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
+		Eigen::PartialPivLU<MatrixXr> WTW_;	// Stores the factorization of W^T * W
+		bool isWTWfactorized_ = false;
 
-		SpMat 			_coeffmatrix;        	//! A Eigen::SpMat: Stores the system right hand side.
-		VectorXr 		_b;                     //! A Eigen::VectorXr: Stores the system right hand side.
-		std::vector<VectorXr> 	_solution; 		//! A vector of solutions: Stores the system solution for various lambda [[!!! TODO !!!]]
-		std::vector<Real> 	_dof;			// Stores tr([???]) for various lambda [[!!! TODO !!!]]
+		// Terms for linear system
+		VectorXr 	_rightHandSide; 	//!A Eigen::VectorXr: Stores the system right hand side.
+		VectorXr 	_forcingTerm;
+		VectorXr 	_solution; 		//!A Eigen::VectorXr: Stores the system solution.
 
-		// Factorized matrices and controllers
-		Eigen::SparseLU<SpMat> 		Adec_; 		// Stores the factorization of A_
-		Eigen::PartialPivLU<MatrixXr> 	Gdec_;		// Stores factorization of G =  C + [V * A^-1 * U]
-		Eigen::PartialPivLU<MatrixXr> 	WTWinv_;	// Stores the factorization of W^t * W, NOT of the inverse
+		// Additional conditions
+		bool isSpaceVarying = false; // used to distinguish whether to use the forcing term u in apply() or not
 
-		bool 			isWTWfactorized_; 	// Checks if the factorization WTWinv_ is already computed, false in constructor
-		bool 			isRcomputed_;		// Checks if matrix R is computed
+		// Setters
+		//! A member function computing the Psi matrix
+		void setPsi(void);
+		//! A member function which builds the Q matrix
+		void setQ();
+		//! A member function which builds the H matrix
+		void setH();
+		//! A member function which builds the A vector containing the areas of the regions in case of areal data
+		void setA();
 
-		// *** METHODS ***
-		// Boundary conditions
-		void 	addDirichletBC();
+		// Utility
+		//! A function that given a vector u, performs Q*u efficiently
+		MatrixXr LeftMultiplybyQ(const MatrixXr& u);
 
-		// Setters and builders
-		// Note that builders are slightly more general allowing to pass them data different
-		// from the ones that are already stord inside the class
-		void 	setPsi();									// Computes psi_
-		void 	setH();										// Computes H_
-		void 	setQ();										// Computes Q_
-
-		void 	buildA(const SpMat & Psi,  const SpMat & R1,  const SpMat & R0);		// std builder of matrix A_
-		void 	getDataMatrix(SpMat & DMat);							// std builder of DMat_
-		void 	getDataMatrixByIndices(SpMat & DMat);						// std builder of DMat_ without using phi
-		void 	buildCoeffMatrix(const SpMat & DMat,  const SpMat & AMat,  const SpMat & MMat);	// std builder of coeffmatrix_
-		void 	getRightHandData(VectorXr & rightHandData);					// std builder of b_
-
-		// Utilities for faster computation
-		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
-
-		// DOF utilities
-		void 	computeDegreesOfFreedom(UInt output_index, Real lambda);
-		void 	computeDegreesOfFreedomExact(UInt output_index, Real lambda);
-		void 	computeDegreesOfFreedomStochastic(UInt output_index, Real lambda);
-
-		// GCV utilities [POIATTI]
-	        Real 	computeGCV(UInt output_index); 			//_usarla in apply, per testare se va, facendo stampare qualcosa
-		Real 	computeGCV_derivative(UInt output_index); 	//_usarla in apply, per testare se va, facendo stampare qualcosa
+		// Builders
+		//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
+		void addDirichletBC();
+		//! A member function computing the no-covariates version of the system matrix
+		void buildMatrixNoCov(const SpMat & Psi, const SpMat & R1, const SpMat & R0);
+		//! A member function returning the system right hand data
+		void getRightHandData(VectorXr& rightHandData);
 
 		// Factorizer
-		void 	system_factorize();
+	    	//! A function to factorize the system, using Woodbury decomposition when there are covariates
+		void system_factorize();
 
 		// Solver
+		//! A function which solves the factorized system
 		template<typename Derived>
 		MatrixXr system_solve(const Eigen::MatrixBase<Derived> &);
 
-		// [[old deprecated uilities]]
-		//void computeBasisEvaluations();
-		//void computeProjOnCovMatrix();
-
-		// [[old deprecated parts]]
-		//! A normal member taking two arguments: Dirichlet Boundary condition
-		/*!
-		 * This member applies Dirichlet boundary conditions on the linear system with the penalization method.
-		  \param bcindex is a const reference to vector<int> : the global indexes of the nodes to which the boundary condition has to be applied.
-		  \param bcvalues is a const reference to vector<double> : the values of the boundary conditions relative to bcindex.
-		/*
-		// void applyDirichletBC(const vector<int>& bcindex, const vector<Real>& bcvalues);
-		// void computeDataMatrix(SpMat& DMat);
-		// void computeDataMatrixByIndices(SpMat& DMat);
-		// void computeRightHandData(VectorXr& rightHandData);
-		// void computeDegreesOfFreedom(UInt output_index);
-
-		//! A template for the system resolution: SpLu, SpQR, SpCholesky,SpConjGrad
-		// template<typename P>
-		// void solve(UInt output_index);
-		*/
-
 	public:
-		// Constructors
-		//! A Constructor.
-		MixedFERegressionBase(const MeshHandler<ORDER, mydim, ndim> & mesh, const InputHandler & regressionData):
-			mesh_(mesh), regressionData_(regressionData), isRcomputed_(false), isWTWfactorized_(false) {};
+		//!A Constructor.
+		MixedFERegressionBase(const MeshHandler<ORDER,mydim,ndim> & mesh, const InputHandler & regressionData, const OptimizationData & optimizationData):
+		 mesh_(mesh), regressionData_(regressionData), optimizationData_(optimizationData){};
 
-		// Main function
+		// [[TODO]]
+		//! The function solving the system, used by the children classes. Saves the result in _solution
+		/*!
+		    \param oper an operator, which is the Stiffness operator in case of Laplacian regularization
+		    \param u the forcing term, will be used only in case of anysotropic nonstationary regression
+		*/
 		template<typename A>
-		void apply(EOExpr<A> oper);
+		void preapply(EOExpr<A> oper,const ForcingTerm & u);
+		void apply(Real lambda);
 
 		// Getters
 		//! A inline member that returns a VectorXr, returns the whole solution_.
-		inline std::vector<VectorXr> const & 	getSolution()	const {return _solution;}
-		inline std::vector<Real> const &	getDOF() 	const {return _dof;} //_serve solo se si caclola la GCV in esterno a C++, noi possiamo non esportare per risparmiare
+		inline const InputHandler *	getData(void)			      {return &regressionData_;}
+		inline const SpMat *		getPsi_(void)			      {return &psi_;} //[[& PER OTTIMIZZARE, CONST???]]
+		inline const SpMat *		getPsi_t(void)			      {return &psi_t_;} //[[& PER OTTIMIZZARE, CONST???]]
+		inline const SpMat *		getR0_(void)			      {return &R0_;}
+		inline const SpMat *		getR1_(void)			      {return &R1_;}
+		//[[??]]inline const SpMat *		get_DMat_(void)			      {return &DMat_;}
+		inline const MatrixXr *		getQ_(void)			      {return &Q_;}
+		inline const MatrixXr *		getH_(void)			      {return &H_;}
+		inline bool			checkisRegression_(void)	const {return (this->regressionData_.getCovariates()->cols()!=0 && this->regressionData_.getCovariates()->rows()!=0);}	// Checks if the model has covariates or not
+		inline bool			check_is_loc_by_n(void)		const {return regressionData_.isLocationsByNodes();}	// Checks if the model has locations or uses nodes
+
+		//! A inline member that returns a VectorXr, returns the whole solution_.
+		inline VectorXr const & getSolution() const{return _solution;};
 };
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 class MixedFERegression : public MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>
 {
 	public:
-		MixedFERegression(const MeshHandler<ORDER, ndim, mydim> & mesh, const InputHandler & regressionData):
-			MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>(mesh, regressionData) {};
+		MixedFERegression(const MeshHandler<ORDER, ndim, mydim> & mesh, const InputHandler & regressionData, const OptimizationData & optimizationData):
+			MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>(mesh, regressionData, optimizationData){};
 
-		void apply()
+		void preapply()
 		{
 			std::cout << "Option not implemented! \n";
 		}

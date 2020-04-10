@@ -1,12 +1,10 @@
 #ifndef __REGRESSIONDATA_HPP__
 #define __REGRESSIONDATA_HPP__
 
-// Headers
 #include "fdaPDE.h"
 #include "mesh_objects.h"
 #include "param_functors.h"
 
-// Classes
 //!  An IO handler class for objects passed from R
 /*!
  * This class, given the data from R, convert them in a C++ format, offering a
@@ -16,182 +14,170 @@
 class  RegressionData
 {
 	private:
-		// Locations related data
-		std::vector<Point> 	locations_;		// Vector of points where we have measurements
-		VectorXr 		observations_;		// Vector of samplings at the points [z]: NAs are discarded
-		bool 			locations_by_nodes_;	// The points are to be found among the nodes? [Y/n]
-		std::vector<UInt> 	observations_indices_;	// If locations_by_nodes_== true, some nodes might not be
-								// realated to a location: observations_indices_ has the
-								// same size as observations_ and tells the node associated to the correponding
-								// selected values; if locations_by_nodes_ == false it's useless, thus empty
+		std::vector<Point> locations_;			// Vector collecting the sampling locations
 
-		//Design matrix related data
-		MatrixXr 		covariates_;		// Design matrix [W] is an [n]x[p] matrix
-		UInt			n_;			// [n]
-		UInt 			p_;			// [p] (often called [q] in this context)
+		VectorXr observations_;				// Vector containing sampled values in the locations
+		std::vector<UInt> observations_indices_;
+		bool locations_by_nodes_;			// If true locations are the nodes of the mesh
 
-		//Other parameters
-		UInt 			order_;			// Input order [???]
-		std::vector<Real> 	lambda_;		// Vector of tested values of lambda
-		UInt 			GCVmethod_;		// Which GCV method is used [1:Exact/2:Stochastic]
-		UInt 			nrealizations_;      	// Number of relizations for the stochastic estimation of GCV
+		//Design matrix
+		MatrixXr covariates_;
+		UInt n_;
+		UInt p_;
 
-		// Boundary conditions
-		std::vector<Real> 	bc_values_;		// Values to apply for Dirichlet Conditions (for correponding indices next vector)
-		std::vector<UInt> 	bc_indices_;		// Indexes of the nodes for which is needed to apply Dirichlet Conditions
+		//Areal data
+		MatrixXi incidenceMatrix_;
+		UInt nRegions_;
 
-		// Dof
-		bool 			DOF_;			// bool compute DOF or not;
+		//Order approximating basis
+		UInt order_;
 
-		// Setters for constructor
-		#ifdef R_VERSION_
+		//Boundary conditions
+		std::vector<Real> bc_values_;
+		std::vector<UInt> bc_indices_;
+
+		#ifdef R_VERSION_ // [[DEPRECAED??]]
 		void setLocations(SEXP Rlocations);
 		void setObservations(SEXP Robservations);
 		void setCovariates(SEXP Rcovariates);
-		void setNrealizations(SEXP Rnrealizations);
+		void setIncidenceMatrix(SEXP RincidenceMatrix);
 		#endif
 
 	public:
-		// Constructors
+		//! A basic version of the constructor.
 		RegressionData(){};
 
 		#ifdef R_VERSION_
-		//! A basic version of the constructor.
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
+			\param Rlocations an R-matrix containing the location of the observations.
 			\param Robservations an R-vector containing the values of the observations.
-			\param Rdesmat an R-matrix containing the design matrix for the regression.
 			\param Rorder an R-integer containing the order of the approximating basis.
-			\param Rlambda an R-double containing the penalization term of the empirical evidence respect to the prior one.
-			\param Rbindex an R-integer containing the indexes of the nodes the user want to apply a Dirichlet Condition,
+			\param Rcovariates an R-matrix storing the covariates of the regression
+			\param RincidenceMatrix an R-matrix containing the incidence matrix defining the regions in the model with areal data
+			\param RBCIndices an R-integer containing the indexes of the nodes the user want to apply a Dirichlet Condition,
 					the other are automatically considered in Neumann Condition.
-			\param Rbvalues an R-double containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
+			\param RBCValues an R-double containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
+		\param RGCVmethod an R-integer indicating the method to use to compute the dofs when DOF is TRUE, can be either 1 (exact) or 2 (stochastic)
+		\param Rnrealizations the number of random points used in the stochastic computation of the dofs
 		*/
-		explicit RegressionData(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rlambda, SEXP Rcovariates,
-				   	SEXP RBCIndices, SEXP RBCValues, SEXP DOF, SEXP RGCVmethod, SEXP Rnrealizations);
+		explicit RegressionData(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates, SEXP RincidenceMatrix,
+			SEXP RBCIndices, SEXP RBCValues);
 		#endif
 
-		explicit RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, std::vector<Real> lambda,
-			 		MatrixXr & covariates , std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, bool DOF);
+		explicit RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, MatrixXr& covariates,
+			MatrixXi & incidenceMatrix, std::vector<UInt> & bc_indices, std::vector<Real>& bc_values);
 
 		// Printers
-		void printObservations(std::ostream & out)	const;
-		void printCovariates(std::ostream & out) 	const;
-		void printLocations(std::ostream & out)		const;
+		void printObservations(std::ostream & out) const;
+		void printCovariates(std::ostream & out) const;
+		void printLocations(std::ostream & out) const;
+		void printIncidenceMatrix(std::ostream & out) const;
 
 		// Getters
 		//! A method returning a reference to the observations vector
-		inline VectorXr const & 		getObservations() 		const {return observations_;}
+		inline const VectorXr * getObservations() const {return &observations_;}
 		//! A method returning a reference to the design matrix
-		inline MatrixXr const & 		getCovariates() 		const {return covariates_;}
+		inline const MatrixXr * getCovariates() const {return &covariates_;}
+		//! A method returning a reference to the incidence matrix
+		inline const MatrixXi * getIncidenceMatrix() const {return &incidenceMatrix_;}
 		//! A method returning the number of observations
-		inline UInt const 			getNumberofObservations() 	const {return observations_.size();}
+		inline UInt getNumberofObservations() const {return observations_.size();}
 		//! A method returning the locations of the observations
-		inline std::vector<Point> const & 	getLocations()	  		const {return locations_;}
-		inline bool 				isLocationsByNodes() 		const {return locations_by_nodes_;}
-		inline bool 				computeDOF() 			const {return DOF_;}
-		inline std::vector<UInt> const & 	getObservationsIndices() 	const {return observations_indices_;}
+		inline const std::vector<Point> * getLocations() const {return &locations_;}
+		//! A method returning the number of regions
+		inline UInt getNumberOfRegions() const {return nRegions_;}
+		inline bool isLocationsByNodes() const {return locations_by_nodes_;}
+		inline const std::vector<UInt> * getObservationsIndices() const {return &observations_indices_;}
 		//! A method returning the the penalization term
-		inline std::vector<Real> const & 	getLambda() 		  	const {return lambda_;}
-		//! A method returning the input order
-		inline UInt const 			getOrder() 			const {return order_;}
+		inline UInt getOrder() const {return order_;}
 		//! A method returning the indexes of the nodes for which is needed to apply Dirichlet Conditions
-		inline std::vector<UInt> const & 	getDirichletIndices() 	  	const {return bc_indices_;}
+		inline std::vector<UInt>getDirichletIndices() const {return bc_indices_;}
 		//! A method returning the values to apply for Dirichlet Conditions
-		inline std::vector<Real> const & 	getDirichletValues() 	  	const {return bc_values_;}
-		//! A method returning the method that should be used to compute the GCV:
-		//! 1: exact calculation
-		//! 2: stochastic estimation
-		inline UInt const & 			getGCVmethod() 			const {return GCVmethod_;}
-		//! A method returning the number of vectors to use to stochastically estimate the edf
-		inline UInt const & 			getNrealizations() 		const {return nrealizations_;}
+		inline std::vector<Real> getDirichletValues() const {return bc_values_;}
 };
 
 
-class  RegressionDataElliptic: public RegressionData
+class RegressionDataElliptic: public RegressionData
 {
 	private:
-		Eigen::Matrix<Real, 2, 2> 	K_;	// Diffusivity
-		Eigen::Matrix<Real, 2, 1> 	beta_;	// Advection
-		Real 				c_;	// Reaction
+		Eigen::Matrix<Real,2,2> K_;
+		Eigen::Matrix<Real,2,1> beta_;
+		Real c_;
 
 	public:
-		// Constructors
 		#ifdef R_VERSION_
 		//! A complete version of the constructor.
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
+			\param Rlocations an R-matrix containing the location of the observations.
 			\param Robservations an R-vector containing the values of the observations.
-			\param Rdesmat an R-matrix containing the design matrix for the regression.
 			\param Rorder an R-integer containing the order of the approximating basis.
-			\param Rlambda an R-double containing the penalization term of the empirical evidence respect to the prior one.
-			\param Rbindex an R-integer vector containing the indexes of the nodes the user want to apply a Dirichlet Condition,
-					the other are automatically considered in Neumann Condition.
-			\param Rbvalues an R-double vector containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
-			\param Rc an R-double that contains the coefficient of the REACTION term
-			\param Rbeta an R-double 2-dim vector that contains the coefficients for the TRANSPORT coefficients.
 			\param RK an R-double 2X2 matrix containing the coefficients for a anisotropic DIFFUSION term.
-			\param (UNSUPPORTED put it zero) Ru an R-double vector of length #triangles that contaiins the forcing term integrals.
+			\param Rbeta an R-double 2-dim vector that contains the coefficients for the TRANSPORT coefficients.
+			\param Rc an R-double that contains the coefficient of the REACTION term
+			\param Rcovariates an R-matrix storing the covariates of the regression
+			\param RincidenceMatrix an R-matrix containing the incidence matrix defining the regions in the model with areal data
+			\param RBCIndices an R-integer containing the indexes of the nodes the user want to apply a Dirichlet Condition,
+					the other are automatically considered in Neumann Condition.
+			\param RBCValues an R-double containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
 		*/
-		explicit RegressionDataElliptic(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rlambda,
-			 			SEXP RK, SEXP Rbeta, SEXP Rc,
-						SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP DOF,SEXP RGCVmethod, SEXP Rnrealizations);
+		explicit RegressionDataElliptic(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP RK, SEXP Rbeta,
+			SEXP Rc, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues);
 		#endif
 
-		explicit RegressionDataElliptic(std::vector<Point> & locations, VectorXr & observations, UInt order, std::vector<Real> lambda,
-			 			Eigen::Matrix<Real, 2, 2> & K, Eigen::Matrix<Real, 2, 1> & beta, Real c,
-						MatrixXr & covariates , std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, bool DOF);
+		explicit RegressionDataElliptic(std::vector<Point> & locations, VectorXr & observations, UInt order,
+			Eigen::Matrix<Real,2,2> & K, Eigen::Matrix<Real,2,1> & beta, Real c, MatrixXr & covariates,
+			MatrixXi & incidenceMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values);
 
-		// Getters
-		inline Eigen::Matrix<Real, 2, 2> const & getK() 	const {return K_;}
-		inline Eigen::Matrix<Real, 2, 1> const & getBeta() 	const {return beta_;}
-		inline Real 			 const   getC() 	const {return c_;}
+		inline Eigen::Matrix<Real,2,2> getK() const {return K_;}
+		inline Eigen::Matrix<Real,2,1> getBeta() const {return beta_;}
+		inline Real getC() const {return c_;}
 };
 
 class RegressionDataEllipticSpaceVarying: public RegressionData
 {
 	private:
-		Diffusivity 	K_;
-		Advection 	beta_;
-		Reaction 	c_;
-		ForcingTerm 	u_;
+		Diffusivity K_;
+		Advection beta_;
+		Reaction c_;
+		ForcingTerm u_;
 
 	public:
-		// Constructors
 		#ifdef R_VERSION_
 		//! A complete version of the constructor.
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
+			\param Rlocations an R-matrix containing the location of the observations.
 			\param Robservations an R-vector containing the values of the observations.
-			\param Rdesmat an R-matrix containing the design matrix for the regression.
 			\param Rorder an R-integer containing the order of the approximating basis.
 			\param Rlambda an R-double containing the penalization term of the empirical evidence respect to the prior one.
-			\param Rbindex an R-integer vector containing the indexes of the nodes the user want to apply a Dirichlet Condition,
-					the other are automatically considered in Neumann Condition.
-			\param Rbvalues an R-double vector containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
-			\param Rc an R-double that contains the coefficient of the REACTION term
-			\param Rbeta an R-double 2-dim vector that contains the coefficients for the TRANSPORT coefficients.
 			\param RK an R-double 2X2 matrix containing the coefficients for a anisotropic DIFFUSION term.
-			\param (UNSUPPORTED put it zero) Ru an R-double vector of length #triangles that contaiins the forcing term integrals.
+			\param Rbeta an R-double 2-dim vector that contains the coefficients for the TRANSPORT coefficients.
+			\param Rc an R-double that contains the coefficient of the REACTION term
+			\param  Ru an R-double vector of length #triangles that contaiins the forcing term integrals.
+			\param Rcovariates an R-matrix storing the covariates of the regression
+			\param RincidenceMatrix an R-matrix containing the incidence matrix defining the regions in the model with areal data
+			\param RBCIndices an R-integer containing the indexes of the nodes the user want to apply a Dirichlet Condition,
+					the other are automatically considered in Neumann Condition.
+			\param RBCValues an R-double containing the value to impose for the Dirichlet condition, on the indexes specified in Rbindex
 		*/
-		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rlambda,
-			 				    SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Ru,
-							    SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP DOF,SEXP RGCVmethod, SEXP Rnrealizations);
+		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP RK, SEXP Rbeta, SEXP Rc,
+			 SEXP Ru, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues);
 		#endif
 
-		explicit RegressionDataEllipticSpaceVarying(std::vector<Point> & locations, VectorXr & observations, UInt order, std::vector<Real> lambda,
-			 				    const std::vector<Eigen::Matrix<Real, 2, 2>, Eigen::aligned_allocator<Eigen::Matrix<Real, 2, 2>>> & K,
-							    const std::vector<Eigen::Matrix<Real, 2, 1>, Eigen::aligned_allocator<Eigen::Matrix<Real, 2, 1>>> & beta,
-							    const std::vector<Real> & c, const std::vector<Real> & u,
-							    MatrixXr & covariates , std::vector<UInt> & bc_indices, std::vector<Real> & bc_values, bool DOF);
 
-		//Getters
-		inline Diffusivity const & 	getK() 		const {return K_;}
-		inline Advection const & 	getBeta() 	const {return beta_;}
-		inline Reaction const & 	getC() 		const {return c_;}
-		inline ForcingTerm const & 	getU() 		const {return u_;}
+		explicit RegressionDataEllipticSpaceVarying(std::vector<Point> & locations, VectorXr & observations, UInt order,
+			const std::vector<Eigen::Matrix<Real,2,2>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,2>>> & K,
+			const std::vector<Eigen::Matrix<Real,2,1>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,1>>> & beta,
+			const std::vector<Real> & c, const std::vector<Real> & u,
+			MatrixXr & covariates, MatrixXi & incidenceMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values);
 
-		//Printer
+		inline Diffusivity getK() const {return K_;}
+		inline Advection getBeta() const {return beta_;}
+		inline Reaction getC() const {return c_;}
+		inline ForcingTerm getU() const {return u_;}
+
 		void print(std::ostream & out) const;
 };
 

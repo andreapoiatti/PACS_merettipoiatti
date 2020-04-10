@@ -35,7 +35,7 @@ class  FPCAObject{
 		void setObservationData(const MatrixXr& datamatrix_);
 		//void setObservationData(const MatrixXr& datamatrix_, const SpMat& psi_);
 		//!A method for updating the Loadings vector given the solution of the linear system and the basis function matrix Psi
-		void setLoadingsPsi(UInt nnodes, const VectorXr& f_sol,const SpMat& psi);
+		void setLoadingsPsi(UInt nnodes, const VectorXr& f_sol, const SpMat& psi);
 		//!A method for updating the Loadings vector given the solution of the linear system and the indices of the non NA values
 		void setLoadings(UInt nnodes, const VectorXr& f_sol, const std::vector<UInt>& obs_indices);
 		//!A method for finalize the Loadings vector

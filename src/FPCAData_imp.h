@@ -1,32 +1,34 @@
 #ifndef __FPCADATA_IMP_HPP__
 #define __FPCADATA_IMP_HPP__
 
-FPCAData::FPCAData(std::vector<Point>& locations, MatrixXr& datamatrix, UInt order, std::vector<Real> lambda ,UInt nPC, UInt nFolds):locations_(locations), order_(order),lambda_(lambda),
- datamatrix_(datamatrix), nPC_(nPC),nFolds_(nFolds)
+FPCAData::FPCAData(std::vector<Point>& locations, MatrixXr& datamatrix, UInt order, MatrixXi& incidenceMatrix,
+					std::vector<Real> lambda, UInt nPC, UInt nFolds): locations_(locations), datamatrix_(datamatrix), order_(order),
+					incidenceMatrix_(incidenceMatrix), lambda_(lambda),  nPC_(nPC),
+					nFolds_(nFolds)
 {
-	if(locations.size()==0)
+	nRegions_ = incidenceMatrix.rows();
+	if(locations.size()==0 && nRegions_==0)
 	{
-		locations_by_nodes_= true;
+		locations_by_nodes_ = true;
 		for(int i = 0; i<datamatrix_.cols();++i) observations_indices_.push_back(i);
 	} else
-		locations_by_nodes_= false;
+		locations_by_nodes_ = false;
 }
 
 #ifdef R_VERSION_
-FPCAData::FPCAData(SEXP Rlocations, SEXP Rdatamatrix, SEXP Rorder, SEXP Rlambda, SEXP RnPC, SEXP RnFolds,SEXP RGCVmethod, SEXP Rnrealizations)
+FPCAData::FPCAData(SEXP Rlocations, SEXP Rdatamatrix, SEXP Rorder, SEXP RincidenceMatrix, SEXP Rlambda, SEXP RnPC, SEXP RnFolds,SEXP RGCVmethod, SEXP Rnrealizations)
 {
-	
 	setLocations(Rlocations);
+	setIncidenceMatrix(RincidenceMatrix);
 	setDatamatrix(Rdatamatrix);
-
 	setNrealizations(Rnrealizations);
 	
 	GCVmethod_ = INTEGER(RGCVmethod)[0];
 
 	order_ =  INTEGER(Rorder)[0];
 	
-    	UInt length_lambda = Rf_length(Rlambda);
-    	for (UInt i = 0; i<length_lambda; ++i)  lambda_.push_back(REAL(Rlambda)[i]);
+	UInt length_lambda = Rf_length(Rlambda);
+	for (UInt i = 0; i<length_lambda; ++i) lambda_.push_back(REAL(Rlambda)[i]);
 
 	nPC_ = INTEGER(RnPC)[0];
 	
@@ -44,7 +46,7 @@ void FPCAData::setLocations(SEXP Rlocations)
 			{
 				locations_.emplace_back(REAL(Rlocations)[i+ n_*0],REAL(Rlocations)[i+ n_*1]);
 			}
-		}else{
+		}else{ //ndim == 3
 			for(auto i=0; i<n_; ++i)
 			{
 				locations_.emplace_back(REAL(Rlocations)[i+ n_*0],REAL(Rlocations)[i+ n_*1],REAL(Rlocations)[i+ n_*2]);
@@ -62,7 +64,10 @@ void FPCAData::setDatamatrix(SEXP Rdatamatrix)
 	observations_indices_.reserve(p_);
 	VectorXr auxiliary_row_;
 	auxiliary_row_.resize(p_);
-	if(locations_.size() == 0)
+	
+	nRegions_ = incidenceMatrix_.rows();
+	
+	if(locations_.size() == 0 && nRegions_==0)
 	{
 		locations_by_nodes_ = true;
 		for(auto i=0; i<n_; ++i)
@@ -97,6 +102,22 @@ void FPCAData::setDatamatrix(SEXP Rdatamatrix)
 void FPCAData::setNrealizations(SEXP Rnrealizations) {
 	nrealizations_ = INTEGER(Rnrealizations)[0];
 }
+
+void FPCAData::setIncidenceMatrix(SEXP RincidenceMatrix)
+{
+	nRegions_ = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[0];
+	UInt p = INTEGER(Rf_getAttrib(RincidenceMatrix, R_DimSymbol))[1];
+
+	incidenceMatrix_.resize(nRegions_, p);
+
+	for(auto i=0; i<nRegions_; ++i)
+	{
+		for(auto j=0; j<p; ++j)
+		{
+			incidenceMatrix_(i,j) = INTEGER(RincidenceMatrix)[i+nRegions_*j];
+		}
+	}
+}
 #endif
 
 
@@ -127,6 +148,17 @@ void FPCAData::printLocations(std::ostream & out) const
 	}
 }
 
+void FPCAData::printIncidenceMatrix(std::ostream & out) const
+{
+	for (auto i=0; i<incidenceMatrix_.rows(); i++)
+	{
+		for (auto j=0; j<incidenceMatrix_.cols(); j++)
+		{
+			out << incidenceMatrix_(i,j) << "\t";
+		}
+		out << std::endl;
+	}
+}
 
 
 #endif

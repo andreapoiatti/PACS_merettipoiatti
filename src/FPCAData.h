@@ -16,16 +16,15 @@ class  FPCAData{
 	
 		std::vector<Point> locations_;
 
-		bool locations_by_nodes_;
 	
 		//Design matrix
 		MatrixXr datamatrix_;
-		std::vector<UInt> observations_indices_;
-		UInt n_;
-		UInt p_;
 		
-		//Other parameters
 		UInt order_;
+		
+		//Areal data
+		MatrixXi incidenceMatrix_;
+		//lambda
 		std::vector<Real> lambda_;
 		
 		//Number of Principal Components
@@ -38,10 +37,20 @@ class  FPCAData{
 		UInt GCVmethod_;
 		UInt nrealizations_;      // Number of relizations for the stochastic estimation of GCV
 		
+		
+		std::vector<UInt> observations_indices_;
+		UInt n_;
+		UInt p_;
+		
+		UInt nRegions_;
+		
+		bool locations_by_nodes_;
+		
 		#ifdef R_VERSION_
 		void setDatamatrix(SEXP Rdatamatrix);
 		void setLocations(SEXP Rlocations);
 		void setNrealizations(SEXP Rnrealizations);
+		void setIncidenceMatrix(SEXP RincidenceMatrix);
 		#endif
 
 	public:
@@ -54,6 +63,9 @@ class  FPCAData{
 			\param Rlocations an R-matrix containing the location of the observations.
 			
 			\param Rorder an R-integer containing the order of the approximating basis.
+			
+			\param RincidenceMatrix an R-matrix containing the incidence matrix defining the regions in the model with areal data
+			
 			\param Rlambda an R-double containing the penalization term of the empirical evidence respect to the prior one.
 			
 			\param RnPC an R-integer specifying the number of principal components to compute.
@@ -69,17 +81,18 @@ class  FPCAData{
 		FPCAData(){};
 
 		#ifdef R_VERSION_
-		explicit FPCAData(SEXP Rlocations, SEXP Rdatamatrix, SEXP Rorder,
-		SEXP Rlambda, SEXP RnPC, SEXP RnFolds,SEXP RGCVmethod, SEXP Rnrealizations);
+		explicit FPCAData(SEXP Rlocations, SEXP Rdatamatrix, SEXP Rorder, SEXP RincidenceMatrix,
+		SEXP Rlambda, SEXP RnPC, SEXP RnFolds, SEXP RGCVmethod, SEXP Rnrealizations);
 		#endif
 
 				
 		explicit FPCAData(std::vector<Point>& locations, MatrixXr& datamatrix,
-		UInt order, std::vector<Real> lambda, UInt nPC, UInt nFolds);
+		UInt order, MatrixXi& incidenceMatrix, std::vector<Real> lambda, UInt nPC, UInt nFolds);
 
 
 		void printDatamatrix(std::ostream & out) const;
 		void printLocations(std::ostream & out) const;
+		void printIncidenceMatrix(std::ostream & out) const;
 
 		//! A method returning the locations of the observations
 		inline std::vector<Point> const & getLocations() const {return locations_;}
@@ -90,11 +103,17 @@ class  FPCAData{
 		
 		//! A method returning a reference to the observations vector
 		inline MatrixXr const & getDatamatrix() const {return datamatrix_;}
+
+		//! A method returning a reference to the incidence matrix
+		inline MatrixXi const & getIncidenceMatrix() const {return incidenceMatrix_;}
 		
 		//! A method returning the number of observations
 		inline UInt const getNumberofObservations() const {return datamatrix_.cols();}
 		//! A method returning the observations indices
 		inline std::vector<UInt> const & getObservationsIndices() const {return observations_indices_;}
+
+		//! A method returning the number of regions
+		inline UInt const getNumberOfRegions() const {return nRegions_;}
 
 		//! A method returning the number of Principal Components to compute
 		inline UInt const getNPC() const {return nPC_;}

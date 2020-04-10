@@ -7,6 +7,7 @@
 //#include <Eigen/SuperLUSupport>
 //#include <Eigen/UmfPackSupport>
 
+//! Some linear solvers definitions that may be useful for the future 
 
 typedef Eigen::SparseLU<SpMat> Sparse_LU;
 typedef Eigen::SimplicialLDLT<SpMat> Sparse_Cholesky;

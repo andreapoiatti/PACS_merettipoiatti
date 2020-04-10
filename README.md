@@ -1,26 +1,24 @@
-## fdaPDE Library
+# fdaPDE_dev
 
-fdaPDE implements a class of spatial regression models in between statistics and numerical analysis. These models are particularly well-suited for situations where a prior knowledge of the underlying phenomenon is known and can be described in terms of a Partial Differential Equation (PDE).
+This repository contains the development version of fdaPDE package (future 1.0 version).
 
-## Installation
-Subfolder structure
-src contains all C++ code and a special file named Makevars necessary to build and install the R package
-R contains the R functions that wrap the C++ calls
-data contains all .rda and .RData files useful for testings
-tests contains basic R script to run tests
-To install the package, please make sure that you have the package devtools already intalled. If using a Linux machine, it is also advisable to install rgl, plot3D and plot3Drgl before fdaPDE
+New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data.
 
-From the root folder then type
+smooth.FEM.basis, smooth.PDE.FEM.basis, smooth.FEM.PDE.sv.basis are deprecated, smooth.FEM has to be used in all cases.
 
-R -e "library(devtools); install()" --silent
-R -e "library(devtools); document()" --silent
+Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying regression have been fixed. Issues of point location in 2.5D have been fixed. Areal data are still undergoing tests.
 
-To install the package from the Github repository, use the command `install_github` from the 
-R package `devtools` as follows:
-`install_github("NegriLuca/fdaPDE-manifold")`
+Compiled in both Win RStudio and Ubuntu 18.04 using g++ compiler. If using a Linux machine, it is advisable to install rgl, plot3D and plot3Drgl before fdaPDE.
 
-## Examples
+## Subfolder structure:
+/src contains all C++ code and a special file named Makevars necessary to build and install the R package, 
+/R contains the R functions that wrap the C++ calls,
+/tests contains a script to test the package,
+/data contains the data to run the tests in /tests.
 
-Some example can be found visualizing the help of the three main smoothing functions i.e.
-`?smooth.FEM.basis` or `?smooth.FEM.PDE.basis` or `?smooth.FEM.PDE.SV.basis`
+## Remarks:
 
+1) the shift of indexes from R to C++ is done within the R functions smooth.FEM and FPCA.FEM Do not use C++ scripts directly on the R mesh objects, unless you take care of shifing indexes by yourself.
+
+2) This repo contains the code version using MUMPS.
+ 

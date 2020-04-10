@@ -1,50 +1,44 @@
 #ifndef FDAPDE_H_
 #define FDAPDE_H_
 
-// Libraries
-// R
+// Insert principal libraries
 #ifdef R_VERSION_
-        #define  R_NO_REMAP
-        #include <R.h>
-        #include <Rdefines.h>
-        #include <Rinternals.h>
+#define R_NO_REMAP
+#include <R.h>
+#include <Rdefines.h>
+#include <Rinternals.h> 
 #endif
 
-// C/C++
-#include <cstdlib>
-#include <iostream>
-#include <limits>
 #include <stdint.h>
-#include <vector>
-// #include <iomanip>
+#include <iostream>
 
-// EIGEN
-//Take the code from the linked RcppEigen
-#define  EIGEN_MPL2_ONLY
-#include <Eigen/Dense>
-#include <Eigen/IterativeLinearSolvers>
-#include <Eigen/Sparse>
-#include <Eigen/StdVector>
+#include <cstdlib>
+//#include <iomanip>
+#include <limits>
+#include <vector>
 
 // For debugging purposes
-// #define  EIGEN_MPL2_ONLY
-// #include "Eigen/Eigen/Dense"
-// #include "Eigen/Eigen/Sparse"
-// #include <Eigen/StdVector>
+//#include <Eigen/StdVector>
+//#include "Eigen/Eigen/Sparse"
+//#include "Eigen/Eigen/Dense"
+//#define  EIGEN_MPL2_ONLY
 
-//----------------------------------------------------------------------------//
+//Take the code from the linked RcppEigen
+#include <Eigen/StdVector>
+#include <Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/IterativeLinearSolvers>
+#define  EIGEN_MPL2_ONLY
 
-// Typedefs
-// C++
-typedef double  Real;
-typedef int     UInt;
+typedef double Real;
+typedef int UInt;
 
-// EIGEN
-typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>     MatrixXr;
-typedef Eigen::Matrix<Real, Eigen::Dynamic, 1>                  VectorXr;
-typedef Eigen::Matrix<UInt, Eigen::Dynamic, 1>                  VectorXi;
-typedef Eigen::SparseMatrix<Real>                               SpMat;
-typedef Eigen::SparseVector<Real>                               SpVec;
-typedef Eigen::Triplet<Real>                                    coeff;
+typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixXr;
+typedef Eigen::Matrix<UInt,Eigen::Dynamic,Eigen::Dynamic> MatrixXi;
+typedef Eigen::Matrix<Real,Eigen::Dynamic,1> VectorXr;
+typedef Eigen::Matrix<UInt,Eigen::Dynamic,1> VectorXi;
+typedef Eigen::SparseMatrix<Real> SpMat;
+typedef Eigen::SparseVector<Real> SpVec;
+typedef Eigen::Triplet<Real> coeff;
 
 #endif /* FDAPDE_H_ */

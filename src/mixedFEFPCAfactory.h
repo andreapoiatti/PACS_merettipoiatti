@@ -27,9 +27,26 @@ class MixedFEFPCAfactory
 	public:
 	//! A method that takes as parameter a string and builds a pointer to the right object for the cross-validation
 	static std::unique_ptr<MixedFEFPCABase<Integrator, ORDER,  mydim,  ndim>> createFPCAsolver(const std::string &validation, const MeshHandler<ORDER,mydim,ndim>& mesh, const FPCAData& fpcaData){
-	if(validation=="GCV") return make_unique<MixedFEFPCAGCV<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
-	if(validation=="KFold") return make_unique<MixedFEFPCAKFold<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
-	if(validation=="NoValidation") return make_unique<MixedFEFPCA<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
+	
+	if(validation=="GCV") 
+	    return make_unique<MixedFEFPCAGCV<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
+	    
+	else if(validation=="KFold") 
+	    return make_unique<MixedFEFPCAKFold<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
+	
+	else if(validation=="NoValidation") 
+	    return make_unique<MixedFEFPCA<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
+	
+	else{
+		#ifdef R_VERSION_
+		Rprintf("Unknown validation option - using no validation");
+		#else
+		std::cout<<"Unknown validation option - using no validation";
+		#endif
+		
+		return make_unique<MixedFEFPCA<Integrator, ORDER,  mydim, ndim>>(mesh,fpcaData);
+	}
+	
 	}
 
 };

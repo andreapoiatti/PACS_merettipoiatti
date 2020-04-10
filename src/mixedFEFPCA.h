@@ -9,6 +9,7 @@
 #include "solver.h"
 #include "FPCAData.h"
 #include "FPCAObject.h"
+#include "integratePsi.h"
 #include <memory>
 
 //! A virtual Base class for the implementation of the SF-PCA algorithm: it contains some methods useful for the construction and the resolution of the linear system that has to be done iteratively in the algorithm.
@@ -24,7 +25,7 @@ protected:
 	std::vector<coeff> tripletsData_;
 	
 	//!A Eigen::SparseMatrix<Real> containing the basis function.
-	SpMat psi_;
+	//SpMat psi_;
 
 	bool isRcomputed_;
 	MatrixXr R_; //R1 ^T * R0^-1 * R1
@@ -39,10 +40,13 @@ protected:
 
 	//!A Eigen::SparseMatrix<Real> containing the basis function.
 	SpMat Psi_;
+
+	//! A Eigen::VectorXr: Stores the area/volume of each region
+	VectorXr Delta_; //Delta_.asDiagonal() = diag(|D_1|,...,|D_N|)
 	
 	//!A Eigen::SparseMatrix<Real> containing the matrix of the linear system
 	SpMat coeffmatrix_;       //!A Eigen::VectorXr: Stores the system right hand side.
-	VectorXr b_;			  //!A Eigen::VectorXr : Stores the system solution.
+	VectorXr b_;			  //!A Eigen::VectorXr: Stores the system solution.
 	std::vector<VectorXr> solution_;
 	
 	Sparse_LU sparseSolver_;
@@ -62,6 +66,8 @@ protected:
 	//!A Eigen::MatrixXr : Stores the datamatrix and its updates after each PC is computed.
 	MatrixXr datamatrixResiduals_ ;
 	
+	//! A method for the computation of Delta_
+	void computeDelta();
 	//! A method for the computation of the basis function matrix Psi_.
 	void computeBasisEvaluations();
 	//! A method for the assembling of the matrix of the system.
@@ -184,7 +190,6 @@ public:
 	//!A specification of the virtual method for performing the SF-PCA algorithm with the K-Fold cross-validation method for the choice of the parameter lambda.
 	void apply();
 };
-
 
 #include "mixedFEFPCA_imp.h"
 
