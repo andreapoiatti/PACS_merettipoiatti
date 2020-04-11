@@ -72,7 +72,7 @@ class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>        // DEB
 {
         //eventuali metodi saranno overridden da opt methods
         public:
-                Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {}; //esempio di possibile constructor
+                Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //esempio di possibile constructor
                 // non può prendere in ingresso const ref, deve modificare l'oggetto F
 
                 std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch)

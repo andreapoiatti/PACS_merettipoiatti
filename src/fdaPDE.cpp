@@ -14,6 +14,7 @@
 #include "carrier.h"
 #include "lambda_optimizer.h"
 #include "newton.h"
+#include "vector_eval.h"
 //#include <chrono>
 
 #include "mixedFEFPCA.h"
@@ -35,7 +36,8 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
 	regression.preapply();
 
 	//Build the carrier
-	Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>> car(&regression, &optimizationData, regression.check_is_loc_by_n(),
+	Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>> car=Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>();
+	car.set_all(&regression, &optimizationData, regression.check_is_loc_by_n(),
 			regression.checkisRegression_(), regressionData.getNumberofObservations(), regressionData.getObservationsIndices(),
 			regressionData.getObservations(), regressionData.getCovariates(), regression.getH_(), regression.getQ_(), regression.getR1_(),
 			regression.getR0_(), regression.getPsi_(), regression.getPsi_t());
@@ -46,6 +48,14 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
 
 	// Build wraper and newton method
 	Function_Wrapper<Real, Real, Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> Fun(GCV_ex);
+
+        //this will be used when batch will be correctly implemented, also for return elements
+        //Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
+
+	Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, {0.001,0.002,0.0001,0.0005,0.007});  //debugging dummy trial: working
+
+        output_Data_opt output_vec=eval.Get_optimization_vectorial();
+
 	Newton_fd<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> nw(Fun);
 
 	// Compute optimal lambda
@@ -273,7 +283,7 @@ extern "C"
 		}
 
 		if(criterion == 0)
-		{
+		{       std::cout<<"Valori"<<std::endl;
 			UInt n_lambdas_ = Rf_length(Rlambdas);
 			std::vector<Real> lambdas_;
 			lambdas_.resize(n_lambdas_);

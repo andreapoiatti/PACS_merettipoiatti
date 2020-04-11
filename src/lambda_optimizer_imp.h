@@ -27,6 +27,17 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt>
 
 
 template<typename InputCarrier>
+const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
+{
+        this->output.z_hat              = this->z_hat;
+        this->output.SS_res             = this->SS_res;
+        this->output.sigma_hat_sq       = this->sigma_hat_sq;
+
+        return this->output;
+}
+
+
+template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_R_(void)
 {
         const SpMat * R1p_= this->the_carrier.get_R1p();          // Get the value of matrix R1

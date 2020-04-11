@@ -35,25 +35,40 @@ class Carrier: public Extensions...
                 const SpMat * psip;
                 const SpMat * psi_tp;
 
+
         public:
                 Carrier() = default;
 
                 //! Constructor taking object Extensions and initializing with it the new class
                 template<typename Dummy = typename std::enable_if<sizeof...(Extensions)!=0, void>, typename... Bricks>
-                Carrier(Bricks && ... ext, const Origin * trace_, const OptimizationData * opt_data_, bool locations_are_nodes_,
+                Carrier(Bricks && ... ext): Extensions(std::forward<Bricks>(ext))...{};
+
+
+                void set_all(const Origin * trace_, const OptimizationData * opt_data_, bool locations_are_nodes_,
                                 bool has_covariates_, UInt n_obs_, const std::vector<UInt> * obs_indicesp_,
                                 const VectorXr * zp_, const MatrixXr * Wp_, const MatrixXr * Hp_, const MatrixXr * Qp_, const SpMat * R1p_,
-                                const SpMat * R0p_, const SpMat * psip_, const SpMat * psi_tp_): trace(trace_), opt_data(opt_data_),
-                                locations_are_nodes(locations_are_nodes_), has_covariates(has_covariates_), n_obs(n_obs_),
-                                obs_indicesp(obs_indicesp_), zp(zp_), Wp(Wp_), Hp(Hp_), Qp(Qp_), R1p(R1p_), R0p(R0p_),
-                                psip(psip_), psi_tp(psi_tp_), Extensions(std::forward<Bricks>(ext)) ...
-                {
-                        if(std::is_base_of<Areal, Carrier>::value)
-                                areal_data = true;
-                        if(std::is_base_of<Temporal, Carrier>::value)
-                                temporal_data = true;
-                };
+                                const SpMat * R0p_, const SpMat * psip_, const SpMat * psi_tp_)
+                                {
+                                        this->trace=trace_;
+                                        this->opt_data=opt_data_;
+                                        this->locations_are_nodes=locations_are_nodes_;
+                                        this->has_covariates=has_covariates_;
+                                        this->n_obs=n_obs_;
+                                        this->obs_indicesp=obs_indicesp_;
+                                        this->zp=zp_;
+                                        this->Wp=Wp_;
+                                        this->Hp=Hp_;
+                                        this->Qp=Qp_;
+                                        this->R1p=R1p_;
+                                        this->R0p=R0p_;
+                                        this->psip=psip_;
+                                        this->psi_tp=psi_tp_;
 
+                                        if(std::is_base_of<Areal, Carrier>::value)
+                                                areal_data = true;
+                                        if(std::is_base_of<Temporal, Carrier>::value)
+                                                temporal_data = true;
+                                };
                 inline const Origin * get_tracep(void) const {return trace;}
                 inline const OptimizationData * get_opt_data(void) const {return opt_data;}
 

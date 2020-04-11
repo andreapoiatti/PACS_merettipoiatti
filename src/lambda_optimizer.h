@@ -168,6 +168,7 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                  //Set and return output data, plus lambda final and number of iterations
 
                 const output_Data & get_output(std::pair<Real, UInt> p, const timespec & T);
+                const output_Data & get_output_partial(void);
 
 };
 
