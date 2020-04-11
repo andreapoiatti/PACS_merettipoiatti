@@ -52,7 +52,7 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
         //this will be used when batch will be correctly implemented, also for return elements
         //Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
 
-	Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, {0.001,0.002,0.0001,0.0005,0.007});  //debugging dummy trial: working
+	Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, {0.001,0.002,0.0001,0.0005,0.000109,0.007});  //debugging dummy trial: working
 
         output_Data_opt output_vec=eval.Get_optimization_vectorial();
 

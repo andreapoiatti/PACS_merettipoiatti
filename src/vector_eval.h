@@ -81,6 +81,7 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
 
                 void compute_specific_parameters(void) override
                 {
+                 Rprintf("Specific parameters for GCV computed\n");
                  this->output.z_hat_opt=this->F.get_output_partial().z_hat;
                  this->output.SS_res_opt=this->F.get_output_partial().SS_res;
                  this->output.sigma_hat_sq_opt=this->F.get_output_partial().sigma_hat_sq;
