@@ -15,20 +15,21 @@
 #include "lambda_optimizer.h"
 #include "newton.h"
 #include "vector_eval.h"
+#include "opt_methods_factory.h"
 //#include <chrono>
 
 #include "mixedFEFPCA.h"
 #include "mixedFERegression.h"
 #include "mixedFEFPCAfactory.h"
 
+template<typename CarrierType>
+SEXP optimizer_method_selection(CarrierType & carrier);
+template<typename EvaluationType, typename CarrierType>
+SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
+
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, OptimizationData & optimizationData)
 {
-	timer Time_partial, Time_tot;
-	Time_partial.start();
-	Time_tot.start();
-
-	Rprintf("WARNING: start taking time\n");
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
 
 	// Build the mixer
@@ -36,96 +37,99 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
 	regression.preapply();
 
 	//Build the carrier
-	Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>> car=Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>();
-	car.set_all(&regression, &optimizationData, regression.check_is_loc_by_n(),
-			regression.checkisRegression_(), regressionData.getNumberofObservations(), regressionData.getObservationsIndices(),
-			regressionData.getObservations(), regressionData.getCovariates(), regression.getH_(), regression.getQ_(), regression.getR1_(),
-			regression.getR0_(), regression.getPsi_(), regression.getPsi_t());
-
-	// Build the GCV
-	Rprintf("\nExact\n");
-	GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1> GCV_ex(car);
-
-	// Build wraper and newton method
-	Function_Wrapper<Real, Real, Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> Fun(GCV_ex);
-
-        //this will be used when batch will be correctly implemented, also for return elements
-        //Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
-
-	Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, {0.001,0.002,0.0001,0.0005,0.000109,0.007});  //debugging dummy trial: working
-
-        output_Data_opt output_vec=eval.Get_optimization_vectorial();
-
-	Newton_fd<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> nw(Fun);
-
-	// Compute optimal lambda
-	Checker ch;
-	std::pair<Real, UInt> lambda_couple = nw.compute(car.get_opt_data()->get_initial_lambda_(), 1e-5, 40, ch);
-	//complete the output struct before building the solution
-
-	Rprintf("WARNING: partial time after the optimization method\n");
-	timespec T=Time_partial.stop();
-
-	//now the last values in GCV_exact are the correct ones, related to the last iteration
-	const output_Data & output = nw.F.get_output(lambda_couple, T); //this is why F has to be public in Opt_methods
-	regression.apply(lambda_couple.first);
-
-	// Get the solution
-	VectorXr solution = regression.getSolution();         //[TO DO] la lascio solo per evitare di modifcare il codice R che la usa, andrà tolta
-
-	//NB_i DOF sono tr(S)+q, servono per il calcolo (che fa esternamente) della GCV
-
-	//Copy result in R memory
-	SEXP result = NILSXP;
-	result = PROTECT(Rf_allocVector(VECSXP, 8));
-	SET_VECTOR_ELT(result, 0, Rf_allocVector(REALSXP, solution.size()));
-	Real *rans = REAL(VECTOR_ELT(result, 0));
-	for(UInt j = 0; j < solution.size(); j++)  //[TO DO ] //sono le f_hat e g_hat, si potrebbe rimuovere, cambiando la chiamata da R in  smooth.FEM.basis
+	if(regressionData.getNumberOfRegions()>0)
 	{
-		rans[j] = solution[j];
+		Rprintf("Areal\n");
+		Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>
+			carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_areal_carrier(regressionData, regression, optimizationData);
+		return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>>(carrier);
 	}
-
-
-	SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, output.z_hat.size()));
-	rans = REAL(VECTOR_ELT(result, 1));
-	for(UInt j = 0; j < output.z_hat.size(); j++)
+	else
 	{
-		rans[j] = output.z_hat[j];
+		Rprintf("Pointwise\n");
+		Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>
+			carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_plain_carrier(regressionData, regression, optimizationData);
+		return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>>(carrier);
 	}
-
-	//Rprintf("Hey doc,  %f %f %f\n", output.z_hat[0], output.z_hat[1], output.z_hat[3]);
-	SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, 1));
-	rans = REAL(VECTOR_ELT(result, 2));
-	rans[0] = output.SS_res;
-
-	SET_VECTOR_ELT(result, 3, Rf_allocVector(REALSXP, 1));
-	rans= REAL(VECTOR_ELT(result, 3));
-	rans[0] = output.sigma_hat_sq;
-
-	SET_VECTOR_ELT(result, 4, Rf_allocVector(REALSXP, 1));
-	rans = REAL(VECTOR_ELT(result, 4));
-	rans[0] = output.lambda_sol;
-
-	SET_VECTOR_ELT(result, 5, Rf_allocVector(REALSXP, 1));
-	rans = REAL(VECTOR_ELT(result, 5));
-	rans[0] = output.n_it;
-
-	SET_VECTOR_ELT(result, 6, Rf_allocVector(REALSXP, 1));
-	rans = REAL(VECTOR_ELT(result, 6));
-	rans[0] = output.time_partial;
-
-	Rprintf("WARNING: total time\n");
-	timespec T2=Time_tot.stop();
-	Real time_tot=T2.tv_sec+1e-9*T2.tv_nsec;
-
-	SET_VECTOR_ELT(result, 7, Rf_allocVector(REALSXP, 1));
-	rans = REAL(VECTOR_ELT(result, 7));
-	rans[0] = time_tot;
-
-	UNPROTECT(1);
-
-	return(result);
 }
+
+template<typename CarrierType>
+SEXP optimizer_method_selection(CarrierType & carrier)
+{
+	// Build the optimizer				[[ TO DO factory]]
+	const OptimizationData * optr = carrier.get_opt_data();
+	if(optr->get_method_() == "gcv" && optr->get_evaluation_() == "exact")
+	{
+		Rprintf("GCV exact\n");
+		GCV_Exact<CarrierType, 1> optim(carrier);
+		return optimizer_strategy_selection<GCV_Exact<CarrierType, 1>, CarrierType>(optim, carrier);
+	}
+	/*else if(optr->get_method_() == "gcv" && optr->get_evaluation_() == "stochastic")
+	{
+		Rprintf("GCV stochastic\n");
+		GCV_Stochastic<CarrierType, 1> optim(carrier);
+		return optimizer_strategy_selection<GCV_Stochastic<CarrierType, 1>, CarrierType>(optim, carrier);
+	}*/
+	else // E.g. K-FOLD CV
+	{
+		Rprintf("Error, no other method implemented\n");
+		return NILSXP;
+	}
+}
+
+template<typename EvaluationType, typename CarrierType>
+SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
+{
+	// Build wraper and newton method
+	Function_Wrapper<Real, Real, Real, Real, EvaluationType> Fun(optim);
+	typedef Function_Wrapper<Real, Real, Real, Real, EvaluationType> FunWr;
+
+	const OptimizationData * optr = carrier.get_opt_data();
+	if(optr->get_criterion_() == "batch")
+	{
+		//this will be used when batch will be correctly implemented, also for return elements
+		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
+		Eval_GCV<Real, Real, EvaluationType> eval(Fun, *(optr->get_lambdas_()));  //debugging dummy trial: working
+		output_Data_opt output_vec = eval.Get_optimization_vectorial();
+
+		return NILSXP;  // [[TO DO]]
+	}
+	else
+	{
+		std::unique_ptr<Opt_methods<Real,Real,EvaluationType>> optim_p =
+			Opt_method_factory<FunWr, Real, Real, EvaluationType>::create_Opt_method(optr->get_criterion_(), Fun);
+
+		// Compute optimal lambda
+		Checker ch;
+		Real lambda = optr->get_initial_lambda_();
+		if(lambda <=0)
+		{
+			// [[ TO DO]] automatic clever method to be implemented
+			lambda = 0.01;
+		}
+
+		timer Time_partial;
+		Time_partial.start();
+
+		Rprintf("WARNING: start taking time\n");
+
+		std::pair<Real, UInt> lambda_couple = optim_p->compute(lambda, 1e-5, 40, ch);
+
+		Rprintf("WARNING: partial time after the optimization method\n");
+		timespec T = Time_partial.stop();
+
+		//now the last values in GCV_exact are the correct ones, related to the last iteration
+		const output_Data & output = optim_p->F.get_output(lambda_couple, T); //this is why F has to be public in Opt_methods
+		carrier.get_tracep()->apply(lambda_couple.first);
+
+		// Get the solution
+		VectorXr solution = carrier.get_tracep()->getSolution();
+
+		return Solution_builders::GCV_Newton_sol(solution, output);  // [[TO DO make this a template according to methods]]
+	}
+}
+
+
 
 template<typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
 SEXP FPCA_skeleton(FPCAData &fPCAData, SEXP Rmesh, std::string validation)
@@ -258,9 +262,13 @@ extern "C"
 	void fill_optimization_data (OptimizationData & optimizationData, SEXP ROPTmethod, SEXP Rlambdas, SEXP Rinitial_lambda, SEXP Rnrealizations)
 	{
 		UInt criterion = INTEGER(ROPTmethod)[0];
-		if(criterion == 1)
+		if(criterion == 2)
 		{
-			optimizationData.set_criterion_("no_batch");
+			optimizationData.set_criterion_("newton_fd");
+		}
+		else if(criterion == 1)
+		{
+			optimizationData.set_criterion_("newton");
 		}
 		else if(criterion == 0)
 			optimizationData.set_criterion_("batch");

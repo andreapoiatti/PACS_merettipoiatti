@@ -54,8 +54,7 @@ GCVMETHODFLAG='Exact'
 
 data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*(ran[2]-ran[1]))
 
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                            GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, initial_lambda=10^-3, opt_strategy = 'newton', stochastic = FALSE)
 
 image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
 
@@ -243,7 +242,7 @@ plot.FEM(smoothing$fit.FEM)
 
 
 #### areal square 2D ####
-
+library(fdaPDE)
 rm(list=ls())
 
 data(square2DarealData)
@@ -298,8 +297,8 @@ GCVMETHODFLAG='Exact'
 
 data = obs_areal + W_areal%*%beta_exact + rnorm(RDD_groups, mean=0, sd=0.05*(ran2[2]-ran2[1]))
 
-smooth_areal<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, covariates = W_areal,
-                                incidence_matrix=incidence_matrix, GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
+smooth_areal<-smooth.FEM(observations=data, FEMbasis=FEMbasis, initial_lambda=10^-3, opt_strategy = 'newton', stochastic = FALSE, covariates = W_areal,
+                                incidence_matrix=incidence_matrix)
 
 #image(smooth_areal2$fit.FEM)
 

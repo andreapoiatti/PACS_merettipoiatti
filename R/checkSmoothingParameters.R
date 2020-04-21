@@ -58,7 +58,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
     print("Warning: initial lambda parameter is not used in batch evaluation\n")
   }
   
-  if(opt_strategy == 'no_batch' && !is.null(initial_lambda) && !is.numeric(initial_lambda)){
+  if(opt_strategy != 'batch' && !is.null(initial_lambda) && !is.numeric(initial_lambda)){
     stop("Non meaningful initial lambda inserted, provide a positive initial value or none")
   }
   
@@ -66,7 +66,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
     stop("Non meaningful initial lambda inserted, provide a positive initial value or none")
   }
 
-  if(opt_strategy == 'no_batch' && !is.null(lambdas)){
+  if(opt_strategy != 'batch' && !is.null(lambdas)){
     print("Warning: 'lambdas' parameter is not used in non batch evaluation\n")
   }
 

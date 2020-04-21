@@ -181,6 +181,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         }
 
                 }
+                return 0;
         }
 
 template<typename InputCarrier>
@@ -202,6 +203,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         const SpMat * psi_tp = carrier.get_psi_tp();
                         AuxiliaryOptimizer::set_E_lnn_W_ptw(E, psi_tp, Qp);
                 }
+                return 0;
         }
 
 #endif

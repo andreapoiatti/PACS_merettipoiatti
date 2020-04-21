@@ -109,6 +109,7 @@ class MixedFERegressionBase
 		//[[??]]inline const SpMat *		get_DMat_(void)			      {return &DMat_;}
 		inline const MatrixXr *		getQ_(void)			      {return &Q_;}
 		inline const MatrixXr *		getH_(void)			      {return &H_;}
+		inline const VectorXr *		getA_(void)			      {return &A_;}
 		inline bool			checkisRegression_(void)	const {return (this->regressionData_.getCovariates()->cols()!=0 && this->regressionData_.getCovariates()->rows()!=0);}	// Checks if the model has covariates or not
 		inline bool			check_is_loc_by_n(void)		const {return regressionData_.isLocationsByNodes();}	// Checks if the model has locations or uses nodes
 

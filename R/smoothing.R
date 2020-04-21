@@ -229,7 +229,7 @@
 #' image(solution$fit.FEM)
 
 smooth.FEM<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, incidence_matrix = NULL, 
-                     BC = NULL, opt_strategy = 'no_batch', opt_method = 'GCV', stochastic = TRUE, lambdas = NULL, initial_lambda = NULL, nrealizations = 100)
+                     BC = NULL, opt_strategy = 'newton_fd', opt_method = 'GCV', stochastic = TRUE, lambdas = NULL, initial_lambda = NULL, nrealizations = 100)
 {
   if(class(FEMbasis$mesh) == "mesh.2D"){
     ndim = 2
@@ -247,8 +247,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, covariates = NULL
   
   if(opt_strategy == 'batch'){
     optm = 0
-  } else if(opt_strategy == 'no_batch'){
+  } else if(opt_strategy == 'newton'){
     optm = 1
+  } else if(opt_strategy == 'newton_fd'){
+    optm = 2
   } else{
     stop("Method must be either batch or no_batch evaluation")
   }
@@ -265,7 +267,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, covariates = NULL
     optm = c(optm,0)
   }
 
-  if(opt_strategy == 'no_batch' && is.null(initial_lambda)){
+  if((opt_strategy == 'newton'||opt_strategy == 'newton_fd') && is.null(initial_lambda)){
     optm = c(optm,0)
   } else {
     optm = c(optm,1)
@@ -344,7 +346,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, covariates = NULL
     print('C++ Code Execution')
     if(!is.null(locations))
       stop("The option locations!=NULL for manifold domains is currently not implemented")
-    if(optm != 'BATCH')
+    if(optm != 0)
       stop("The option GCV is not implemented for manifolds")
     bigsol = CPP_smooth.manifold.FEM.basis(locations, observations, FEMbasis, lambdas, covariates, incidence_matrix, ndim, mydim, BC, nrealizations)
     
@@ -354,21 +356,21 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, covariates = NULL
     
     bigsol = NULL  
     print('C++ Code Execution')
-    if(optm != 'BATCH')
+    if(optm != 0)
       stop("The option GCV is not implemented for volumes")
     bigsol = CPP_smooth.volume.FEM.basis(locations, observations, FEMbasis, lambdas, covariates, incidence_matrix, ndim, mydim, BC, nrealizations)
     
     numnodes = FEMbasis$mesh$nnodes
   }
   
-  f = bigsol[[1]][1:numnodes,]
-  g = bigsol[[1]][(numnodes+1):(2*numnodes),]
+  # TEMPORARILY HALTED,[[ TO DO]]
+  #f = bigsol[[1]][1:numnodes,]
+  #g = bigsol[[1]][(numnodes+1):(2*numnodes),]
   
   # Make Functional objects object
-  fit.FEM  = FEM(f, FEMbasis)
-  PDEmisfit.FEM = FEM(g, FEMbasis)
+  #fit.FEM  = FEM(f, FEMbasis)
+  #PDEmisfit.FEM = FEM(g, FEMbasis)
   
-  ## TEMPORARILY STPPED
  # reslist = NULL
 #  beta = getBetaCoefficients(locations, observations, fit.FEM, covariates, incidence_matrix, ndim, mydim)
  # if(GCV == TRUE)
