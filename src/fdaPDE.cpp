@@ -16,6 +16,7 @@
 #include "newton.h"
 #include "vector_eval.h"
 #include "opt_methods_factory.h"
+#include "solution_builders.h"
 //#include <chrono>
 
 #include "mixedFEFPCA.h"
@@ -86,13 +87,24 @@ SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 
 	const OptimizationData * optr = carrier.get_opt_data();
 	if(optr->get_criterion_() == "batch")
-	{
+	{       timer Time_partial;
+	        Time_partial.start();
+		Rprintf("WARNING: start taking time\n");
 		//this will be used when batch will be correctly implemented, also for return elements
 		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
 		Eval_GCV<Real, Real, EvaluationType> eval(Fun, *(optr->get_lambdas_()));  //debugging dummy trial: working
 		output_Data_opt output_vec = eval.Get_optimization_vectorial();
 
-		return NILSXP;  // [[TO DO]]
+		Rprintf("WARNING: partial time after the batch method\n");
+		timespec T = Time_partial.stop();
+
+		//to compute f and g hat
+		carrier.get_tracep()->apply(output_vec.lambda_opt);
+
+		// Get the solution
+		VectorXr solution = carrier.get_tracep()->getSolution();
+
+                return Solution_builders::GCV_batch_sol(solution, output_vec, T);
 	}
 	else
 	{
@@ -123,6 +135,7 @@ SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 		carrier.get_tracep()->apply(lambda_couple.first);
 
 		// Get the solution
+		//to compute f and g hat
 		VectorXr solution = carrier.get_tracep()->getSolution();
 
 		return Solution_builders::GCV_Newton_sol(solution, output);  // [[TO DO make this a template according to methods]]
@@ -303,7 +316,7 @@ extern "C"
 
 			optimizationData.set_lambdas_(lambdas_);
 		}
-		else if(criterion == 1)
+		else if(criterion == 1 || criterion==2)
 		{
 			UInt initialization = INTEGER(ROPTmethod)[3];
 			if(initialization == 1)

@@ -86,7 +86,7 @@ void GCV_Family<InputCarrier, 1>::set_V_(void)
                 E_.makeCompressed();                      // compress the matrix to save space
                 V_ = solver.solve(E_);          // find the value of V = T^{-1}*E
         }
-
+        
         V_.makeCompressed();            // compress the matrix to save space
 }
 

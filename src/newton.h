@@ -212,57 +212,6 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                 }
 };
 
-class Solution_builders
-{
-        public:
-                static SEXP GCV_Newton_sol(const VectorXr & solution, const output_Data & output)
-                {
-                        //Copy result in R memory
-                        SEXP result = NILSXP;
-                        result = PROTECT(Rf_allocVector(VECSXP, 8));
-                        SET_VECTOR_ELT(result, 0, Rf_allocVector(REALSXP, solution.size()));
-                        Real *rans = REAL(VECTOR_ELT(result, 0));
-                        for(UInt j = 0; j < solution.size(); j++)  //[TO DO ] //sono le f_hat e g_hat, si potrebbe rimuovere, cambiando la chiamata da R in  smooth.FEM.basis
-                        {
-                                rans[j] = solution[j];
-                        }
-
-
-                        SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, output.z_hat.size()));
-                        rans = REAL(VECTOR_ELT(result, 1));
-                        for(UInt j = 0; j < output.z_hat.size(); j++)
-                        {
-                                rans[j] = output.z_hat[j];
-                        }
-
-                        //Rprintf("Hey doc,  %f %f %f\n", output.z_hat[0], output.z_hat[1], output.z_hat[3]);
-                        SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, 1));
-                        rans = REAL(VECTOR_ELT(result, 2));
-                        rans[0] = output.SS_res;
-
-                        SET_VECTOR_ELT(result, 3, Rf_allocVector(REALSXP, 1));
-                        rans= REAL(VECTOR_ELT(result, 3));
-                        rans[0] = output.sigma_hat_sq;
-
-                        SET_VECTOR_ELT(result, 4, Rf_allocVector(REALSXP, 1));
-                        rans = REAL(VECTOR_ELT(result, 4));
-                        rans[0] = output.lambda_sol;
-
-                        SET_VECTOR_ELT(result, 5, Rf_allocVector(REALSXP, 1));
-                        rans = REAL(VECTOR_ELT(result, 5));
-                        rans[0] = output.n_it;
-
-                        SET_VECTOR_ELT(result, 6, Rf_allocVector(REALSXP, 1));
-                        rans = REAL(VECTOR_ELT(result, 6));
-                        rans[0] = output.time_partial;
-
-
-                        UNPROTECT(1);
-
-                        return(result);
-                }
-
-};
 
 
 #endif

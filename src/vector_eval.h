@@ -67,8 +67,9 @@ struct output_Data_opt
         VectorXr        z_hat_opt;                          //!< Model predicted values in the locations
         Real            SS_res_opt;                         //!< Model predicted sum of squares of the residuals
         Real            sigma_hat_sq_opt;                   //!< Model estimated variance of errors
-        Real            lambda_opt;                         //!< Lambda obtained in the solution
-        std::vector<Real> GCV_evals;                        //!< GCV evaluations vector
+        Real            lambda_opt;                        //!< Lambda obtained in the solution
+        Real            GCV_opt;                           //!<GCV optimal comptued in the vector of lambdas
+        std::vector<Real> GCV_evals;                       //!< GCV evaluations vector
 };
 
 // i metodi per le funzioni in F si chiamano evaluate_f, evaluate_first_derivative, evaluate_second_derivative
@@ -96,6 +97,7 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
                   std::pair<std::vector<Real>, UInt> p=this->compute_vector();
                   this->output.GCV_evals=p.first;
                   this->output.lambda_opt=this->lambda_vec.at(p.second); //safer to access, if there have been errors before
+                  this->output.GCV_opt=p.first.at(p.second); //safer to access, if an error occurred
                   return this->output;
                   };
 
