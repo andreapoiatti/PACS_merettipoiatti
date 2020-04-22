@@ -76,6 +76,43 @@ class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>        // DEB
                 Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //esempio di possibile constructor
                 // non può prendere in ingresso const ref, deve modificare l'oggetto F
 
+Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
+{        Real a=aa, b=bb;
+     Real eval_a=this->F.evaluate_second_derivative(a);
+    if( eval_a*this->F.evaluate_second_derivative(b) >= 0)
+    {
+        std::cout<<"Incorrect a and b";
+        return 1;
+    }
+
+
+    Real c=a;
+    UInt n_it=0;
+    Real eval_c;
+    while (n_it<max_it) //tell about interval is sufficently small
+    {
+        c = std::sqrt(a*b);
+
+        eval_c=this->F.evaluate_second_derivative(c);
+        if ( eval_c== 0.0){
+
+            break;
+        }
+        else if (eval_c*eval_a < 0){
+
+                b=c;
+        }
+        else{
+
+                a=c;
+        }
+        n_it++;
+        eval_a=this->F.evaluate_second_derivative(a);
+    }
+  return c;
+}
+
+
                 std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch) override
                 {
                         // Initialize the algorithm
@@ -83,6 +120,10 @@ class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>        // DEB
                         Tuple x      = x0;
                         UInt  n_iter = 0;
                         Real  error  = std::numeric_limits<Real>::infinity();
+
+                        Real flesso=bisection(1e-7,2,6);
+                        Rprintf("\nFlesso at %f\n", flesso);
+                        x=flesso/100;
 
                         //only the first time applied here
                         Real   fx  = this->F.evaluate_f(x);
@@ -141,6 +182,57 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {}; //esempio di possibile constructor
                 // non può prendere in ingresso const ref, deve modificare l'oggetto F
 
+
+                Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
+                {        Real a=aa, b=bb;
+                        Real h=1e-5;
+                     Real eval_a=this->second_derivative(a,h);
+                    if( eval_a*this->second_derivative(b,h) >= 0)
+                    {
+                        std::cout<<"Incorrect a and b";
+                        return 1;
+                    }
+
+
+                    Real c=a;
+                    UInt n_it=0;
+                    Real eval_c;
+                    while (n_it<max_it) //tell about interval is sufficently small
+                    {
+                        c = std::sqrt(a*b);
+
+                        eval_c=this->second_derivative(c,h);
+                        if ( eval_c== 0.0){
+
+                            break;
+                        }
+                        else if (eval_c*eval_a < 0){
+
+                                b=c;
+                        }
+                        else{
+
+                                a=c;
+                        }
+                        n_it++;
+                        eval_a=this->second_derivative(a,h);
+                    }
+                  return c;
+                }
+
+
+                Real second_derivative(const Real& x, const Real& h)
+               {
+                       Rprintf("Forward: \n");
+                       Real fxph = this->F.evaluate_f(x+h);
+                       Rprintf("Backward: \n");
+                       Real fxmh = this->F.evaluate_f(x-h);
+                       Rprintf("Center: \n");
+                       Real fx  = this->F.evaluate_f(x);
+                       return (fxph+fxmh-(2*fx))/(h*h);
+
+                 }
+
                 std::pair<Real, UInt> compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch) override
                 {
                         // Initialize the algorithm
@@ -148,6 +240,10 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                         Real x      = x0;
                         UInt  n_iter = 0;
                         Real  error  = std::numeric_limits<Real>::infinity();
+
+                        Real flesso=bisection(1e-7,2,6);
+                        Rprintf("\nFlesso at %f\n", flesso);
+                        x=flesso/100;
 
                         Real h = 1e-4;
 
