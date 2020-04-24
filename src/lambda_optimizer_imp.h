@@ -86,7 +86,7 @@ void GCV_Family<InputCarrier, 1>::set_V_(void)
                 E_.makeCompressed();                      // compress the matrix to save space
                 V_ = solver.solve(E_);          // find the value of V = T^{-1}*E
         }
-        
+
         V_.makeCompressed();            // compress the matrix to save space
 }
 
@@ -214,22 +214,23 @@ void GCV_Family<InputCarrier, 1>::set_US_(void)
 
         Rprintf("Set_US");
 
-        UInt nr = this->the_carrier.get_opt_data()->getnrealizations_();
-        US_.resize(s, nr);
-        for (int i = 0; i < s; ++i)
-                for (int j = 0; j < nr; ++j)
+        UInt nr = this->the_carrier.get_opt_data()->get_nrealizations_();
+        this->US_ = MatrixXr::Zero(this->s, nr);
+
+        for (UInt i=0; i<this->s; ++i)
+                for (UInt j=0; j<nr; ++j)
                 {
                         if (distribution(generator))
                         {
-                                US_(i, j) = 1.0;
+                                this->US_.coeffRef(i, j) = 1.0;
                         }
                         else
                         {
-                                US_(i, j) = -1.0;
+                                this->US_.coeffRef(i, j) = -1.0;
                         }
                 }
 
-        us = true;
+        this->us = true;
 }
 
 //! Utility to compute the predicted values in the locations
@@ -523,12 +524,12 @@ void GCV_Exact<InputCarrier, 1>::update_parameters(Real lambda)
 
 //----------------------------------------------------------------------------//
 // ** GCV_Stochastic **
-/*
-template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
-void GCV_Stochastic<InputHandler, Integrator, ORDER, mydim, ndim, 1>::update_dof(Real lambda)
+
+template<typename InputCarrier>
+void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
 {
 	UInt nnodes    = this->R_.rows();
-        UInt nr        = this->model.getData()->getNrealizations();
+        UInt nr        = this->the_carrier.get_opt_data()->get_nrealizations_();
 
         if(this->us == false)
         {
@@ -537,38 +538,29 @@ void GCV_Stochastic<InputHandler, Integrator, ORDER, mydim, ndim, 1>::update_dof
 
 	// Define the first right hand side : | I  0 |^T * psi^T * Q * u
 	MatrixXr b = MatrixXr::Zero(2*nnodes, this->US_.cols());
-        const SpMat &    Psi_   = this->model.getPsi_();
+        UInt ret = AuxiliaryOptimizer::universal_b_setter(b, this->the_carrier, this->US_, nnodes);
 
-        if (this->model.checkisRegression_())
-        {
-                b.topRows(nnodes) = Psi_.transpose() * this->model.getQ_()* this->US_;
-        }
-        else
-        {
-                b.topRows(nnodes) = Psi_.transpose() * this->US_;
-        }
+
 	// Resolution of the system [[TO BE OPTIMIZED in PHI]]
-	//MatrixXr x = system_solve(b);
-	Eigen::SparseLU<SpMat> solver;
+        SpMat R1_lambda = (-lambda)*(*this->the_carrier.get_R1p());
+	SpMat R0_lambda = (-lambda)*(*this->the_carrier.get_R0p());
 
-        SpMat R1_lambda = (-lambda) * this->model.getR1_();
-        SpMat R0_lambda = (-lambda) * this->model.getR0_();
-        const SpMat & DMat_ = this->model.get_DMat_();
-        SpMat coeffmatrix_lambda;
-        // Build A and coeffmatrix
-        this->model.buildCoeffMatrix(DMat_, R1_lambda, R0_lambda, coeffmatrix_lambda);
-	solver.compute(coeffmatrix_lambda);
-	auto x = solver.solve(b);
-	MatrixXr USTpsi = this->US_.transpose()*Psi_;
+	this->the_carrier.get_tracep()->buildMatrixNoCov((*this->the_carrier.get_psip()), R1_lambda, R0_lambda);
+
+	// Factorize the system
+	this->the_carrier.get_tracep()->system_factorize();
+
+	// Solve the system
+    	auto x = this->the_carrier.get_tracep()->system_solve(b);
+
+	MatrixXr USTpsi = this->US_.transpose()*(*this->the_carrier.get_psip());
 	VectorXr edf_vect(nr);
 	Real q = 0;
 
 	// Degrees of freedom = q + E[ u^T * psi * | I  0 |* x ]
-        timer Time6;
-        Time6.start();
-	if (this->model.checkisRegression_() == true)
+	if (this->the_carrier.has_W())
         {
-		q = this->model.getData()->getCovariates().cols();
+		q = this->the_carrier.get_Wp()->cols();
 	}
 	// For any realization we calculate the degrees of freedom
 	for (UInt i = 0; i < nr; ++i)
@@ -578,8 +570,6 @@ void GCV_Stochastic<InputHandler, Integrator, ORDER, mydim, ndim, 1>::update_dof
 
 	// Estimates: sample mean, sample variance
 	this->dof = edf_vect.sum()/nr;
-        Rprintf("TIME6:");
-        Time6.stop();
 
         // Debugging purpose
         //Rprintf("DOF:%f\n", this->dof);
@@ -606,25 +596,24 @@ void GCV_Stochastic<InputCarrier, 1>::update_dor(Real lambda)
 template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
-        this->model.set_lambda(lambda);
-        this->model.apply_2();
+        this->the_carrier.get_tracep()->apply(lambda);
 
         UInt nnodes    = this->R_.rows();
         VectorXr f_hat = this->the_carrier.get_tracep()->getSolution().head(nnodes);
 
 
         //[[todo fixing ]]
-        if (this->model.checkisRegression_())
+        if (this->the_carrier.has_W())
         {
-                this->z_hat = this->model.getH_()*this->model.getData()->getObservations() + this->model.getQ_()*this->model.getPsi_()*f_hat;
+                this->z_hat = (*this->the_carrier.get_Hp())*(*this->the_carrier.get_zp()) + (*this->the_carrier.get_Qp())*(*this->the_carrier.get_psip())*f_hat;
         }
         else
         {
-                this->z_hat = this->model.getPsi_()*f_hat;
+                this->z_hat = (*this->the_carrier.get_psip())*f_hat;
         }
 }
 
-template<typename InputCarrier, UInt ndim>
+template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_parameters(Real lambda)
 {
         this->compute_z_hat(lambda);
@@ -633,7 +622,7 @@ void GCV_Stochastic<InputCarrier, 1>::update_parameters(Real lambda)
         this->update_dor(lambda);
         this->compute_sigma_hat_sq();
 }
-*/
+
 //----------------------------------------------------------------------------//
 
 #endif

@@ -214,8 +214,9 @@ class GCV_Stochastic: public GCV_Family<InputCarrier, size>
         [[VERSION WITH TIMES STILL TO BE IMPLEMENTED]]
 */
 };
-/*
-template<typename InputCarrier, UInt ndim>
+
+
+template<typename InputCarrier>
 class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 {
         private:
@@ -235,7 +236,7 @@ class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 
                 void update_parameters(Real lambda) override;
 };
-*/
+
 
 //----------------------------------------------------------------------------//
 // *** K-FOLD GCV ***

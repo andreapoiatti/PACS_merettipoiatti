@@ -65,12 +65,12 @@ SEXP optimizer_method_selection(CarrierType & carrier)
 		GCV_Exact<CarrierType, 1> optim(carrier);
 		return optimizer_strategy_selection<GCV_Exact<CarrierType, 1>, CarrierType>(optim, carrier);
 	}
-	/*else if(optr->get_method_() == "gcv" && optr->get_evaluation_() == "stochastic")
+	else if(optr->get_method_() == "gcv" && optr->get_evaluation_() == "stochastic")
 	{
 		Rprintf("GCV stochastic\n");
 		GCV_Stochastic<CarrierType, 1> optim(carrier);
 		return optimizer_strategy_selection<GCV_Stochastic<CarrierType, 1>, CarrierType>(optim, carrier);
-	}*/
+	}
 	else // E.g. K-FOLD CV
 	{
 		Rprintf("Error, no other method implemented\n");

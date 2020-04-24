@@ -125,6 +125,7 @@ Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
                         Rprintf("\nFlesso at %f\n", flesso);
                         x=flesso/100;
 
+
                         //only the first time applied here
                         Real   fx  = this->F.evaluate_f(x);
                         Tuple   fpx = this->F.evaluate_first_derivative (x);

@@ -70,19 +70,8 @@ class MixedFERegressionBase
 		// Builders
 		//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 		void addDirichletBC();
-		//! A member function computing the no-covariates version of the system matrix
-		void buildMatrixNoCov(const SpMat & Psi, const SpMat & R1, const SpMat & R0);
 		//! A member function returning the system right hand data
 		void getRightHandData(VectorXr& rightHandData);
-
-		// Factorizer
-	    	//! A function to factorize the system, using Woodbury decomposition when there are covariates
-		void system_factorize();
-
-		// Solver
-		//! A function which solves the factorized system
-		template<typename Derived>
-		MatrixXr system_solve(const Eigen::MatrixBase<Derived> &);
 
 	public:
 		//!A Constructor.
@@ -113,6 +102,15 @@ class MixedFERegressionBase
 		inline bool			checkisRegression_(void)	const {return (this->regressionData_.getCovariates()->cols()!=0 && this->regressionData_.getCovariates()->rows()!=0);}	// Checks if the model has covariates or not
 		inline bool			check_is_loc_by_n(void)		const {return regressionData_.isLocationsByNodes();}	// Checks if the model has locations or uses nodes
 
+		// Factorizer
+		//! A function to factorize the system, using Woodbury decomposition when there are covariates
+		void system_factorize();
+		// Solver
+		//! A function which solves the factorized system
+		template<typename Derived>
+		MatrixXr system_solve(const Eigen::MatrixBase<Derived> &);
+		//! A member function computing the no-covariates version of the system matrix
+		void buildMatrixNoCov(const SpMat & Psi, const SpMat & R1, const SpMat & R0);
 		//! A inline member that returns a VectorXr, returns the whole solution_.
 		inline VectorXr const & getSolution() const{return _solution;};
 };

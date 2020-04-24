@@ -54,6 +54,14 @@ struct AuxiliaryOptimizer
 
         static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const SpMat & S, const VectorXr * zp);
         static void set_z_hat_nW(VectorXr & z_hat, const SpMat & S, const VectorXr * zp);
+
+        template<typename InputCarrier>
+        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
+                universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes);
+
+        template<typename InputCarrier>
+        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
+                universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes);
 };
 
 
@@ -202,6 +210,36 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         // Psi is full
                         const SpMat * psi_tp = carrier.get_psi_tp();
                         AuxiliaryOptimizer::set_E_lnn_W_ptw(E, psi_tp, Qp);
+                }
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes)
+        {
+                if (carrier.has_W())
+                {
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(carrier.get_Ap()->asDiagonal())*(*carrier.get_Qp())*US;
+                }
+                else
+                {
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(carrier.get_Ap()->asDiagonal())*US;
+                }
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes)
+        {
+                if (carrier.has_W())
+                {
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(*carrier.get_Qp())*US;
+                }
+                else
+                {
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*US;
                 }
                 return 0;
         }
