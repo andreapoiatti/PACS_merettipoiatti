@@ -12,33 +12,17 @@
 
 // IMPLEMENTATION OF THE REMARK:
 // When nodes and locations are cohincident is more advantageous
-// to avoid a direct sum with the full matrix D_ taking only the
+// to avoid a direct sum with the full matrix, taking only the
 // non-null components on its diagonal and subsequently summing
-// them direcly to the second block of T: lambda*R.
+// them direcly to the second block.
 
-void AuxiliaryOptimizer::set_T_ln_nW_a(SpMat & T, const VectorXr * Ap, const std::vector<UInt> * kp, UInt s)
-{
-        // T = Psi^t*Psi == Indicator(k[i],k[i])
-        for (UInt i = 0; i < s ; i++)
-                T.coeffRef((*kp)[i], (*kp)[i]) += (*Ap).coeff(i);
-}
-
-void AuxiliaryOptimizer::set_T_ln_W_a(SpMat & T, const VectorXr * Ap, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s)
-{
-        // T = Psi^t*Q*Psi == q_ij*Indicator(k[i],k[j])
-        MatrixXr temp = (*Ap).asDiagonal()*(*Qp);
-        for (UInt i = 0; i < s ; i++)
-                for (int j = 0; j < s; j++)
-                        T.coeffRef((*kp)[i], (*kp)[j]) += temp.coeff(i, j);
-}
-
-void AuxiliaryOptimizer::set_T_lnn_nW_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp)
+void AuxiliaryOptimizer::set_T_nW_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp)
 {
         // Avoid using Q
         T += (*psi_tp)*(*Ap).asDiagonal()*(*psip);
 }
 
-void AuxiliaryOptimizer::set_T_lnn_W_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_T_W_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
 {
         // Full model, no simplification allowed
         SpMat temp = ((*Qp)*(*psip)).sparseView();
@@ -101,40 +85,12 @@ void AuxiliaryOptimizer::set_E_lnn_W_ptw(SpMat & E, const SpMat * psi_tp, const 
         E = ((*psi_tp)*(*Qp)).sparseView();
 }
 
-void AuxiliaryOptimizer::set_E_ln_W_a(SpMat & E, const std::vector<UInt> * kp, const MatrixXr * Qp, const VectorXr * Ap, UInt nr, UInt s)
-{
-        SpMat temp;
-        temp.resize(nr, s);
-        std::vector<coeff> vec;
-        vec.reserve(s);
-
-        for (UInt i = 0; i < s ; i++)
-                vec.push_back(coeff((*kp)[i], i, (*Ap).coeff(i)));
-
-        temp.setFromTriplets(vec.begin(), vec.end());
-        temp.makeCompressed();
-
-        E = (temp*(*Qp)).sparseView();
-}
-
-void AuxiliaryOptimizer::set_E_lnn_W_a(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap)
+void AuxiliaryOptimizer::set_E_W_a(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap)
 {
         E = ((*psi_tp)*(*Ap).asDiagonal()*(*Qp)).sparseView();
 }
 
-void AuxiliaryOptimizer::set_E_ln_nW_a(SpMat & E, const std::vector<UInt> * kp, const VectorXr * Ap, UInt nr, UInt s)
-{
-        E.resize(nr, s);
-        std::vector<coeff> vec;
-        vec.reserve(s);
-
-        for (UInt i = 0; i < s ; i++)
-                vec.push_back(coeff((*kp)[i], i, (*Ap).coeff(i)));
-
-        E.setFromTriplets(vec.begin(), vec.end());
-}
-
-void AuxiliaryOptimizer::set_E_lnn_nW_a(SpMat & E, const SpMat * psi_tp, const VectorXr * Ap)
+void AuxiliaryOptimizer::set_E_nW_a(SpMat & E, const SpMat * psi_tp, const VectorXr * Ap)
 {
         E = ((*psi_tp)*(*Ap).asDiagonal());
 }
