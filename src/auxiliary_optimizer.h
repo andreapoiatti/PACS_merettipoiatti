@@ -1,6 +1,7 @@
 #ifndef __AUXILIARYOPTIMIZER_HPP__
 #define __AUXILIARYOPTIMIZER_HPP__
 
+#include <functional>
 #include "fdaPDE.h"
 #include "carrier.h"
 #include "solver.h"
@@ -21,14 +22,25 @@ class GOF_updater
 {
         private:
                 std::vector<T> last_lambda_derivatives;
+                std::vector<std::function<void(Real)>> updaters;
+                LambdaOptim * start_ptr = nullptr;
 
-                inline void call_from_to(UInt start, UInt finish, T lambda, LambdaOptim * lopt_ptr)
+
+                inline void call_from_to(UInt start, UInt finish, T lambda)
                 {
                         for(UInt i=start; i<=finish; ++i)
                         {
-                                lopt_ptr->updaters(i, lambda);
+                                updaters[i](lambda);
                                 last_lambda_derivatives[i] = lambda;
                         }
+                }
+
+                inline void updaters_setter(LambdaOptim * lopt_ptr)
+                {
+                        updaters.reserve(3);
+                        updaters.push_back(std::bind(&LambdaOptim::zero_updater, lopt_ptr, std::placeholders::_1));
+                        updaters.push_back(std::bind(&LambdaOptim::first_updater, lopt_ptr, std::placeholders::_1));
+                        updaters.push_back(std::bind(&LambdaOptim::second_updater, lopt_ptr, std::placeholders::_1));
                 }
 
         public:
@@ -41,11 +53,18 @@ class GOF_updater
 
                 inline void call_to(UInt finish, T lambda, LambdaOptim * lopt_ptr)
                 {
+                        if(start_ptr != lopt_ptr)
+                        {
+                                updaters_setter(lopt_ptr);
+                                start_ptr = lopt_ptr;
+                                Rprintf("reset updaters\n");
+                        }
+
                         bool found = false;
                         for(UInt i = 0; i<=finish && found==false; ++i)
                                 if(lambda != last_lambda_derivatives[i])
                                 {
-                                        call_from_to(i, finish, lambda, lopt_ptr);
+                                        call_from_to(i, finish, lambda);
                                         found = true;
                                 }
                 }

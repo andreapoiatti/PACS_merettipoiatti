@@ -356,33 +356,7 @@ void GCV_Family<InputCarrier, 1>::second_updater(Real lambda)
         this->set_ddS_and_trddS_();
 }
 
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::updaters(UInt i, Real lambda)
-{
-        switch (i)
-        {
-                case 0:
-                        {
-                                zero_updater(lambda);
-                                break;
-                        }
-                case 1:
-                        {
-                                first_updater(lambda);
-                                break;
-                        }
-                case 2:
-                        {
-                                second_updater(lambda);
-                                break;
-                        }
-                default:
-                        Rprintf("Error\n"); //ECCEZIONE
-        }
-}
-
 // GCV function and derivatives
-
 template<typename InputCarrier>
 Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
 {

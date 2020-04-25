@@ -110,10 +110,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 void update_family_p2(void);     //Part 2, common to all
                 void update_family(Real lambda);
 
-                void zero_updater(Real lambda);
-                void first_updater(Real lambda);
-                void second_updater(Real lambda);
-
                 // Utilities
                 void LeftMultiplybyPsiAndTrace(Real & trace, SpMat & ret, const SpMat & mat);
 
@@ -142,7 +138,9 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                         }
 
         public:
-                void updaters(UInt i, Real lambda);
+                void zero_updater(Real lambda);
+                void first_updater(Real lambda);
+                void second_updater(Real lambda);
 
                 Real compute_f( Real lambda);
                 Real compute_fp(Real lambda);
