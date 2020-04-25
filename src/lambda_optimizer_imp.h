@@ -341,7 +341,6 @@ template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::zero_updater(Real lambda)
 {
         this->update_parameters(lambda);  // Update all parameters depending on lambda
-        std::get<0>(this->last_lambda) = lambda;
 }
 
 template<typename InputCarrier>
@@ -349,63 +348,37 @@ void GCV_Family<InputCarrier, 1>::first_updater(Real lambda)
 {
         this->set_dS_and_trdS_();
         this->compute_aux();
-        std::get<1>(this->last_lambda) = lambda;
 }
 
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::second_updater(Real lambda)
 {
         this->set_ddS_and_trddS_();
-        std::get<2>(this->last_lambda) = lambda;
 }
 
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::f_updater(Real lambda)
+void GCV_Family<InputCarrier, 1>::updaters(UInt i, Real lambda)
 {
-        if (lambda != std::get<0>(this->last_lambda))
-                this->zero_updater(lambda);
-        // else everything is up to date
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::fp_updater(Real lambda)
-{
-        if (lambda != std::get<0>(this->last_lambda))
+        switch (i)
         {
-                // Update all parameters depending on lambda
-                this->zero_updater(lambda);
-                this->first_updater(lambda);
+                case 0:
+                        {
+                                zero_updater(lambda);
+                                break;
+                        }
+                case 1:
+                        {
+                                first_updater(lambda);
+                                break;
+                        }
+                case 2:
+                        {
+                                second_updater(lambda);
+                                break;
+                        }
+                default:
+                        Rprintf("Error\n"); //ECCEZIONE
         }
-        else if (lambda != std::get<1>(this->last_lambda))
-        {
-                // Update only the parameters for the first derivative
-                this->first_updater(lambda);
-        }
-        // else everything is up to date
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::fs_updater(Real lambda)
-{
-        if (lambda != std::get<0>(this->last_lambda))
-        {
-                // Update all parameters depending on lambda
-                this->zero_updater(lambda);
-                this->first_updater(lambda);
-                this->second_updater(lambda);
-        }
-        else if (lambda != std::get<1>(this->last_lambda))
-        {
-                // Update only the parameters for first and second derivative
-                this->first_updater(lambda);
-                this->second_updater(lambda);
-        }
-        else if (lambda != std::get<2>(this->last_lambda))
-        {
-                // Update only the parameters for the second derivative
-                this->second_updater(lambda);
-        }
-        // else everything is up to date
 }
 
 // GCV function and derivatives
@@ -416,7 +389,7 @@ Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
         // GCV = s*(z-zhat)^t*(z-zhat)/(s-(q+trS))^2
         //     = SS_res*s/(dor^2)
         //     = sigma_hat_^2*s/dor
-        this->f_updater(lambda);
+        this->gu.call_to(0, lambda, this);
 
         Real GCV_val = s*sigma_hat_sq/dor;    // Compute the value of the GCV and print it
 
@@ -439,7 +412,7 @@ Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
         // and   [2] = 2*eps_hat^t*d(eps_hat)/dlambda = -2*eps^hat*dS
         // summing: 2*s/(dor^2) * (sigma_hat_^2*tr(dS/dlambda) - eps_hat*dS/dlambda*z)
 
-        this->fp_updater(lambda);
+        this->gu.call_to(1, lambda, this);
 
         // Compute the value of the GCV first derivative and print it
 	Real GCV_der_val = 2*s* (sigma_hat_sq*trdS_ - aux)/(dor*dor);
@@ -456,7 +429,7 @@ Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
 template<typename InputCarrier>
 Real GCV_Family<InputCarrier, 1>::compute_fs(Real lambda)
 {
-        this->fs_updater(lambda);
+        this->gu.call_to(2, lambda, this);
 
         const VectorXr * zp = this->the_carrier.get_zp();
         VectorXr t = dS_*(*zp);

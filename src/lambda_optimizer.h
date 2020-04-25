@@ -8,19 +8,6 @@
 #include "auxiliary_optimizer.h"
 #include <algorithm>
 
-
-//Output struct to be used to return values in R
-struct output_Data
-{
-        VectorXr        z_hat;                          //!< Model predicted values in the locations
-        Real            SS_res;                         //!< Model predicted sum of squares of the residuals
-        Real            sigma_hat_sq;                   //!< Model estimated variance of errors
-        Real            lambda_sol;                     //!<Lambda obratained in the solution
-        UInt            n_it;                           //!< Number of iterations for the method
-        Real            time_partial;                   //!<Time, from beginning to end of the optimization method
-};
-
-
 // Classes
 // **** General method ***
 template <typename InputCarrier, UInt size>
@@ -41,7 +28,6 @@ template <typename InputCarrier>
 class Lambda_optimizer<InputCarrier, 1>
 {
         protected:
-                std::tuple<Real, Real, Real> last_lambda;              //!< tuple of previousy used lambdas for respectively, f, fp, fs
                 //! Model containing all the information necessary for the computation of the optimal value
                 const InputCarrier & the_carrier;
 
@@ -50,10 +36,7 @@ class Lambda_optimizer<InputCarrier, 1>
                 /*! \param model the structure from which to take all the data for the derived classes
                  */
                 Lambda_optimizer<InputCarrier, 1>(InputCarrier & the_carrier_):
-                        the_carrier(the_carrier_), last_lambda(std::make_tuple(-1, -1, -1)) {}
-
-                Lambda_optimizer<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
-                        the_carrier(the_carrier_), last_lambda(std::make_tuple(lambda0, -1, -1)) {}
+                        the_carrier(the_carrier_) {}
 
         virtual void update_parameters(Real lambda) = 0;
 };
@@ -74,8 +57,8 @@ template <typename InputCarrier>
 class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
 {
         protected:
-                using  Lambda_optimizer<InputCarrier, 1>::last_lambda;
                 using  Lambda_optimizer<InputCarrier, 1>::the_carrier;
+                GOF_updater<GCV_Family<InputCarrier, 1>, Real> gu;
 
                 //Useful common data
                 VectorXr        z_hat;                          //!< Model predicted values in the locations
@@ -131,10 +114,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 void first_updater(Real lambda);
                 void second_updater(Real lambda);
 
-                void f_updater(Real lambda);
-                void fp_updater(Real lambda);
-                void fs_updater(Real lambda);
-
                 // Utilities
                 void LeftMultiplybyPsiAndTrace(Real & trace, SpMat & ret, const SpMat & mat);
 
@@ -147,23 +126,28 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 GCV_Family<InputCarrier, 1>(InputCarrier & the_carrier_):
                         Lambda_optimizer<InputCarrier, 1>(the_carrier_)
                         {
+                                this->gu.initialize(std::vector<Real>{-1.,-1.,-1.});
                                 compute_s();
                                 set_R_();
                         }
 
                 //! Initial guess about lambda
                 GCV_Family<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
-                        Lambda_optimizer<InputCarrier, 1>(the_carrier_, lambda0)
+                        Lambda_optimizer<InputCarrier, 1>(the_carrier_)
                         {
                                 compute_s();
                                 set_R_();
                                 update_family(lambda0);
+                                this->gu.initialize(std::vector<Real>{lambda0,-1.,-1.});
                         }
 
         public:
+                void updaters(UInt i, Real lambda);
+
                 Real compute_f( Real lambda);
                 Real compute_fp(Real lambda);
                 Real compute_fs(Real lambda);
+
         virtual void update_parameters(Real lambda) = 0;
                  //Set and return output data, plus lambda final and number of iterations
 
@@ -188,11 +172,13 @@ template<typename InputCarrier>
 class GCV_Exact<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 {
         private:
+                using  GCV_Family<InputCarrier, 1>::gu;
                 void update_dof(Real lambda)    override;
                 void update_dor(Real lambda)    override;
 
         public:
-                GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_): GCV_Family<InputCarrier, 1>(the_carrier_) {}
+                GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_):
+                        GCV_Family<InputCarrier, 1>(the_carrier_) {}
 
                 GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
                         GCV_Family<InputCarrier, 1>(the_carrier_, lambda0)
@@ -220,12 +206,14 @@ template<typename InputCarrier>
 class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 {
         private:
+                using  GCV_Family<InputCarrier, 1>::gu;
                 void compute_z_hat (Real lambda);
                 void update_dof(Real lambda)    override;
                 void update_dor(Real lambda)    override;
 
         public:
-                GCV_Stochastic<InputCarrier, 1>(InputCarrier & the_carrier_): GCV_Family<InputCarrier, 1>(the_carrier_){}
+                GCV_Stochastic<InputCarrier, 1>(InputCarrier & the_carrier_):
+                        GCV_Family<InputCarrier, 1>(the_carrier_) {}
 
                 GCV_Stochastic<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
                         GCV_Family<InputCarrier, 1>(the_carrier_, lambda0)

@@ -5,6 +5,52 @@
 #include "carrier.h"
 #include "solver.h"
 
+//Output struct to be used to return values in R
+struct output_Data
+{
+        VectorXr        z_hat;                          //!< Model predicted values in the locations
+        Real            SS_res;                         //!< Model predicted sum of squares of the residuals
+        Real            sigma_hat_sq;                   //!< Model estimated variance of errors
+        Real            lambda_sol;                     //!<Lambda obratained in the solution
+        UInt            n_it;                           //!< Number of iterations for the method
+        Real            time_partial;                   //!<Time, from beginning to end of the optimization method
+};
+
+template <typename LambdaOptim, typename T>
+class GOF_updater
+{
+        private:
+                std::vector<T> last_lambda_derivatives;
+
+                inline void call_from_to(UInt start, UInt finish, T lambda, LambdaOptim * lopt_ptr)
+                {
+                        for(UInt i=start; i<=finish; ++i)
+                        {
+                                lopt_ptr->updaters(i, lambda);
+                                last_lambda_derivatives[i] = lambda;
+                        }
+                }
+
+        public:
+                GOF_updater(void) = default;
+
+                inline void initialize(const std::vector<T> & first_lambdas)
+                {
+                        last_lambda_derivatives = first_lambdas;
+                }
+
+                inline void call_to(UInt finish, T lambda, LambdaOptim * lopt_ptr)
+                {
+                        bool found = false;
+                        for(UInt i = 0; i<=finish && found==false; ++i)
+                                if(lambda != last_lambda_derivatives[i])
+                                {
+                                        call_from_to(i, finish, lambda, lopt_ptr);
+                                        found = true;
+                                }
+                }
+};
+
 template <bool ... b>
 struct multi_bool_type
 {
