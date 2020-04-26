@@ -125,7 +125,7 @@ Real bisection(const Real &aa,const  Real &bb, const UInt& max_it, const Real &e
 
 
 
-                        Real a=1e-7;
+                        Real a=1e-6;
 			Real b=2;
 			Real eval_a=this->F.evaluate_second_derivative(a); //useful to save one evaluation in the bisection method if the extrema are already correct
 			Real eval_b=this->F.evaluate_second_derivative(b);
