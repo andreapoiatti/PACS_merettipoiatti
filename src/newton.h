@@ -76,12 +76,12 @@ class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>        // DEB
                 Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //esempio di possibile constructor
                 // non può prendere in ingresso const ref, deve modificare l'oggetto F
 
-Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
-{        Real a=aa, b=bb;
-     Real eval_a=this->F.evaluate_second_derivative(a);
-    if( eval_a*this->F.evaluate_second_derivative(b) >= 0)
+Real bisection(const Real &aa,const  Real &bb, const UInt& max_it, const Real &eval_a_, const Real &eval_b_)
+{    Real a=aa, b=bb;
+     Real eval_a=eval_a_;
+    if( eval_a*eval_b_>= 0)
     {
-        std::cout<<"Incorrect a and b";
+        Rprintf("\n Incorrect a and b\n");
         return 1;
     }
 
@@ -89,6 +89,7 @@ Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
     Real c=a;
     UInt n_it=0;
     Real eval_c;
+
     while (n_it<max_it) //tell about interval is sufficently small
     {
         c = std::sqrt(a*b);
@@ -105,9 +106,10 @@ Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
         else{
 
                 a=c;
+                eval_a=eval_c;
         }
         n_it++;
-        eval_a=this->F.evaluate_second_derivative(a);
+       
     }
   return c;
 }
@@ -121,10 +123,30 @@ Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
                         UInt  n_iter = 0;
                         Real  error  = std::numeric_limits<Real>::infinity();
 
-                        Real flesso=bisection(1e-7,2,6);
-                        Rprintf("\nFlesso at %f\n", flesso);
-                        x=flesso/100;
 
+
+                        Real a=1e-7;
+			Real b=2;
+			Real eval_a=this->F.evaluate_second_derivative(a); //useful to save one evaluation in the bisection method if the extrema are already correct
+			Real eval_b=this->F.evaluate_second_derivative(b);
+                        while (eval_a<=0)
+                                  {a*=10;
+				   eval_a=this->F.evaluate_second_derivative(a);
+                                   }
+			while (eval_b>=0)
+                                  {b*=10;
+				   eval_b=this->F.evaluate_second_derivative(b);}
+
+                        Rprintf("\n Starting interval for preprocessing: [%f;%f]\n", a,b);
+
+                        Real flesso=bisection(a,b,4, eval_a, eval_b);
+                        Rprintf("\nFlesso at %f\n", flesso);
+                        
+			if (x>flesso/5 || x<a)
+                              {x=flesso/50;
+				Rprintf("\nInitial value inserted is out of range, using default value lambda=%f\n",x);
+				}	
+                        Rprintf("\n Starting Newton's iteratios: starting point lambda=%f\n",x);
 
                         //only the first time applied here
                         Real   fx  = this->F.evaluate_f(x);
@@ -178,19 +200,19 @@ class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
 template <typename ...Extensions>
 class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Extensions...>
 {
+
         //eventuali metodi saranno overridden da opt methods
         public:
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {}; //esempio di possibile constructor
                 // non può prendere in ingresso const ref, deve modificare l'oggetto F
 
 
-                Real bisection(const Real &aa,const  Real &bb, const UInt& max_it)
-                {        Real a=aa, b=bb;
-                        Real h=1e-5;
-                     Real eval_a=this->second_derivative(a,h);
-                    if( eval_a*this->second_derivative(b,h) >= 0)
+                Real bisection(const Real &aa,const  Real &bb, const UInt& max_it, const Real &eval_a_, const Real &eval_b_, const Real& h)
+		{    Real a=aa, b=bb;
+     		     Real eval_a=eval_a_;
+    		if( eval_a*eval_b_>= 0)
                     {
-                        std::cout<<"Incorrect a and b";
+                        Rprintf("\n Incorrect a and b\n");
                         return 1;
                     }
 
@@ -198,6 +220,7 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                     Real c=a;
                     UInt n_it=0;
                     Real eval_c;
+		  
                     while (n_it<max_it) //tell about interval is sufficently small
                     {
                         c = std::sqrt(a*b);
@@ -214,9 +237,11 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                         else{
 
                                 a=c;
+                                
+               		        eval_a=eval_c;
                         }
                         n_it++;
-                        eval_a=this->second_derivative(a,h);
+                      
                     }
                   return c;
                 }
@@ -241,12 +266,36 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                         Real x      = x0;
                         UInt  n_iter = 0;
                         Real  error  = std::numeric_limits<Real>::infinity();
+		        Real a=1e-7;
+			Real b=2;
 
-                        Real flesso=bisection(1e-7,2,6);
-                        Rprintf("\nFlesso at %f\n", flesso);
-                        x=flesso/100;
 
-                        Real h = 1e-4;
+			Real h = 1e-5;                        
+
+			Real eval_a=this->second_derivative(a,h); //useful to save one evaluation in the bisection method if the extrema are already correct
+			Real eval_b=this->second_derivative(b,h);
+                        while (eval_a<=0)
+                                  {a*=10;
+				   eval_a=this->second_derivative(a,h);
+                                   }
+			while (eval_b>=0)
+                                  {b*=10;
+				   eval_b=this->second_derivative(b,h);}
+
+                        Rprintf("\n Starting interval for preprocessing: [%f;%f]\n", a,b);
+
+                        Real flesso=bisection(a,b,4, eval_a, eval_b,h);
+ 			Rprintf("\nFlesso at %f\n", flesso);
+                        
+                      if (x>flesso/5 || x<a)
+                              {x=flesso/50;
+				Rprintf("\nInitial value inserted is out of range, using default value lambda=%f\n",x);
+				}
+
+
+			Rprintf("\n Starting Newton's iteratios: starting point lambda=%f\n",x);
+
+                        
 
                         //only the first time applied here
                         Rprintf("Forward: \n");
