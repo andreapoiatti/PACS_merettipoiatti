@@ -40,11 +40,10 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_R_(void)
 {
-        const SpMat * R1p_= this->the_carrier.get_R1p();          // Get the value of matrix R1
-        Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver
+        const SpMat * R1p_= this->the_carrier.get_R1p();         // Get the value of matrix R1
+        Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
         solver.compute(*(this->the_carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-        R_ = (*R1p_).transpose()*solver.solve(*R1p_);            // R == _R1^t*R0^{-1}*R1
-        R_.makeCompressed();                                     // Compress the matrix to speed up the next operations
+        this->R_ = (*R1p_).transpose()*solver.solve(*R1p_);            // R == _R1^t*R0^{-1}*R1
 }
 
 //! Method to set the value of member SpMat T_
@@ -56,9 +55,10 @@ void GCV_Family<InputCarrier, 1>::set_R_(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
 {
-        T_ = lambda*R_;
-        UInt ret =  AuxiliaryOptimizer::universal_T_setter<InputCarrier>(T_, this->the_carrier);
-        T_.makeCompressed();    // Compressing the matrix for further computation
+        this->T_ = lambda*this->R_;
+        const UInt ret =  AuxiliaryOptimizer::universal_T_setter<InputCarrier>(this->T_, this->the_carrier);
+        Eigen::LDLT<MatrixXr> Dsolver(this->T_);	        // define a factorization
+        this->factorized_T = Dsolver;
 }
 
 //! Method to set the value of member SpMat V_
@@ -70,24 +70,18 @@ void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_V_(void)
 {
-        Sparse_LU solver;	        // define a factorized empty sparse LU solver
-        solver.compute(T_);             // apply it to T to simplify the inverse
-
         if(!this->the_carrier.is_areal() && !this->the_carrier.has_W())
         {
                 // Q == I
                 const SpMat * psi_tp = this->the_carrier.get_psi_tp();
-                V_ = solver.solve(*psi_tp);      // find the value of V = T^{-1}*Psi^t
+                this->V_ = this->factorized_T.solve(MatrixXr(*psi_tp));      // find the value of V = T^{-1}*Psi^t
         }
         else
         {
-                SpMat E_;                // Declare an empty auxiliary matrix
-                UInt ret =  AuxiliaryOptimizer::universal_E_setter<InputCarrier>(E_, this->the_carrier);
-                E_.makeCompressed();                      // compress the matrix to save space
-                V_ = solver.solve(E_);          // find the value of V = T^{-1}*E
+                MatrixXr E_;                // Declare an empty auxiliary matrix
+                const UInt ret =  AuxiliaryOptimizer::universal_E_setter<InputCarrier>(E_, this->the_carrier);
+                this->V_ = this->factorized_T.solve(E_);          // find the value of V = T^{-1}*E
         }
-
-        V_.makeCompressed();            // compress the matrix to save space
 }
 
 //! Method to set the value of member SpMat S_ and its trace trS_
@@ -100,9 +94,8 @@ template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_S_and_trS_(void)
 {
         // S = Psi*V
-        trS_ = 0.0;
-        this->LeftMultiplybyPsiAndTrace(trS_, S_, V_);
-        S_.makeCompressed();    // Compress the matrix to save space
+        this->trS_ = 0.0;
+        this->LeftMultiplybyPsiAndTrace(this->trS_, this->S_, this->V_);
 }
 
 //! Method to set the value of member SpMat dS_ and its trace trdS_, also computes utility matrix K_
@@ -117,15 +110,12 @@ void GCV_Family<InputCarrier, 1>::set_dS_and_trdS_(void)
         // dS_ = -Psi*(Psi^t*Q*Psi+lambda*R1^t*R0^-1*R1)^{-1}*R1^t*R0^{-1}*R1*(Psi^t*Q*Psi+lambda*R1^t*R0^{-1}*R1)^{-1}*Psi^t*Q
         //     = -Psi*T^{-1}*R*V
         //     =  Psi*(-K*V)
-        //    :=  Psi*F
-        Sparse_Cholesky solver;	                // define a factorized empty sparse Cholesky solver [[NOT BETTER TO SOLVE THE ONE WE USE FOR T?]]
-        solver.compute(T_);                     // apply it to T_ to simplify the inverse
-        K_ = solver.solve(R_);                   // K = T^{-1}*R
-        SpMat F_ = -K_*V_;                        // F = -K*V
-        trdS_ = 0.0;
+        //    :=  -Psi*F
+        this->K_ = this->factorized_T.solve(this->R_);              // K = T^{-1}*R
+        this->F_= this->K_*this->V_;                               // F = K*V
+        this->trdS_ = 0.0;
 
-        this->LeftMultiplybyPsiAndTrace(trdS_, dS_, F_);
-        dS_.makeCompressed();    // Compress the matrix to save space
+        this->LeftMultiplybyPsiAndTrace(this->trdS_, this->dS_, -this->F_);
 }
 
 //! Method to set the value of member SpMat ddS_ and its trace trddS_
@@ -140,11 +130,10 @@ void GCV_Family<InputCarrier, 1>::set_ddS_and_trddS_(void)
         // ddS_ = -
         //      = -
         //     := 2*Psi*K^2*V
-        SpMat G_ = 2*K_*K_*V_;                        // G = -2*K^2*V
-        trddS_ = 0.0;
+        MatrixXr G_ = 2*this->K_*this->F_;                        // G = 2*K^2*V
+        this->trddS_ = 0.0;
 
-        this->LeftMultiplybyPsiAndTrace(trddS_, ddS_, G_);
-        ddS_.makeCompressed();    // Compress the matrix to save space
+        this->LeftMultiplybyPsiAndTrace(this->trddS_, this->ddS_, G_);
 }
 
 // Utilities
@@ -157,7 +146,7 @@ void GCV_Family<InputCarrier, 1>::set_ddS_and_trddS_(void)
  * /sa {set_S_and_trS_(void), set_dS_and_trdS_(void), set_ddS_and_trddS_(void)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, SpMat & ret, const SpMat & mat)
+void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, MatrixXr & ret, const MatrixXr & mat)
 {
         if (this->the_carrier.loc_are_nodes())
         {
@@ -173,9 +162,7 @@ void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, SpMat 
                 // we reserve a vector containing such entries and
                 // we set the final matrix from these triplets
 
-                std::vector<coeff> vec;
-                vec.reserve(s*s);
-                ret.resize(s, s);
+                ret = MatrixXr::Zero(s,s);
 
                 const std::vector<UInt> * kp = this->the_carrier.get_obs_indicesp();
                 for (UInt i = 0; i < s; i++)
@@ -184,17 +171,14 @@ void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, SpMat 
                                 if (i == j)
                                 {
                                         Real v = mat.coeff((*kp)[i], j);
-                                        vec.push_back(coeff(i, j, v));
                                         trace += v;
+                                        ret.coeffRef(i,i) += mat.coeff((*kp)[i], i);
                                 }
                                 else
                                 {
-                                        vec.push_back(coeff(i, j, mat.coeff((*kp)[i], j)));
+                                        ret.coeffRef(i,j) += mat.coeff((*kp)[i], j);
                                 }
                         }
-
-
-                ret.setFromTriplets(vec.begin(), vec.end());
         }
         else
         {
@@ -214,7 +198,7 @@ void GCV_Family<InputCarrier, 1>::set_US_(void)
 
         Rprintf("Set_US");
 
-        UInt nr = this->the_carrier.get_opt_data()->get_nrealizations_();
+        const UInt nr = this->the_carrier.get_opt_data()->get_nrealizations_();
         this->US_ = MatrixXr::Zero(this->s, nr);
 
         for (UInt i=0; i<this->s; ++i)
@@ -243,11 +227,11 @@ void GCV_Family<InputCarrier, 1>::compute_z_hat(void)
         {
                 const MatrixXr * Hp = this->the_carrier.get_Hp();
                 const MatrixXr * Qp = this->the_carrier.get_Qp();
-                AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, Qp, S_, zp);
+                AuxiliaryOptimizer::set_z_hat_W(this->z_hat, Hp, Qp, this->S_, zp);
         }
         else
         {
-                AuxiliaryOptimizer::set_z_hat_nW(z_hat, S_, zp);
+                AuxiliaryOptimizer::set_z_hat_nW(this->z_hat, this->S_, zp);
         }
 
         // Debugging purpose
@@ -261,7 +245,7 @@ void GCV_Family<InputCarrier, 1>::compute_z_hat(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::compute_eps_hat(void)
 {
-        eps_hat = (*this->the_carrier.get_zp())-z_hat;
+        this->eps_hat = (*this->the_carrier.get_zp())-this->z_hat;
 
         // Debugging purpose
         //Rprintf("Eps_hat \n");
@@ -274,7 +258,7 @@ void GCV_Family<InputCarrier, 1>::compute_eps_hat(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::compute_SS_res(void)
 {
-        SS_res = eps_hat.squaredNorm();
+        this->SS_res = this->eps_hat.squaredNorm();
 
         // Debugging purpose
         //Rprintf("SS_res  = %f\n", this->SS_res);
@@ -284,7 +268,7 @@ void GCV_Family<InputCarrier, 1>::compute_SS_res(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::compute_s(void)
 {
-        s = this->the_carrier.get_n_obs();
+        this->s = this->the_carrier.get_n_obs();
 }
 
 
@@ -292,7 +276,7 @@ void GCV_Family<InputCarrier, 1>::compute_s(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
 {
-        sigma_hat_sq = SS_res/Real(dor);
+        this->sigma_hat_sq = this->SS_res/Real(this->dor);
 
         // Debugging purpose
         //Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
@@ -305,7 +289,7 @@ void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::compute_aux(void)
 {
-        aux =  eps_hat.transpose()*dS_*(*this->the_carrier.get_zp());
+        this->aux =  this->eps_hat.transpose()*this->dS_*(*this->the_carrier.get_zp());
 }
 
 // Updaters
@@ -365,7 +349,7 @@ Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
         //     = sigma_hat_^2*s/dor
         this->gu.call_to(0, lambda, this);
 
-        Real GCV_val = s*sigma_hat_sq/dor;    // Compute the value of the GCV and print it
+        Real GCV_val = this->s*this->sigma_hat_sq/Real(this->dor);    // Compute the value of the GCV and print it
 
 	#ifdef R_VERSION_
                 Rprintf("LAMBDA = %f\n",lambda);
@@ -389,7 +373,7 @@ Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
         this->gu.call_to(1, lambda, this);
 
         // Compute the value of the GCV first derivative and print it
-	Real GCV_der_val = 2*s* (sigma_hat_sq*trdS_ - aux)/(dor*dor);
+	Real GCV_der_val = 2*this->s* (this->sigma_hat_sq*this->trdS_ - this->aux)/(this->dor*this->dor);
 
 	#ifdef R_VERSION_
 		Rprintf("GCV_derivative = %f\n", GCV_der_val);
@@ -406,17 +390,17 @@ Real GCV_Family<InputCarrier, 1>::compute_fs(Real lambda)
         this->gu.call_to(2, lambda, this);
 
         const VectorXr * zp = this->the_carrier.get_zp();
-        VectorXr t = dS_*(*zp);
+        VectorXr t = this->dS_*(*zp);
         Real aux2;
         if (this->the_carrier.has_W())
                 aux2 = t.transpose()*(*this->the_carrier.get_Qp())*t;
         else
                 aux2 = t.squaredNorm();
-        Real aux3 = eps_hat.transpose()*ddS_*(*zp);
+        Real aux3 = this->eps_hat.transpose()*this->ddS_*(*zp);
 
         // Compute second derivative and print it
 	Real GCV_sec_der_val =
-                2*s*(trdS_*(3*sigma_hat_sq*trdS_-4*aux)/dor + sigma_hat_sq*trddS_ + aux2 - aux3)/(dor*dor);
+                2*this->s*(this->trdS_*(3*this->sigma_hat_sq*this->trdS_-4*this->aux)/this->dor + this->sigma_hat_sq*this->trddS_ + aux2 - aux3)/(this->dor*this->dor);
 
 	#ifdef R_VERSION_
 		Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
@@ -545,8 +529,8 @@ void GCV_Stochastic<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
         this->the_carrier.get_tracep()->apply(lambda);
 
-        UInt nnodes    = this->R_.rows();
-        VectorXr f_hat = this->the_carrier.get_tracep()->getSolution().head(nnodes);
+        const UInt nnodes    = this->R_.rows();
+        const VectorXr f_hat = this->the_carrier.get_tracep()->getSolution().head(nnodes);
 
 
         //[[todo fixing ]]

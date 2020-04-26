@@ -16,27 +16,26 @@
 // non-null components on its diagonal and subsequently summing
 // them direcly to the second block.
 
-void AuxiliaryOptimizer::set_T_nW_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp)
+void AuxiliaryOptimizer::set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp)
 {
         // Avoid using Q
-        T += (*psi_tp)*(*Ap).asDiagonal()*(*psip);
+        T += ((*psi_tp)*(*Ap).asDiagonal()*(*psip));
 }
 
-void AuxiliaryOptimizer::set_T_W_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
 {
         // Full model, no simplification allowed
-        SpMat temp = ((*Qp)*(*psip)).sparseView();
-        T += (*psi_tp)*(*Ap).asDiagonal()*temp;
+        T += ((*psi_tp)*(*Ap).asDiagonal()*(*Qp)*(*psip));
 }
 
-void AuxiliaryOptimizer::set_T_ln_nW_ptw(SpMat & T, const std::vector<UInt> * kp, UInt s)
+void AuxiliaryOptimizer::set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s)
 {
         // T = Psi^t*Psi == Indicator(k[i],k[i])
         for (UInt i = 0; i < s ; i++)
                 T.coeffRef((*kp)[i], (*kp)[i]) += 1;
 }
 
-void AuxiliaryOptimizer::set_T_ln_W_ptw(SpMat & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s)
+void AuxiliaryOptimizer::set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s)
 {
         // T = Psi^t*Q*Psi == q_ij*Indicator(k[i],k[j])
         for (UInt i = 0; i < s ; i++)
@@ -44,17 +43,16 @@ void AuxiliaryOptimizer::set_T_ln_W_ptw(SpMat & T, const std::vector<UInt> * kp,
                         T.coeffRef((*kp)[i], (*kp)[j]) += (*Qp).coeff(i, j);
 }
 
-void AuxiliaryOptimizer::set_T_lnn_nW_ptw(SpMat & T, const SpMat * psip, const SpMat * psi_tp)
+void AuxiliaryOptimizer::set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp)
 {
         // Avoid using Q
-        T += (*psi_tp)*(*psip);
+        T += ((*psi_tp)*(*psip));
 }
 
-void AuxiliaryOptimizer::set_T_lnn_W_ptw(SpMat & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
 {
         // Full model, no simplification allowed
-        SpMat temp = ((*Qp)*(*psip)).sparseView();
-        T += (*psi_tp)*temp;
+        T += ((*psi_tp)*(*Qp)*(*psip));
 }
 
 // THEORETICAL REMARK:
@@ -67,41 +65,37 @@ void AuxiliaryOptimizer::set_T_lnn_W_ptw(SpMat & T, const SpMat * psip, const Sp
 // we reserve a vector containing such entries and
 // we set the final matrix from these triplets
 
-void AuxiliaryOptimizer::set_E_ln_W_ptw(SpMat & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s)
+void AuxiliaryOptimizer::set_E_ln_W_ptw(MatrixXr & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s)
 {
-        E.resize(nr, s);
-        std::vector<coeff> vec;
-        vec.reserve(s*s);
+        E = MatrixXr::Zero(nr, s);
 
         for (UInt i = 0; i < s ; i++)
-                for (UInt j = 0; j < s; j++)
-                        vec.push_back(coeff((*kp)[i], j, (*Qp).coeff(i, j)));
-
-        E.setFromTriplets(vec.begin(), vec.end());
+                for (int j = 0; j < s; j++)
+                        E.coeffRef((*kp)[i], j) += (*Qp).coeff(i, j);
 }
 
-void AuxiliaryOptimizer::set_E_lnn_W_ptw(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_E_lnn_W_ptw(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp)
 {
-        E = ((*psi_tp)*(*Qp)).sparseView();
+        E = ((*psi_tp)*(*Qp));
 }
 
-void AuxiliaryOptimizer::set_E_W_a(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap)
+void AuxiliaryOptimizer::set_E_W_a(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap)
 {
-        E = ((*psi_tp)*(*Ap).asDiagonal()*(*Qp)).sparseView();
+        E = ((*psi_tp)*(*Ap).asDiagonal()*(*Qp));
 }
 
-void AuxiliaryOptimizer::set_E_nW_a(SpMat & E, const SpMat * psi_tp, const VectorXr * Ap)
+void AuxiliaryOptimizer::set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const VectorXr * Ap)
 {
         E = ((*psi_tp)*(*Ap).asDiagonal());
 }
 
 
-void AuxiliaryOptimizer::set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const SpMat & S, const VectorXr * zp)
+void AuxiliaryOptimizer::set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp)
 {
         z_hat = ((*Hp)+(*Qp)*S)*(*zp);
 }
 
-void AuxiliaryOptimizer::set_z_hat_nW(VectorXr & z_hat, const SpMat & S, const VectorXr * zp)
+void AuxiliaryOptimizer::set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp)
 {
         z_hat = S*(*zp);
 }

@@ -57,7 +57,6 @@ class GOF_updater
                         {
                                 updaters_setter(lopt_ptr);
                                 start_ptr = lopt_ptr;
-                                Rprintf("reset updaters\n");
                         }
 
                         bool found = false;
@@ -87,34 +86,34 @@ struct AuxiliaryOptimizer
 {
         template<typename InputCarrier>
         static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_T_setter(SpMat & T, const InputCarrier & carrier);
+                universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
 
         template<typename InputCarrier>
         static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_T_setter(SpMat & T, const InputCarrier & carrier);
+                universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
 
-        static void set_T_nW_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp);
-        static void set_T_W_a(SpMat & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
-        static void set_T_ln_nW_ptw(SpMat & T, const std::vector<UInt> * kp, UInt s);
-        static void set_T_ln_W_ptw(SpMat & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s);
-        static void set_T_lnn_nW_ptw(SpMat & T, const SpMat * psip, const SpMat * psi_tp);
-        static void set_T_lnn_W_ptw(SpMat & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
+        static void set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp);
+        static void set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
+        static void set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s);
+        static void set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s);
+        static void set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp);
+        static void set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
 
         template<typename InputCarrier>
         static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_E_setter(SpMat & E, const InputCarrier & carrier);
+                universal_E_setter(MatrixXr & E, const InputCarrier & carrier);
 
         template<typename InputCarrier>
         static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_E_setter(SpMat & E, const InputCarrier & carrier);
+                universal_E_setter(MatrixXr & E, const InputCarrier & carrier);
 
-        static void set_E_ln_W_ptw(SpMat & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s);
-        static void set_E_lnn_W_ptw(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp);
-        static void set_E_W_a(SpMat & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap);
-        static void set_E_nW_a(SpMat & E, const SpMat * psi_tp, const VectorXr * Ap);
+        static void set_E_ln_W_ptw(MatrixXr & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s);
+        static void set_E_lnn_W_ptw(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp);
+        static void set_E_W_a(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap);
+        static void set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const VectorXr * Ap);
 
-        static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const SpMat & S, const VectorXr * zp);
-        static void set_z_hat_nW(VectorXr & z_hat, const SpMat & S, const VectorXr * zp);
+        static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp);
+        static void set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp);
 
         template<typename InputCarrier>
         static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
@@ -128,7 +127,7 @@ struct AuxiliaryOptimizer
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_T_setter(SpMat & T, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, const InputCarrier & carrier)
         {
                 const VectorXr * Ap = carrier.get_Ap();
                 const SpMat * psip = carrier.get_psip();
@@ -149,7 +148,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_T_setter(SpMat & T, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, const InputCarrier & carrier)
         {
                 if (carrier.loc_are_nodes())
                 {
@@ -189,7 +188,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_E_setter(SpMat & E, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_E_setter(MatrixXr & E, const InputCarrier & carrier)
         {
                 const VectorXr * Ap = carrier.get_Ap();
                 if (carrier.has_W())
@@ -211,7 +210,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_E_setter(SpMat & E, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_E_setter(MatrixXr & E, const InputCarrier & carrier)
         {
                 const MatrixXr * Qp = carrier.get_Qp();        // Q != I
                 if (carrier.loc_are_nodes())

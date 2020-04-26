@@ -70,17 +70,20 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 output_Data     output;            //Output, needed to be used in FdaPDE.h, necessarily public
 
                 // Utility matrices
-                SpMat   	R_; 			        //!< stores the value of R1^t*R0^{-1}*R1                          [[nnodes x nnodes]]
-                SpMat   	T_; 				//!< stores the value of Psi^t*Q*Psi+lambda*R                     [[nnodes x nnodes]]
-                SpMat   	V_; 			        //!< stores the value of T^{-1}*Psi^t*Q                           [[nnodes x   s   ]]
-                SpMat           S_;                             //!< stores the value of Psi*V [as in Stu-Hunter Sangalli]        [[   s   x   s   ]]
+                MatrixXr   	R_; 			        //!< stores the value of R1^t*R0^{-1}*R1                          [[nnodes x nnodes]]
+                MatrixXr   	T_; 				//!< stores the value of Psi^t*Q*Psi+lambda*R                     [[nnodes x nnodes]]
+                MatrixXr   	V_; 			        //!< stores the value of T^{-1}*Psi^t*Q                           [[nnodes x   s   ]]
+                MatrixXr        S_;                             //!< stores the value of Psi*V [as in Stu-Hunter Sangalli]        [[   s   x   s   ]]
                 Real            trS_;                           //!< stores the value of the trace of S
-                SpMat           K_;                             //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
-                SpMat           dS_;                            //!< stores the derivative of S w.r.t. lambda                     [[   s   x   s   ]]
+                MatrixXr        K_;                             //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
+                MatrixXr        F_;
+                MatrixXr        dS_;                            //!< stores the derivative of S w.r.t. lambda                     [[   s   x   s   ]]
                 Real            trdS_;                          //!< stores the value of the trace of dS
-                SpMat           ddS_;                           //!< stores the second derivative of S w.r.t. lambda              [[   s   x   s   ]]
+                MatrixXr        ddS_;                           //!< stores the second derivative of S w.r.t. lambda              [[   s   x   s   ]]
                 Real            trddS_;                         //!< stores the value of the trace of ddS
                 MatrixXr        US_;
+
+                Eigen::LDLT<MatrixXr> factorized_T;
 
                 // Degrees of freedom
                 Real dof;                                       //!< tr(S) + q, degrees of freedom of the model
@@ -96,7 +99,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 void set_ddS_and_trddS_(void);
                 void set_US_(void);
 
-
                 // Setters of the common data
                 void compute_s(void);
                 void compute_z_hat(void);
@@ -111,7 +113,7 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 void update_family(Real lambda);
 
                 // Utilities
-                void LeftMultiplybyPsiAndTrace(Real & trace, SpMat & ret, const SpMat & mat);
+                void LeftMultiplybyPsiAndTrace(Real & trace, MatrixXr & ret, const MatrixXr & mat);
 
                 // DOF methods
         virtual void update_dof(Real lambda)    = 0;
