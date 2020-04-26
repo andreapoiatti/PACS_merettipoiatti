@@ -74,4 +74,48 @@ $ [5] = - \frac{1}{dor^2}<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \frac{d\ha
 \\
 $\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) = \frac{2s}{dor^2}(\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) - 4<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) + <\frac{d\mathbold{S}}{d\lambda}\mathbold{z},\mathbold{Q} \frac{d\mathbold{S}}{d\lambda}\mathbold{z}> - <\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}, \hat{\mathbold{\varepsilon}}>)$
 
+\chapter{Forcing term and nonhomogeneous Dirichlet}
+Define $GCV_{homo}$ the computation of the GCV in the homogeneous case
+\section{GCV-I-derivative}
+$ \frac{dGCV}{d\lambda}(\lambda)=\frac{d[GCV_{homo}+\frac{s}{dor^2}(||\textbf{r}(\lambda)||^2-2<\hat{\mathbold{\varepsilon}},\textbf{r}(\lambda)>)]}{d\lambda}=\frac{dGCV_{homo}}{d\lambda}+s(||\textbf{r}(\lambda)||^2-2<\hat{\mathbold{\varepsilon}},\textbf{r}(\lambda)>)\frac{d(dor^{-2})}{d\lambda}+\frac{2s}{dor^2}(<\textbf{r}(\lambda),\frac{d\textbf{r}}{d\lambda}>-<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\textbf{r}(\lambda)>-<\hat{\mathbold{\varepsilon}},\frac{d\textbf{r}(\lambda)}{d\lambda}>)$\\
+\begin{equation}
+V=\Psi^T\textbf{AQ}\Psi+\lambda \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{R}_1
+\end{equation}
+\begin{equation}
+\frac{d\textbf{V}^{-1}}{d\lambda}=-\textbf{V}^{-1}\textbf{R}_1^T\textbf{R}_0^{-1}\textbf{R}_1 \textbf{V}^{-1}
+\end{equation}
+\begin{equation}
+\frac{d\textbf{S}}{d\lambda}=-\Psi \frac{d\textbf{V}^{-1}}{d\lambda}\Psi^T\textbf{AQ}
+\end{equation}
+\begin{equation}
+\frac{d\textbf{r}}{d\lambda}=\frac{1}{\lambda}\textbf{r}(\lambda)+\lambda \textbf{Q}\Psi \frac{d\textbf{V}^{-1}}{d\lambda} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u}^{*}
+\end{equation}
+
+\section{GCV-II-derivative}
+\begin{align*}
+\frac{d^2 GCV}{d\lambda^2}&=\frac{d^2 GCV_{homo}}{d\lambda^2}+2s(<\textbf{r}(\lambda),\frac{d\textbf{r}}{d\lambda}>-<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\textbf{r}(\lambda)>-<\hat{\mathbold{\varepsilon}},\frac{d\textbf{r}(\lambda)}{d\lambda}>)\frac{d(dor^{-2})}{d\lambda}+s(||\textbf{r}(\lambda)||^2\\&-2<\hat{\mathbold{\varepsilon}},\textbf{r}(\lambda)>)\frac{d^2}{d\lambda^2}(dor^{-2})+2\frac{s}{dor^2}[\ ||\frac{d\textbf{r}}{d\lambda}||^2+<\textbf{r}, \frac{d^2\textbf{r}}{d\lambda^2}>-<\frac{d^2 \hat{\mathbold{\varepsilon}}}{d\lambda}, \textbf{r}(\lambda)>-2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda}, \frac{d\textbf{r}(\lambda)}{d\lambda}>\\&-<\hat{\mathbold{\varepsilon}}, \frac{d^2\textbf{r}}{d\lambda^2}>]\\&+2s\frac{d(dor^{-2})}{d\lambda}[<\textbf{r}(\lambda),\frac{d\textbf{r}}{d\lambda}>-<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\textbf{r}(\lambda)>-<\hat{\mathbold{\varepsilon}},\frac{d\textbf{r}(\lambda)}{d\lambda}>]
+\end{align*}
+
+\begin{equation}
+\frac{d^2\hat{\mathbold{\varepsilon}}}{d\lambda^2}=-\textbf{Q}\frac{d^2\textbf{S}}{d\lambda^2}\textbf{z}
+\end{equation}
+
+\begin{equation}
+\frac{d^2\textbf{r}}{d\lambda^2}=-\frac{1}{\lambda^2}\textbf{r}(\lambda)+\frac{1}{\lambda}\frac{d\textbf{r}}{d\lambda}+\textbf{Q}\Psi (\frac{d\textbf{V}^{-1}}{d\lambda} +\lambda \frac{d^2\textbf{V}^{-1}}{d\lambda^2})\textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u}^{*}
+\end{equation}
+
+\begin{equation}
+\frac{d^2\textbf{V}^{-1}}{d\lambda^2}=-\frac{d\textbf{V}^{-1}}{d\lambda}\textbf{R}_1^T\textbf{R}_0^{-1}\textbf{R}_1 \textbf{V}^{-1}-\textbf{V}^{-1}\textbf{R}_1^T\textbf{R}_0^{-1}\textbf{R}_1\frac{d\textbf{V}^{-1}}{d\lambda}
+\end{equation}
+
+\begin{equation}
+\frac{d\ dor}{d\lambda}=-tr(\frac{d\textbf{S}(\lambda)}{d\lambda})
+\end{equation}
+
+
+\begin{equation}
+\frac{d^2 dor^{-2}}{d\lambda^2}=2tr(\frac{d^2\textbf{S}(\lambda)}{d\lambda^2})dor^{-3}+6\ dor^{-4}\{tr(\frac{d\textbf{S}(\lambda)}{d\lambda})\}^2
+\end{equation}
+
+
 \end{document}
