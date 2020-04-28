@@ -66,7 +66,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 Real            SS_res;                         //!< Model predicted sum of squares of the residuals
                 UInt            s;                              //!< Model number of observations
                 Real            sigma_hat_sq;                   //!< Model estimated variance of errors
-                Real            aux;                            //!< Stores the value of <eps_hat, dS*z>
                 output_Data     output;            //Output, needed to be used in FdaPDE.h, necessarily public
 
                 // Utility matrices
@@ -75,13 +74,12 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 MatrixXr   	V_; 			        //!< stores the value of T^{-1}*Psi^t*Q                           [[nnodes x   s   ]]
                 MatrixXr        S_;                             //!< stores the value of Psi*V [as in Stu-Hunter Sangalli]        [[   s   x   s   ]]
                 Real            trS_;                           //!< stores the value of the trace of S
-                MatrixXr        K_;                             //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
-                MatrixXr        F_;
                 MatrixXr        dS_;                            //!< stores the derivative of S w.r.t. lambda                     [[   s   x   s   ]]
                 Real            trdS_;                          //!< stores the value of the trace of dS
                 MatrixXr        ddS_;                           //!< stores the second derivative of S w.r.t. lambda              [[   s   x   s   ]]
                 Real            trddS_;                         //!< stores the value of the trace of ddS
                 MatrixXr        US_;
+                AuxiliaryData<InputCarrier> adt;
 
                 Eigen::LDLT<MatrixXr> factorized_T;
 
@@ -105,7 +103,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 void compute_eps_hat(void);
                 void compute_SS_res(void);
                 void compute_sigma_hat_sq(void);
-                void compute_aux(void);
 
                 // Updaters
                 void update_family_p1(Real lambda);  //Part 1
@@ -149,8 +146,8 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 Real compute_fs(Real lambda);
 
         virtual void update_parameters(Real lambda) = 0;
-                 //Set and return output data, plus lambda final and number of iterations
 
+                //Set and return output data, plus lambda final and number of iterations
                 const output_Data & get_output(std::pair<Real, UInt> p, const timespec & T);
                 const output_Data & get_output_partial(void);
 

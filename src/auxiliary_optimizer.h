@@ -17,6 +17,20 @@ struct output_Data
         Real            time_partial;                   //!<Time, from beginning to end of the optimization method
 };
 
+template <bool ... b>
+struct multi_bool_type
+{
+
+};
+
+typedef multi_bool_type<true> t_type;
+typedef multi_bool_type<false> f_type;
+typedef multi_bool_type<true, true> tt_type;
+typedef multi_bool_type<false, true> ft_type;
+typedef multi_bool_type<true, false> tf_type;
+typedef multi_bool_type<false, false> ff_type;
+
+
 template <typename LambdaOptim, typename T>
 class GOF_updater
 {
@@ -69,27 +83,39 @@ class GOF_updater
                 }
 };
 
-template <bool ... b>
-struct multi_bool_type
+template<typename InputCarrier, typename Enable = void>
+struct AuxiliaryData
 {
-
+        MatrixXr K_;                            //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
+        MatrixXr F_;                            //!< stores K*v
+        VectorXr t_;                            //!< stores dS*z;
+        Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
+        Real     b_;                            //!< Stores <t, Q*t>
+        Real     c_;                            //!< Stores <eps_hat, ddS*z>
 };
 
-typedef multi_bool_type<true> t_type;
-typedef multi_bool_type<false> f_type;
-typedef multi_bool_type<true, true> tt_type;
-typedef multi_bool_type<false, true> ft_type;
-typedef multi_bool_type<true, false> tf_type;
-typedef multi_bool_type<false, false> ff_type;
+template<typename InputCarrier>
+struct AuxiliaryData<InputCarrier, typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value>::type>
+{
+        MatrixXr K_;                            //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
+        MatrixXr F_;                            //!< stores K*v
+        VectorXr t_;                            //!< stores dS*z;
+        Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
+        Real     b_;                            //!< Stores <t, Q*t>
+        Real     c_;                            //!< Stores <eps_hat, ddS*z>
+        VectorXr r_;
+        VectorXr h_;
+};
+
 
 struct AuxiliaryOptimizer
 {
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
 
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
                 universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
 
         static void set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp);
@@ -98,30 +124,78 @@ struct AuxiliaryOptimizer
         static void set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s);
         static void set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp);
         static void set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
+        /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_E_setter(MatrixXr & E, const InputCarrier & carrier);
 
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
                 universal_E_setter(MatrixXr & E, const InputCarrier & carrier);
 
         static void set_E_ln_W_ptw(MatrixXr & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s);
         static void set_E_lnn_W_ptw(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp);
         static void set_E_W_a(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap);
         static void set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const VectorXr * Ap);
+        /* -------------------------------------------------------------------*/
 
         static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp);
         static void set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp);
+        /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes);
 
         template<typename InputCarrier>
-        static typename std::enable_if< std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
                 universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, UInt nnodes);
+        /* -------------------------------------------------------------------*/
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
+                universal_first_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & dS, const VectorXr & eps);
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
+                universal_first_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & dS, const VectorXr & eps);
+        /* -------------------------------------------------------------------*/
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
+                universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps);
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
+                universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps);
+        /* -------------------------------------------------------------------*/
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+                universal_GCV(const Real s, const Real sigma_hat_sq, const Real dor);
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+                universal_GCV(const Real s, const Real sigma_hat_sq, const Real dor);
+        /* -------------------------------------------------------------------*/
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+                universal_GCV_d(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS);
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+                universal_GCV_d(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS);
+
+        /* -------------------------------------------------------------------*/
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+                universal_GCV_dd(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS, const Real trddS);
+
+        template<typename InputCarrier>
+        static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+                universal_GCV_dd(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS, const Real trddS);
 };
 
 
@@ -258,6 +332,90 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         b.topRows(nnodes) = (*carrier.get_psi_tp())*US;
                 }
                 return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_first_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & dS, const VectorXr & eps)
+        {
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_first_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & dS, const VectorXr & eps)
+        {
+                const VectorXr * zp = carrier.get_zp();
+                adt.t_ = dS*(*zp);
+                adt.a_ = eps.transpose()*dS*(*zp);
+
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps)
+        {
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
+        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps)
+        {
+                const VectorXr * zp = carrier.get_zp();
+                if (carrier.has_W())
+                        adt.b_ = adt.t_.transpose()*(*carrier.get_Qp())*adt.t_;
+                else
+                        adt.b_ = adt.t_.squaredNorm();
+                adt.c_ = eps.transpose()*ddS*(*zp);
+
+                return 0;
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV(const Real s, const Real sigma_hat_sq, const Real dor)
+        {
+                return 0;
+        }
+
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV(const Real s, const Real sigma_hat_sq, const Real dor)
+        {
+                return s*sigma_hat_sq/Real(dor);
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV_d(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS)
+        {
+                return 0;
+        }
+
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV_d(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS)
+        {
+                return 2*s*(sigma_hat_sq*trdS - adt.a_)/Real(dor*dor);
+        }
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV_dd(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS, const Real trddS)
+        {
+                return 0;
+        }
+
+
+template<typename InputCarrier>
+typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, Real>::type
+        AuxiliaryOptimizer::universal_GCV_dd(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS, const Real trddS)
+        {
+                return 2*s*(trdS*(3*sigma_hat_sq*trdS-4*adt.a_)/dor + sigma_hat_sq*trddS + adt.b_ - adt.c_)/Real(dor*dor);
         }
 
 #endif

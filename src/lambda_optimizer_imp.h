@@ -111,11 +111,11 @@ void GCV_Family<InputCarrier, 1>::set_dS_and_trdS_(void)
         //     = -Psi*T^{-1}*R*V
         //     =  Psi*(-K*V)
         //    :=  -Psi*F
-        this->K_ = this->factorized_T.solve(this->R_);              // K = T^{-1}*R
-        this->F_= this->K_*this->V_;                               // F = K*V
+        this->adt.K_ = this->factorized_T.solve(this->R_);              // K = T^{-1}*R
+        this->adt.F_= this->adt.K_*this->V_;                               // F = K*V
         this->trdS_ = 0.0;
 
-        this->LeftMultiplybyPsiAndTrace(this->trdS_, this->dS_, -this->F_);
+        this->LeftMultiplybyPsiAndTrace(this->trdS_, this->dS_, -this->adt.F_);
 }
 
 //! Method to set the value of member SpMat ddS_ and its trace trddS_
@@ -130,7 +130,7 @@ void GCV_Family<InputCarrier, 1>::set_ddS_and_trddS_(void)
         // ddS_ = -
         //      = -
         //     := 2*Psi*K^2*V
-        MatrixXr G_ = 2*this->K_*this->F_;                        // G = 2*K^2*V
+        MatrixXr G_ = 2*this->adt.K_*this->adt.F_;                        // G = 2*K^2*V
         this->trddS_ = 0.0;
 
         this->LeftMultiplybyPsiAndTrace(this->trddS_, this->ddS_, G_);
@@ -282,16 +282,6 @@ void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
         //Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
 }
 
-//! Utility to compute a term useful in the first and second derivative of the GCV
-/*
- * /sa {compute_fp(Real lambda), compute_fs(Real lambda)}
- */
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_aux(void)
-{
-        this->aux =  this->eps_hat.transpose()*this->dS_*(*this->the_carrier.get_zp());
-}
-
 // Updaters
 
 template<typename InputCarrier>
@@ -331,13 +321,14 @@ template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::first_updater(Real lambda)
 {
         this->set_dS_and_trdS_();
-        this->compute_aux();
+        UInt ret = AuxiliaryOptimizer::universal_first_updater<InputCarrier>(this->adt, this->the_carrier, this->dS_, this->eps_hat);
 }
 
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::second_updater(Real lambda)
 {
         this->set_ddS_and_trddS_();
+        UInt ret = AuxiliaryOptimizer::universal_second_updater<InputCarrier>(this->adt, this->the_carrier, this->ddS_, this->eps_hat);
 }
 
 // GCV function and derivatives
@@ -349,7 +340,9 @@ Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
         //     = sigma_hat_^2*s/dor
         this->gu.call_to(0, lambda, this);
 
-        Real GCV_val = this->s*this->sigma_hat_sq/Real(this->dor);    // Compute the value of the GCV and print it
+        // Compute the value of the GCV and print it
+        Real GCV_val =
+                AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
 
 	#ifdef R_VERSION_
                 Rprintf("LAMBDA = %f\n",lambda);
@@ -373,7 +366,8 @@ Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
         this->gu.call_to(1, lambda, this);
 
         // Compute the value of the GCV first derivative and print it
-	Real GCV_der_val = 2*this->s* (this->sigma_hat_sq*this->trdS_ - this->aux)/(this->dor*this->dor);
+	Real GCV_der_val =
+                AuxiliaryOptimizer::universal_GCV_d<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_);
 
 	#ifdef R_VERSION_
 		Rprintf("GCV_derivative = %f\n", GCV_der_val);
@@ -389,18 +383,9 @@ Real GCV_Family<InputCarrier, 1>::compute_fs(Real lambda)
 {
         this->gu.call_to(2, lambda, this);
 
-        const VectorXr * zp = this->the_carrier.get_zp();
-        VectorXr t = this->dS_*(*zp);
-        Real aux2;
-        if (this->the_carrier.has_W())
-                aux2 = t.transpose()*(*this->the_carrier.get_Qp())*t;
-        else
-                aux2 = t.squaredNorm();
-        Real aux3 = this->eps_hat.transpose()*this->ddS_*(*zp);
-
         // Compute second derivative and print it
 	Real GCV_sec_der_val =
-                2*this->s*(this->trdS_*(3*this->sigma_hat_sq*this->trdS_-4*this->aux)/this->dor + this->sigma_hat_sq*this->trddS_ + aux2 - aux3)/(this->dor*this->dor);
+                AuxiliaryOptimizer::universal_GCV_dd<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_, this->trddS_);
 
 	#ifdef R_VERSION_
 		Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);

@@ -136,6 +136,11 @@ class Temporal
         // [[ TO BE IMPLEMENTED]]
 };
 
+class Forced
+{
+        // [[ TO BE IMPLEMENTED]]
+};
+
 template<typename DataHandler, typename MixedClass>
 class CarrierBuilder
 {
