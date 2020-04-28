@@ -7,6 +7,7 @@
 
 // Declaration of classes that will be used as Extensions for Carrier
 class Areal;
+class Forced;
 class Temporal;
 
 template<typename Origin, typename... Extensions>
@@ -20,6 +21,7 @@ class Carrier: public Extensions...
                 bool locations_are_nodes = false;
                 bool has_covariates = false;
                 bool areal_data = false;
+                bool forced_data = false;
                 bool temporal_data = false;
 
                 UInt n_obs;
@@ -66,6 +68,8 @@ class Carrier: public Extensions...
 
                                         if(std::is_base_of<Areal, Carrier>::value)
                                                 this->areal_data = true;
+                                        if(std::is_base_of<Forced, Carrier>::value)
+                                                this->forced_data = true;
                                         if(std::is_base_of<Temporal, Carrier>::value)
                                                 this->temporal_data = true;
                                 };
@@ -128,15 +132,30 @@ class Areal
                 // Setters
                 inline void set_n_regions(UInt n_regions_) {this->n_regions = n_regions_;}
                 inline void set_Ap(const VectorXr * Ap_) {this->Ap = Ap_;}
-
-};
-
-class Temporal
-{
-        // [[ TO BE IMPLEMENTED]]
 };
 
 class Forced
+{
+private:
+        const VectorXr * up;
+
+public:
+        Forced() = default;
+        Forced(const VectorXr * up_): up(up_) {};
+
+        void set_all_forced(const VectorXr * up_)
+        {
+                set_up(up_);
+        }
+
+        // Getters
+        inline const VectorXr * get_up(void) const {return this->up;}
+
+        // Setters
+        inline void set_up(const VectorXr * up_) {this->up = up_;}
+};
+
+class Temporal
 {
         // [[ TO BE IMPLEMENTED]]
 };
@@ -164,6 +183,31 @@ class CarrierBuilder
                                 data.getObservations(), data.getCovariates(), mc.getH_(), mc.getQ_(), mc.getR1_(),
                                 mc.getR0_(), mc.getPsi_(), mc.getPsi_t());
                         car.set_all_areal(data.getNumberOfRegions(), mc.getA_());
+
+                        return car;
+                }
+
+                static Carrier<MixedClass,Forced> build_forced_carrier(const DataHandler & data, MixedClass & mc, const OptimizationData & optimizationData)
+                {
+                        Carrier<MixedClass,Forced> car;
+                        car.set_all(&mc, &optimizationData, mc.check_is_loc_by_n(),
+                                mc.checkisRegression_(), data.getNumberofObservations(), data.getObservationsIndices(),
+                                data.getObservations(), data.getCovariates(), mc.getH_(), mc.getQ_(), mc.getR1_(),
+                                mc.getR0_(), mc.getPsi_(), mc.getPsi_t());
+                        car.set_all_forced(mc.getu_());
+
+                        return car;
+                }
+
+                static Carrier<MixedClass,Forced,Areal> build_forced_areal_carrier(const DataHandler & data, MixedClass & mc, const OptimizationData & optimizationData)
+                {
+                        Carrier<MixedClass,Forced,Areal> car;
+                        car.set_all(&mc, &optimizationData, mc.check_is_loc_by_n(),
+                                mc.checkisRegression_(), data.getNumberofObservations(), data.getObservationsIndices(),
+                                data.getObservations(), data.getCovariates(), mc.getH_(), mc.getQ_(), mc.getR1_(),
+                                mc.getR0_(), mc.getPsi_(), mc.getPsi_t());
+                        car.set_all_areal(data.getNumberOfRegions(), mc.getA_());
+                        car.set_all_forced(mc.getu_());
 
                         return car;
                 }

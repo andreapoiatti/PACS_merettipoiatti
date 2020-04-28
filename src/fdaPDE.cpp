@@ -38,19 +38,39 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
 	regression.preapply();
 
 	//Build the carrier
-	if(regressionData.getNumberOfRegions()>0)
+	if(regression.check_is_space_varying())
 	{
-		Rprintf("Areal\n");
-		Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>
-			carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_areal_carrier(regressionData, regression, optimizationData);
-		return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>>(carrier);
+		if(regressionData.getNumberOfRegions()>0)
+		{
+			Rprintf("Areal-forced\n");
+			Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Forced, Areal>
+				carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_forced_areal_carrier(regressionData, regression, optimizationData);
+			return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Forced, Areal>>(carrier);
+		}
+		else
+		{
+			Rprintf("Pointwise-forced\n");
+			Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Forced>
+				carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_forced_carrier(regressionData, regression, optimizationData);
+			return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Forced>>(carrier);
+		}
 	}
 	else
 	{
-		Rprintf("Pointwise\n");
-		Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>
-			carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_plain_carrier(regressionData, regression, optimizationData);
-		return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>>(carrier);
+		if(regressionData.getNumberOfRegions()>0)
+		{
+			Rprintf("Areal\n");
+			Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>
+				carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_areal_carrier(regressionData, regression, optimizationData);
+			return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>, Areal>>(carrier);
+		}
+		else
+		{
+			Rprintf("Pointwise\n");
+			Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>
+				carrier = CarrierBuilder<InputHandler,MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>::build_plain_carrier(regressionData, regression, optimizationData);
+			return optimizer_method_selection<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>>(carrier);
+		}
 	}
 }
 

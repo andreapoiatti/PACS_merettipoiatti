@@ -40,10 +40,7 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_R_(void)
 {
-        const SpMat * R1p_= this->the_carrier.get_R1p();         // Get the value of matrix R1
-        Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
-        solver.compute(*(this->the_carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-        this->R_ = (*R1p_).transpose()*solver.solve(*R1p_);            // R == _R1^t*R0^{-1}*R1
+        const UInt ret =  AuxiliaryOptimizer::universal_R_setter<InputCarrier>(this->R_, this->the_carrier, this->adt);
 }
 
 //! Method to set the value of member SpMat T_
@@ -57,8 +54,6 @@ void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
 {
         this->T_ = lambda*this->R_;
         const UInt ret =  AuxiliaryOptimizer::universal_T_setter<InputCarrier>(this->T_, this->the_carrier);
-        Eigen::LDLT<MatrixXr> Dsolver(this->T_);	        // define a factorization
-        this->factorized_T = Dsolver;
 }
 
 //! Method to set the value of member SpMat V_
@@ -70,18 +65,7 @@ void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_V_(void)
 {
-        if(!this->the_carrier.is_areal() && !this->the_carrier.has_W())
-        {
-                // Q == I
-                const SpMat * psi_tp = this->the_carrier.get_psi_tp();
-                this->V_ = this->factorized_T.solve(MatrixXr(*psi_tp));      // find the value of V = T^{-1}*Psi^t
-        }
-        else
-        {
-                MatrixXr E_;                // Declare an empty auxiliary matrix
-                const UInt ret =  AuxiliaryOptimizer::universal_E_setter<InputCarrier>(E_, this->the_carrier);
-                this->V_ = this->factorized_T.solve(E_);          // find the value of V = T^{-1}*E
-        }
+        const UInt ret =  AuxiliaryOptimizer::universal_V_setter<InputCarrier>(this->V_, this->T_, this->R_, this->the_carrier, this->adt);
 }
 
 //! Method to set the value of member SpMat S_ and its trace trS_
@@ -111,7 +95,6 @@ void GCV_Family<InputCarrier, 1>::set_dS_and_trdS_(void)
         //     = -Psi*T^{-1}*R*V
         //     =  Psi*(-K*V)
         //    :=  -Psi*F
-        this->adt.K_ = this->factorized_T.solve(this->R_);              // K = T^{-1}*R
         this->adt.F_= this->adt.K_*this->V_;                               // F = K*V
         this->trdS_ = 0.0;
 
@@ -219,25 +202,14 @@ void GCV_Family<InputCarrier, 1>::set_US_(void)
 
 //! Utility to compute the predicted values in the locations
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_z_hat(void)
+void GCV_Family<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
-        // [[ TODO NOT IMPLEMENTED PRESENCE OF FORCING TERM]]
-        const VectorXr * zp = this->the_carrier.get_zp();
-        if(this->the_carrier.has_W())
-        {
-                const MatrixXr * Hp = this->the_carrier.get_Hp();
-                const MatrixXr * Qp = this->the_carrier.get_Qp();
-                AuxiliaryOptimizer::set_z_hat_W(this->z_hat, Hp, Qp, this->S_, zp);
-        }
-        else
-        {
-                AuxiliaryOptimizer::set_z_hat_nW(this->z_hat, this->S_, zp);
-        }
+        UInt ret = AuxiliaryOptimizer::universal_z_hat_setter<InputCarrier>(this->z_hat, this->the_carrier, this->S_, this->adt, lambda);
 
         // Debugging purpose
         // Rprintf("z_hat: \n");
         // for(int i = 0; i < 20; i++)
-        //        Rprintf("%f,", this->z_hat[i]);
+        //        Rprintf("%f, ", this->z_hat[i]);
 	// Rprintf("\n");
 }
 
@@ -248,10 +220,10 @@ void GCV_Family<InputCarrier, 1>::compute_eps_hat(void)
         this->eps_hat = (*this->the_carrier.get_zp())-this->z_hat;
 
         // Debugging purpose
-        //Rprintf("Eps_hat \n");
-        //for(UInt i = 0; i < this->s; i++)
+        // Rprintf("Eps_hat \n");
+        // for(UInt i = 0; i < this->s; i++)
         //        Rprintf("%f, ", this->eps_hat[i]);
-        //Rprintf("\n");
+        // Rprintf("\n");
 }
 
 //! Utility to compute the sum of the squares of the residuals
@@ -261,7 +233,7 @@ void GCV_Family<InputCarrier, 1>::compute_SS_res(void)
         this->SS_res = this->eps_hat.squaredNorm();
 
         // Debugging purpose
-        //Rprintf("SS_res  = %f\n", this->SS_res);
+        // Rprintf("SS_res  = %f\n", this->SS_res);
 }
 
 //! Utility to compute the size of the model
@@ -279,7 +251,7 @@ void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
         this->sigma_hat_sq = this->SS_res/Real(this->dor);
 
         // Debugging purpose
-        //Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
+        // Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
 }
 
 // Updaters
@@ -290,7 +262,7 @@ void GCV_Family<InputCarrier, 1>::update_family_p1(Real lambda)
         this->set_T_(lambda);
         this->set_V_();
         this->set_S_and_trS_();
-        this->compute_z_hat();
+        this->compute_z_hat(lambda);
 }
 
 template<typename InputCarrier>
@@ -321,14 +293,14 @@ template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::first_updater(Real lambda)
 {
         this->set_dS_and_trdS_();
-        UInt ret = AuxiliaryOptimizer::universal_first_updater<InputCarrier>(this->adt, this->the_carrier, this->dS_, this->eps_hat);
+        UInt ret = AuxiliaryOptimizer::universal_first_updater<InputCarrier>(this->adt, this->the_carrier, this->dS_, this->eps_hat, lambda);
 }
 
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::second_updater(Real lambda)
 {
         this->set_ddS_and_trddS_();
-        UInt ret = AuxiliaryOptimizer::universal_second_updater<InputCarrier>(this->adt, this->the_carrier, this->ddS_, this->eps_hat);
+        UInt ret = AuxiliaryOptimizer::universal_second_updater<InputCarrier>(this->adt, this->the_carrier, this->ddS_, this->eps_hat, lambda);
 }
 
 // GCV function and derivatives

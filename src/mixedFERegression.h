@@ -99,8 +99,10 @@ class MixedFERegressionBase
 		inline const MatrixXr *		getQ_(void)			      {return &Q_;}
 		inline const MatrixXr *		getH_(void)			      {return &H_;}
 		inline const VectorXr *		getA_(void)			      {return &A_;}
+		inline const VectorXr *		getu_(void)			      {return &_forcingTerm;}
 		inline bool			checkisRegression_(void)	const {return (this->regressionData_.getCovariates()->cols()!=0 && this->regressionData_.getCovariates()->rows()!=0);}	// Checks if the model has covariates or not
 		inline bool			check_is_loc_by_n(void)		const {return regressionData_.isLocationsByNodes();}	// Checks if the model has locations or uses nodes
+		inline bool			check_is_space_varying(void)	const {return isSpaceVarying;}
 
 		// Factorizer
 		//! A function to factorize the system, using Woodbury decomposition when there are covariates

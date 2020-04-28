@@ -81,8 +81,6 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 MatrixXr        US_;
                 AuxiliaryData<InputCarrier> adt;
 
-                Eigen::LDLT<MatrixXr> factorized_T;
-
                 // Degrees of freedom
                 Real dof;                                       //!< tr(S) + q, degrees of freedom of the model
                 Real dor;                                       //!< s - dof, degrees of freedom of the residuals
@@ -99,7 +97,7 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
 
                 // Setters of the common data
                 void compute_s(void);
-                void compute_z_hat(void);
+                void compute_z_hat(Real lambda);
                 void compute_eps_hat(void);
                 void compute_SS_res(void);
                 void compute_sigma_hat_sq(void);
