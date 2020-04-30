@@ -57,7 +57,27 @@ $[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\
 \\
 $[2]= \frac{d(dor^{-2})}{d\lambda} = -2\frac{1}{dor^3}\frac{d(dor)}{d\lambda} = -2\frac{1}{dor^3}\frac{d(s-q-tr(\mathbold{S}))}{d\lambda} = 2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})$\\
 \\
-$\implies \frac{dGCV}{d\lambda}(\lambda) = s (-<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>\frac{2}{dor^2} + SS_{res}\frac{2}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})) = \frac{2s}{{dor}^2}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) - <\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>)$
+$\implies \frac{dGCV}{d\lambda}(\lambda) = s (-<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>\frac{2}{dor^2} + SS_{res}\frac{2}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})) = \frac{2s}{{dor}^2}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + a)$
+
+\subsection{Fundamental matrices}
+\begin{enumerate}
+	\item $ \mathbf{R} = \mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1}$
+	\item $ \mathbf{T} = \boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1} = \boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R}$
+	\item $\mathbf{V} = (\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\boldsymbol{\Psi}^t\mathbf{Q} = \boldsymbol{T}^{-1}\boldsymbol{\Psi}^t\mathbf{Q}$
+	\item $ \mathbf{S} =  \boldsymbol{\Psi}(\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\boldsymbol{\Psi}^t\mathbf{Q} = \boldsymbol{\Psi}\boldsymbol{V}$
+	\item $\frac{d\mathbold{S}}{d\lambda} = -\boldsymbol{\Psi}(\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1}(\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\boldsymbol{\Psi}^t\mathbf{Q}\\
+	= -\boldsymbol{\Psi}\mathbf{T}^{-1}\mathbf{R}\mathbf{V} = -\boldsymbol{\Psi}\mathbf{K}\mathbf{V} = -\boldsymbol{\Psi}\mathbf{F}$
+\end{enumerate}
+
+
+\paragraph{Useful stored factors}
+\begin{enumerate}
+	\item $\mathbf{K} = \mathbf{T}^{-1}\mathbf{R}$
+	\item $\mathbf{F} = \mathbf{K}\mathbf{V}$
+	\item $\mathbf{t} = \frac{d\mathbold{S}}{d\lambda}\mathbold{z}$
+	\item $ a = -<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}> = -<\mathbf{t}, \hat{\mathbold{\varepsilon}}>$
+\end{enumerate}
+\newpage
 
 \section{GCV-II-derivative}
 $ \frac{d^2GCV}{d\lambda^2}(\lambda) = 2s\frac{d({dor}^{-2}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) - <\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>))}{d\lambda}\\$
@@ -72,7 +92,83 @@ $ [4] = - \frac{1}{dor^2}<\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}, \hat{\
 \\
 $ [5] = - \frac{1}{dor^2}<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \frac{d\hat{\mathbold{\varepsilon}}}{d\lambda}> = \frac{1}{dor^2}<\frac{d\mathbold{S}}{d\lambda}\mathbold{z},\mathbold{Q} \frac{d\mathbold{S}}{d\lambda}\mathbold{z}>$\\
 \\
-$\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) = \frac{2s}{dor^2}(\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) - 4<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) + <\frac{d\mathbold{S}}{d\lambda}\mathbold{z},\mathbold{Q} \frac{d\mathbold{S}}{d\lambda}\mathbold{z}> - <\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}, \hat{\mathbold{\varepsilon}}>)$
+$\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) =
+\\ =\frac{2s}{dor^2}\{\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) - 4<\frac{d\mathbold{S}}{d\lambda}\mathbold{z}, \hat{\mathbold{\varepsilon}}>]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) + <\frac{d\mathbold{S}}{d\lambda}\mathbold{z},\mathbold{Q} \frac{d\mathbold{S}}{d\lambda}\mathbold{z}> - <\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}, \hat{\mathbold{\varepsilon}}>\} = \\
+=\frac{2s}{dor^2}\{\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + 4a]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) +b+c\}$
+
+\subsection{Fundamental matrices}
+\begin{enumerate}
+	\item $\frac{d^2\mathbold{S}}{d\lambda^2} = 2 \boldsymbol{\Psi}[(\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1}]^2(\boldsymbol{\Psi}^t\mathbf{Q}\boldsymbol{\Psi}+\lambda\mathbf{R_1}^t\mathbf{R_0}^{-1}\mathbf{R_1})^{-1}\boldsymbol{\Psi}^t\mathbf{Q}\\
+	= 2\boldsymbol{\Psi}(\mathbf{T}^{-1}\mathbf{R})^2\mathbf{V} = 2\boldsymbol{\Psi}\mathbf{K}^2\mathbf{V} = 2\boldsymbol{\Psi}\mathbf{K}\mathbf{F}$
+\end{enumerate}
+
+\paragraph{Useful stored factors}
+\begin{enumerate}
+	\item $b = <\frac{d\mathbold{S}}{d\lambda}\mathbold{z},\mathbold{Q} \frac{d\mathbold{S}}{d\lambda}\mathbold{z}>  = <\mathbold{t},\mathbold{Q} \mathbold{t}>$
+	\item $c = -<\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}, \hat{\mathbold{\varepsilon}}>$
+\end{enumerate}
+
+\chapter{Forced GCV}
+
+\section{GCV-I-derivative}
+$ \frac{dGCV}{d\lambda}(\lambda) = \frac{d(s\frac{SS_{res}(\lambda)}{dor^2(\lambda)})}{d\lambda} = s (\frac{dSS_{res}}{d\lambda}\frac{1}{dor^2} + SS_{res}\frac{d(dor^{-2})}{d\lambda}) $\\
+\\
+$[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\mathbold{\varepsilon}}> )}{d\lambda} = 2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\hat{\mathbold{\varepsilon}}> = 2 < \frac{d((\mathbold{Q}-\mathbold{Q}\mathbold{S})\mathbold{z}-\mathbf{r})}{d\lambda}, \hat{\mathbold{\varepsilon}}> = -2<\mathbold{Q}(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}), \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}\in Sym}{=}\\ -2<\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda},\mathbold{Q} \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}^2 = \mathbold{Q}}{=} 2<\lambda \boldsymbol{h} -(\frac{\mathbf{s}}{\lambda} +\mathbf{t}), \hat{\mathbold{\varepsilon}}> = 2a$\\
+\\
+$[2]= \frac{d(dor^{-2})}{d\lambda} = -2\frac{1}{dor^3}\frac{d(dor)}{d\lambda} = -2\frac{1}{dor^3}\frac{d(s-q-tr(\mathbold{S}))}{d\lambda} = 2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})$\\
+\\
+$\implies \frac{dGCV}{d\lambda}(\lambda) = s (\frac{2a}{dor^2} + SS_{res}\frac{2}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})) = \frac{2s}{{dor}^2}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + a)$
+
+\paragraph{Useful side computations}
+\begin{enumerate}
+	\item $ \frac{d\mathbold{s}}{d\lambda} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} =\frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{K}\mathbf{g} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{k} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{h} $
+\end{enumerate}
+
+\paragraph{Useful stored factors}
+\begin{enumerate}
+	\item $ \mathbf{f} = \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} $
+	\item $ \mathbf{g} = \textbf{T}^{-1}\textbf{f} $
+	\item $ \mathbf{k} = \textbf{K}\mathbf{g}$
+	\item $ \mathbf{h} = \boldsymbol{\Psi}\mathbf{k}$
+	\item $ \mathbf{s} = \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda \boldsymbol{\Psi}\mathbf{g} $
+	\item $ \mathbf{r} = \lambda \textbf{Q}\boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda \textbf{Q}\boldsymbol{\Psi}\mathbf{g} = \textbf{Q}\mathbf{s}$
+	\item $\mathbf{p} = \lambda \boldsymbol{h} -(\frac{\mathbf{s}}{\lambda} +\mathbf{t}) $
+\end{enumerate}
+
+\paragraph{Redefined factors}
+\begin{enumerate}
+	\item $ a = <\mathbf{p}, \hat{\mathbold{\varepsilon}}> $
+\end{enumerate}
+
+\newpage
+\section{GCV-II-derivative}
+$ \frac{d^2GCV}{d\lambda^2}(\lambda) = 2s\frac{d({dor}^{-2}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + <\mathbold{p}, \hat{\mathbold{\varepsilon}}>))}{d\lambda}\\$
+\\
+$ [1] = \frac{d(dor^{-2})}{d\lambda}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + <\boldsymbol{p}, \hat{\mathbold{\varepsilon}}>) =  2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + <\boldsymbol{p}, \hat{\mathbold{\varepsilon}}>)$\\
+\\
+$ [2] = \frac{1}{dor^2}\frac{d(\hat{\sigma}^2)}{d\lambda}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{\frac{d(SS_{res})}{d\lambda}dor - SS_{res}\frac{d(dor)}{d\lambda}}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{<\mathbold{p}, \hat{\mathbold{\varepsilon}}>dor + SS_{res}tr(\frac{d\mathbold{S}}{d\lambda})}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^3}(2<\mathbold{p}, \hat{\mathbold{\varepsilon}}> + \hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}))tr(\frac{d\mathbold{S}}{d\lambda})$\\
+\\
+$ [3] =  \frac{1}{dor^2}\hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2})$\\
+\\
+$ [4] = \frac{1}{dor^2}<\frac{d\mathbold{p}}{d\lambda}, \hat{\mathbold{\varepsilon}}> =  \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z} + \frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h} + \lambda \frac{d\boldsymbol{h}}{d\lambda} - \frac{1}{\lambda}\frac{d\boldsymbol{s}}{d\lambda}, \hat{\mathbold{\varepsilon}}> =\\ \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z} + \frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h} -2\lambda\boldsymbol{\Psi} \textbf{K} \textbf{k} -\frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h}, \hat{\mathbold{\varepsilon}}> = \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}  + 2\boldsymbol{h} -2\lambda\boldsymbol{\Psi} \textbf{K} \textbf{k}, \hat{\mathbold{\varepsilon}}> $\\
+\\
+$ [5] =  \frac{1}{dor^2}<\mathbold{p}, \frac{d\hat{\mathbold{\varepsilon}}}{d\lambda}> = \frac{1}{dor^2}<\mathbold{p},\mathbold{Q}\mathbold{p}>$\\
+\\
+$\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) =
+\\ =\frac{2s}{dor^2}\{\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + 4<\mathbold{p}, \hat{\mathbold{\varepsilon}}>]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) + <\mathbold{p},\mathbold{Q} \mathbold{p}> + <\frac{d\mathbold{p}}{d\lambda}, \hat{\mathbold{\varepsilon}}>\} = \\
+=\frac{2s}{dor^2}\{\frac{1}{dor}[3\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + 4a]tr(\frac{d\mathbold{S}}{d\lambda}) + \hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2}) +b+c\}$
+
+\paragraph{Useful side computations}
+\begin{enumerate}
+	\item $ \frac{d\mathbold{h}}{d\lambda} = -2\boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \mathbf{f} = -2\boldsymbol{\Psi} \textbf{K} \textbf{k}$
+\end{enumerate}
+
+\paragraph{Redefined factors}
+\begin{enumerate}
+	\item $b = <\mathbold{p},\mathbold{Q}\mathbold{p}>$
+	\item $c = <\frac{d\mathbold{p}}{d\lambda}, \hat{\mathbold{\varepsilon}}> $
+\end{enumerate}
+
 
 \chapter{Forcing term and nonhomogeneous Dirichlet}
 Define $GCV_{homo}$ the computation of the GCV in the homogeneous case
