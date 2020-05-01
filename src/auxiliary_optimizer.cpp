@@ -89,7 +89,6 @@ void AuxiliaryOptimizer::set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const Ve
         E = ((*psi_tp)*(*Ap).asDiagonal());
 }
 
-
 void AuxiliaryOptimizer::set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp)
 {
         z_hat = ((*Hp)+(*Qp)*S)*(*zp);

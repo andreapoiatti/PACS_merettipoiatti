@@ -107,10 +107,9 @@ struct AuxiliaryData<InputCarrier, typename std::enable_if<std::is_same<multi_bo
                 Real     c_;                            //!< Stores <eps_hat, ddS*z>
                 VectorXr f_;
                 VectorXr g_;
-                VectorXr k_;
-                VectorXr r_;
                 VectorXr h_;
                 VectorXr p_;
+                VectorXr r_;
 
         void left_multiply_by_psi(const InputCarrier & carrier, VectorXr & ret, const VectorXr & vec);
 };
@@ -138,7 +137,6 @@ void AuxiliaryData<InputCarrier, typename std::enable_if<std::is_same<multi_bool
 
 struct AuxiliaryOptimizer
 {
-
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_R_setter(MatrixXr & R, const InputCarrier & carrier, AuxiliaryData<InputCarrier> & adt);
@@ -186,6 +184,7 @@ struct AuxiliaryOptimizer
         static void set_E_W_a(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap);
         static void set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const VectorXr * Ap);
         /* -------------------------------------------------------------------*/
+
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
@@ -193,6 +192,9 @@ struct AuxiliaryOptimizer
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
                 universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
+
+        template<typename InputCarrier>
+        static void common_z_hat_part(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S);
 
         static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp);
         static void set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp);
@@ -238,7 +240,6 @@ struct AuxiliaryOptimizer
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<t_type,t_type>::value, Real>::type
                 universal_GCV_dd(const AuxiliaryData<InputCarrier> & adt, const Real s, const Real sigma_hat_sq, const Real dor, const Real trdS, const Real trddS);
-
 };
 
 template<typename InputCarrier>
@@ -426,17 +427,7 @@ template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
         AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
         {
-                const VectorXr * zp = carrier.get_zp();
-                if(carrier.has_W())
-                {
-                        const MatrixXr * Hp = carrier.get_Hp();
-                        const MatrixXr * Qp = carrier.get_Qp();
-                        AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, Qp, S, zp);
-                }
-                else
-                {
-                        AuxiliaryOptimizer::set_z_hat_nW(z_hat, S, zp);
-                }
+                common_z_hat_part(z_hat, carrier, S);
 
                 adt.left_multiply_by_psi(carrier, adt.r_, adt.g_);
 
@@ -459,20 +450,26 @@ template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
         AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
         {
-                const VectorXr * zp = carrier.get_zp();
-                if(carrier.has_W())
-                {
-                        const MatrixXr * Hp = carrier.get_Hp();
-                        const MatrixXr * Qp = carrier.get_Qp();
-                        AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, Qp, S, zp);
-                }
-                else
-                {
-                        AuxiliaryOptimizer::set_z_hat_nW(z_hat, S, zp);
-                }
+                common_z_hat_part(z_hat, carrier, S);
 
                 return 0;
         }
+
+template<typename InputCarrier>
+void AuxiliaryOptimizer::common_z_hat_part(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S)
+{
+        const VectorXr * zp = carrier.get_zp();
+        if(carrier.has_W())
+        {
+                const MatrixXr * Hp = carrier.get_Hp();
+                const MatrixXr * Qp = carrier.get_Qp();
+                AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, Qp, S, zp);
+        }
+        else
+        {
+                AuxiliaryOptimizer::set_z_hat_nW(z_hat, S, zp);
+        }
+}
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
@@ -510,9 +507,13 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
         {
                 const VectorXr * zp = carrier.get_zp();
                 adt.t_ = dS*(*zp);
-                adt.k_ = adt.K_*adt.g_;
-                adt.left_multiply_by_psi(carrier, adt.h_, adt.k_);
-                adt.p_ = lambda*adt.h_-adt.r_/lambda-adt.t_;
+                MatrixXr temp = lambda*adt.K_;
+                for (UInt i=0; i<temp.cols(); i++)
+                {
+                        temp.coeffRef(i,i) -= 1;
+                }
+                adt.h_ = temp*adt.g_;
+                adt.left_multiply_by_psi(carrier, adt.p_, adt.h_);
                 adt.a_ = eps.transpose()*adt.p_;  // note different from previous case!!
 
                 return 0;
@@ -539,16 +540,10 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
                 else
                         adt.b_ = adt.p_.squaredNorm();
 
-                VectorXr dh;
-                adt.left_multiply_by_psi(carrier, dh, adt.K_*adt.k_);
-                dh = 2*dh;
+                VectorXr aux;
+                adt.left_multiply_by_psi(carrier, aux, -2*adt.K_*adt.h_);
 
-                adt.c_ = eps.transpose()*(-ddS*(*zp) + adt.r_/Real(lambda*lambda) + adt.h_ + lambda*dh);
-
-                if (carrier.has_W())
-                        adt.c_ += eps.transpose()*(*carrier.get_Qp())*dh;
-                else
-                        adt.c_ += eps.transpose()*dh;
+                adt.c_ = eps.transpose()*(-ddS*(*zp) + aux);
 
                 return 0;
         }

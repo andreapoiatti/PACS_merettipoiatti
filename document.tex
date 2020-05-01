@@ -113,7 +113,7 @@ $\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) =
 \section{GCV-I-derivative}
 $ \frac{dGCV}{d\lambda}(\lambda) = \frac{d(s\frac{SS_{res}(\lambda)}{dor^2(\lambda)})}{d\lambda} = s (\frac{dSS_{res}}{d\lambda}\frac{1}{dor^2} + SS_{res}\frac{d(dor^{-2})}{d\lambda}) $\\
 \\
-$[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\mathbold{\varepsilon}}> )}{d\lambda} = 2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\hat{\mathbold{\varepsilon}}> = 2 < \frac{d((\mathbold{Q}-\mathbold{Q}\mathbold{S})\mathbold{z}-\mathbf{r})}{d\lambda}, \hat{\mathbold{\varepsilon}}> = -2<\mathbold{Q}(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}), \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}\in Sym}{=}\\ -2<\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda},\mathbold{Q} \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}^2 = \mathbold{Q}}{=} 2<\lambda \boldsymbol{h} -(\frac{\mathbf{s}}{\lambda} +\mathbf{t}), \hat{\mathbold{\varepsilon}}> = 2a$\\
+$[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\mathbold{\varepsilon}}> )}{d\lambda} = 2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\hat{\mathbold{\varepsilon}}> = 2 < \frac{d((\mathbold{Q}-\mathbold{Q}\mathbold{S})\mathbold{z}-\mathbf{r})}{d\lambda}, \hat{\mathbold{\varepsilon}}> = -2<\mathbold{Q}(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}), \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}\in Sym}{=}\\ -2<\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda},\mathbold{Q} \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}^2 = \mathbold{Q}}{=} 2<\mathbold{\Psi}\mathbold{h}  +\mathbold{t}, \hat{\mathbold{\varepsilon}}> = 2a$\\
 \\
 $[2]= \frac{d(dor^{-2})}{d\lambda} = -2\frac{1}{dor^3}\frac{d(dor)}{d\lambda} = -2\frac{1}{dor^3}\frac{d(s-q-tr(\mathbold{S}))}{d\lambda} = 2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})$\\
 \\
@@ -121,18 +121,17 @@ $\implies \frac{dGCV}{d\lambda}(\lambda) = s (\frac{2a}{dor^2} + SS_{res}\frac{2
 
 \paragraph{Useful side computations}
 \begin{enumerate}
-	\item $ \frac{d\mathbold{s}}{d\lambda} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} =\frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{K}\mathbf{g} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{\Psi} \textbf{k} = \frac{\mathbf{s}}{\lambda} - \lambda \boldsymbol{h} $
+	\item $ \mathbf{s} = \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda\boldsymbol{\Psi}\mathbf{g} $
+	\item $ \mathbf{r} = \lambda \textbf{Q}\boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda \textbf{Q}\boldsymbol{\Psi}\mathbf{g} = \textbf{Q}\mathbf{s}$
+	\item $ \frac{d\mathbold{s}}{d\lambda} = \boldsymbol{\Psi}\mathbf{g} - \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} =\boldsymbol{\Psi}\mathbf{g} - \lambda \boldsymbol{\Psi} \textbf{K}\mathbf{g} = \boldsymbol{\Psi}(\mathbf{I}-\lambda\mathbf{K})\mathbf{g} $
 \end{enumerate}
 
 \paragraph{Useful stored factors}
 \begin{enumerate}
 	\item $ \mathbf{f} = \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} $
 	\item $ \mathbf{g} = \textbf{T}^{-1}\textbf{f} $
-	\item $ \mathbf{k} = \textbf{K}\mathbf{g}$
-	\item $ \mathbf{h} = \boldsymbol{\Psi}\mathbf{k}$
-	\item $ \mathbf{s} = \lambda \boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda \boldsymbol{\Psi}\mathbf{g} $
-	\item $ \mathbf{r} = \lambda \textbf{Q}\boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} = \lambda \textbf{Q}\boldsymbol{\Psi}\mathbf{g} = \textbf{Q}\mathbf{s}$
-	\item $\mathbf{p} = \lambda \boldsymbol{h} -(\frac{\mathbf{s}}{\lambda} +\mathbf{t}) $
+	\item $ \mathbf{h} = (\lambda\mathbf{K}-\mathbf{I})\mathbf{g} $
+	\item $ \mathbf{p} = -(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}) =  \boldsymbol{\Psi}\mathbf{h}  +\mathbf{t} $
 \end{enumerate}
 
 \paragraph{Redefined factors}
@@ -150,7 +149,7 @@ $ [2] = \frac{1}{dor^2}\frac{d(\hat{\sigma}^2)}{d\lambda}tr(\frac{d\mathbold{S}}
 \\
 $ [3] =  \frac{1}{dor^2}\hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2})$\\
 \\
-$ [4] = \frac{1}{dor^2}<\frac{d\mathbold{p}}{d\lambda}, \hat{\mathbold{\varepsilon}}> =  \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z} + \frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h} + \lambda \frac{d\boldsymbol{h}}{d\lambda} - \frac{1}{\lambda}\frac{d\boldsymbol{s}}{d\lambda}, \hat{\mathbold{\varepsilon}}> =\\ \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z} + \frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h} -2\lambda\boldsymbol{\Psi} \textbf{K} \textbf{k} -\frac{\boldsymbol{s}}{\lambda^2} + \boldsymbol{h}, \hat{\mathbold{\varepsilon}}> = \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}  + 2\boldsymbol{h} -2\lambda\boldsymbol{\Psi} \textbf{K} \textbf{k}, \hat{\mathbold{\varepsilon}}> $\\
+$ [4] = \frac{1}{dor^2}<\frac{d\mathbold{p}}{d\lambda}, \hat{\mathbold{\varepsilon}}> =  \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z} -\frac{d^2\mathbold{s}}{d\lambda^2}, \hat{\mathbold{\varepsilon}}> =  \frac{1}{dor^2}<-\frac{d^2\mathbold{S}}{d\lambda^2}\mathbold{z}  -2\boldsymbol{\Psi} \textbf{K} \textbf{h}, \hat{\mathbold{\varepsilon}}> $\\
 \\
 $ [5] =  \frac{1}{dor^2}<\mathbold{p}, \frac{d\hat{\mathbold{\varepsilon}}}{d\lambda}> = \frac{1}{dor^2}<\mathbold{p},\mathbold{Q}\mathbold{p}>$\\
 \\
@@ -160,7 +159,7 @@ $\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) =
 
 \paragraph{Useful side computations}
 \begin{enumerate}
-	\item $ \frac{d\mathbold{h}}{d\lambda} = -2\boldsymbol{\Psi} \textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \textbf{R}\textbf{T}^{-1} \mathbf{f} = -2\boldsymbol{\Psi} \textbf{K} \textbf{k}$
+	\item $ \frac{d\mathbold{h}}{d\lambda} = -2\textbf{K} \textbf{h}$
 \end{enumerate}
 
 \paragraph{Redefined factors}
