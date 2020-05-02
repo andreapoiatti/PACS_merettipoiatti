@@ -77,11 +77,7 @@ void MixedFERegressionBase<InputHandler, Integrator, ORDER, mydim, ndim>::setPsi
 			if(tri_activated.getId() == Identifier::NVAL)
 			{
 				// If not found
-				#ifdef R_VERSION_
 				Rprintf("ERROR: Point %d is not in the domain, remove point and re-perform smoothing\n", i+1);
-				#else
-				std::cout << "ERROR: Point " << i+1 <<" is not in the domain\n";
-				#endif
 			}
 			else
 			{
@@ -524,11 +520,7 @@ public:
 	{
 		if(mydim!=2 || ndim !=2)
 		{
-			#ifdef R_VERSION_
 				Rprintf("ERROR: these dimensions are not yet implemented, for the moment smoothEllipticPDE is available for mydim=ndim=2");
-			#else
-				std::cout << "ERROR: these dimensions are not yet implemented, for the moment smoothEllipticPDE is available for mydim=ndim=2\n";
-			#endif
 		}
 		else
 		{
@@ -556,11 +548,7 @@ public:
 	{
 		if(mydim!=2 || ndim !=2)
 		{
-			#ifdef R_VERSION_
 				Rprintf("ERROR: these dimensions are not yet implemented, for the moment smoothEllipticPDE is available for mydim=ndim=2");
-			#else
-				std::cout << "ERROR: these dimensions are not yet implemented, for the moment smoothEllipticPDE is available for mydim=ndim=2\n";
-			#endif
 		}
 		else
 		{
@@ -573,7 +561,7 @@ public:
 			const Advection & b = this->regressionData_.getBeta();
 			const ForcingTerm & u= this->regressionData_.getU();
 
-			this->isSpaceVarying = TRUE;
+			this->isSpaceVarying = true;
 
 			MixedFERegressionBase<RegressionDataEllipticSpaceVarying, Integrator, ORDER, mydim, ndim>::preapply(c*mass+stiff[K]+dot(b,grad), u);
 		}

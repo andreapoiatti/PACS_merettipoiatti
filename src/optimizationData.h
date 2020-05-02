@@ -23,6 +23,8 @@ class  OptimizationData
         public:
                 OptimizationData() = default;
 
+                OptimizationData(SEXP ROPTmethod, SEXP Rlambdas, SEXP Rinitial_lambda, SEXP Rnrealizations);
+
                 // Setters
                 inline void set_criterion_ (const std::string && criterion) {criterion_ = criterion;}
                 inline void set_evaluation_ (const std::string && evaluation) {evaluation_ = evaluation;}
@@ -42,7 +44,6 @@ class  OptimizationData
                 // Debugging
                 void print_opt_data(void) const;
 };
-
 
 
 //\param DOF an R boolean indicating whether dofs of the model have to be computed or not

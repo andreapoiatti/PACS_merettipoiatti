@@ -1,7 +1,5 @@
-#ifndef __REGRESSIONDATA_IMP_HPP__
-#define __REGRESSIONDATA_IMP_HPP__
-
 #include <numeric>
+#include "regressionData.h"
 
 RegressionData::RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, MatrixXr & covariates,
 	MatrixXi & incidenceMatrix, std::vector<UInt> & bc_indices, std::vector<Real> & bc_values):
@@ -37,7 +35,6 @@ RegressionDataEllipticSpaceVarying::RegressionDataEllipticSpaceVarying(std::vect
 {;}
 
 
-#ifdef R_VERSION_
 RegressionData::RegressionData(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues)
 {
 	setLocations(Rlocations);
@@ -177,7 +174,6 @@ void RegressionData::setIncidenceMatrix(SEXP RincidenceMatrix)
 	}
 }
 
-#endif
 
 void RegressionData::printObservations(std::ostream & out) const
 {
@@ -219,5 +215,3 @@ void RegressionData::printIncidenceMatrix(std::ostream & out) const
 		out << std::endl;
 	}
 }
-
-#endif

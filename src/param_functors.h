@@ -24,7 +24,6 @@ public:
 			K_(){};
 	Diffusivity(const std::vector<Eigen::Matrix<Real,2,2>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,2> > >& K):
 		K_(K){};
-	#ifdef R_VERSION_
 	Diffusivity(SEXP RGlobalVector)
 	{
 		UInt num_int_nodes = Rf_length(RGlobalVector)/4;
@@ -38,7 +37,6 @@ public:
 			}
 		}
 	}
-	#endif
 
 
 	Eigen::Matrix<Real,2,2> operator()(UInt globalNodeIndex, UInt ic1 = 0) const
@@ -53,7 +51,6 @@ class Advection : public virtual Function
 public:
 	Advection(const std::vector<Eigen::Matrix<Real,2,1>, Eigen::aligned_allocator<Eigen::Matrix<Real,2,1> > >& beta):
 		beta_(beta){};
-	#ifdef R_VERSION_
 	Advection(SEXP RGlobalVector)
 	{
 		UInt num_int_nodes = Rf_length(RGlobalVector)/2;
@@ -66,7 +63,7 @@ public:
 			}
 		}
 	}
-	#endif
+
 	Real operator() (UInt globalNodeIndex, UInt ic = 0) const
 	{
 		return beta_[globalNodeIndex][ic];
@@ -79,7 +76,6 @@ class Reaction : public virtual Function
 public:
 	Reaction(const std::vector<Real>& c, UInt ic = 0):
 		c_(c){};
-#ifdef R_VERSION_
 	Reaction(SEXP RGlobalVector)
 	{
 		UInt num_int_nodes = Rf_length(RGlobalVector);
@@ -89,7 +85,7 @@ public:
 					c_[l] = REAL(RGlobalVector)[l];
 		}
 	}
-	#endif
+
 	Real operator()(UInt globalNodeIndex, UInt ic = 0) const
 	{
 		return c_[globalNodeIndex];
@@ -102,7 +98,7 @@ class ForcingTerm : public virtual Function
 public:
 	ForcingTerm(const std::vector<Real>& u, UInt ic = 0):
 		u_(u){};
-	#ifdef R_VERSION_
+
 	ForcingTerm(SEXP RGlobalVector)
 	{
 		UInt num_int_nodes = Rf_length(RGlobalVector);
@@ -112,7 +108,7 @@ public:
 					u_[l] = REAL(RGlobalVector)[l];
 		}
 	}
-	#endif
+
 	Real operator()(UInt globalNodeIndex, UInt ic = 0) const
 	{
 		return u_[globalNodeIndex];

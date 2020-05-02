@@ -5,7 +5,6 @@
 #include<fstream>
 #include<sstream>
 
-#ifdef R_VERSION_
 template <UInt ORDER>
 MeshHandler<ORDER,2,2>::MeshHandler(SEXP mesh)
 {
@@ -20,7 +19,6 @@ MeshHandler<ORDER,2,2>::MeshHandler(SEXP mesh)
 	num_elements_ = INTEGER(Rf_getAttrib(VECTOR_ELT(mesh_, 3), R_DimSymbol))[0];
 
 }
-#endif
 
 template <UInt ORDER>
 Point MeshHandler<ORDER,2,2>::getPoint(Id id)
@@ -199,7 +197,6 @@ void MeshHandler<ORDER,2,2>::printNeighbors(std::ostream & out)
 //////////////////////////////////////////////////////////
 
 
-#ifdef R_VERSION_
 template <UInt ORDER>
 MeshHandler<ORDER,2,3>::MeshHandler(SEXP mesh)
 {
@@ -210,7 +207,6 @@ MeshHandler<ORDER,2,3>::MeshHandler(SEXP mesh)
 	elements_.assign(INTEGER(VECTOR_ELT(mesh_, 3)), INTEGER(VECTOR_ELT(mesh_, 3))+ 3*ORDER*num_elements_);
 
 }
-#endif
 
 
 template <UInt ORDER>
@@ -370,7 +366,6 @@ void MeshHandler<ORDER,2,3>::printElements(std::ostream & out)
 //////////////////////////////////////////////////////////
 
 
-#ifdef R_VERSION_
 template <UInt ORDER>
 MeshHandler<ORDER,3,3>::MeshHandler(SEXP mesh)
 {
@@ -381,7 +376,6 @@ MeshHandler<ORDER,3,3>::MeshHandler(SEXP mesh)
 	elements_.assign(INTEGER(VECTOR_ELT(mesh_, 3)), INTEGER(VECTOR_ELT(mesh_, 3))+ (6*ORDER-2)*num_elements_);
 
 }
-#endif
 
 
 template <UInt ORDER>

@@ -36,18 +36,15 @@ class  RegressionData
 		std::vector<Real> bc_values_;
 		std::vector<UInt> bc_indices_;
 
-		#ifdef R_VERSION_ // [[DEPRECAED??]]
 		void setLocations(SEXP Rlocations);
 		void setObservations(SEXP Robservations);
 		void setCovariates(SEXP Rcovariates);
 		void setIncidenceMatrix(SEXP RincidenceMatrix);
-		#endif
 
 	public:
 		//! A basic version of the constructor.
 		RegressionData(){};
 
-		#ifdef R_VERSION_
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
 			\param Rlocations an R-matrix containing the location of the observations.
@@ -63,7 +60,6 @@ class  RegressionData
 		*/
 		explicit RegressionData(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP Rcovariates, SEXP RincidenceMatrix,
 			SEXP RBCIndices, SEXP RBCValues);
-		#endif
 
 		explicit RegressionData(std::vector<Point> & locations, VectorXr & observations, UInt order, MatrixXr& covariates,
 			MatrixXi & incidenceMatrix, std::vector<UInt> & bc_indices, std::vector<Real>& bc_values);
@@ -106,7 +102,6 @@ class RegressionDataElliptic: public RegressionData
 		Real c_;
 
 	public:
-		#ifdef R_VERSION_
 		//! A complete version of the constructor.
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
@@ -124,7 +119,6 @@ class RegressionDataElliptic: public RegressionData
 		*/
 		explicit RegressionDataElliptic(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP RK, SEXP Rbeta,
 			SEXP Rc, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues);
-		#endif
 
 		explicit RegressionDataElliptic(std::vector<Point> & locations, VectorXr & observations, UInt order,
 			Eigen::Matrix<Real,2,2> & K, Eigen::Matrix<Real,2,1> & beta, Real c, MatrixXr & covariates,
@@ -144,7 +138,6 @@ class RegressionDataEllipticSpaceVarying: public RegressionData
 		ForcingTerm u_;
 
 	public:
-		#ifdef R_VERSION_
 		//! A complete version of the constructor.
 		/*!
 			It initializes the object storing the R given objects. This is the simplest of the two possible interfaces with R
@@ -164,7 +157,6 @@ class RegressionDataEllipticSpaceVarying: public RegressionData
 		*/
 		explicit RegressionDataEllipticSpaceVarying(SEXP Rlocations, SEXP Robservations, SEXP Rorder, SEXP RK, SEXP Rbeta, SEXP Rc,
 			 SEXP Ru, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues);
-		#endif
 
 
 		explicit RegressionDataEllipticSpaceVarying(std::vector<Point> & locations, VectorXr & observations, UInt order,
@@ -180,7 +172,5 @@ class RegressionDataEllipticSpaceVarying: public RegressionData
 
 		void print(std::ostream & out) const;
 };
-
-#include "regressionData_imp.h"
 
 #endif

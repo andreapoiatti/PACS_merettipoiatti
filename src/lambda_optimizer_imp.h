@@ -316,12 +316,8 @@ Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
         Real GCV_val =
                 AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
 
-	#ifdef R_VERSION_
                 Rprintf("LAMBDA = %f\n",lambda);
 	        Rprintf("GCV = %f\n",GCV_val);
-	#else
-		std::cout << "GCV value =" << GCV_val << std::endl;
-	#endif
 
 	return GCV_val;
 }
@@ -341,11 +337,8 @@ Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
 	Real GCV_der_val =
                 AuxiliaryOptimizer::universal_GCV_d<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_);
 
-	#ifdef R_VERSION_
 		Rprintf("GCV_derivative = %f\n", GCV_der_val);
-	#else
-		std::cout << "GCV_derivative value = " << GCV_der_val << std::endl;
-	#endif
+
 
 	return GCV_der_val;
 }
@@ -359,11 +352,7 @@ Real GCV_Family<InputCarrier, 1>::compute_fs(Real lambda)
 	Real GCV_sec_der_val =
                 AuxiliaryOptimizer::universal_GCV_dd<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_, this->trddS_);
 
-	#ifdef R_VERSION_
 		Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
-	#else
-		std::cout << "GCV_second_derivative value = " << GCV_sec_der_val << std::endl;
-	#endif
 
 	return GCV_sec_der_val;
 }
@@ -391,13 +380,7 @@ void GCV_Exact<InputCarrier, 1>::update_dor(Real lambda)
 
         if (this->dor < 0)   // Just in case of bad computation
         {
-                #ifdef R_VERSION_
                               Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
-                #else
-                              std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. " <<
-                                            "This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. " <<
-                                            "Value of 'lambda' that produces an error is:" << lambda <<"\n";
-                #endif
         }
 }
 
@@ -471,13 +454,7 @@ void GCV_Stochastic<InputCarrier, 1>::update_dor(Real lambda)
 
         if (this->dor < 0)   // Just in case of bad computation
         {
-                #ifdef R_VERSION_
                               Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
-                #else
-                              std::cout << "WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. " <<
-                                            "This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. " <<
-                                            "Value of 'lambda' that produces an error is:" << lambda <<"\n";
-                #endif
         }
 }
 

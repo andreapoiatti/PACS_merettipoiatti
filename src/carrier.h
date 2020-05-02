@@ -46,7 +46,7 @@ class Carrier: public Extensions...
                 Carrier(Bricks && ... ext): Extensions(std::forward<Bricks>(ext))...{};
 
 
-                void set_all(Origin * trace_, const OptimizationData * opt_data_,
+                inline void set_all(Origin * trace_, const OptimizationData * opt_data_,
                         bool locations_are_nodes_, bool has_covariates_, UInt n_obs_, const std::vector<UInt> * obs_indicesp_,
                         const VectorXr * zp_, const MatrixXr * Wp_, const MatrixXr * Hp_, const MatrixXr * Qp_,
                         const SpMat * R1p_, const SpMat * R0p_, const SpMat * psip_, const SpMat * psi_tp_)
@@ -119,7 +119,7 @@ class Areal
                 Areal() = default;
                 Areal(UInt n_regions_, const VectorXr * Ap_):n_regions(n_regions_), Ap(Ap_) {};
 
-                void set_all_areal(UInt n_regions_, const VectorXr * Ap_)
+                inline void set_all_areal(UInt n_regions_, const VectorXr * Ap_)
                 {
                         set_n_regions(n_regions_);
                         set_Ap(Ap_);
@@ -136,23 +136,23 @@ class Areal
 
 class Forced
 {
-private:
-        const VectorXr * up;
+        private:
+                const VectorXr * up;
 
-public:
-        Forced() = default;
-        Forced(const VectorXr * up_): up(up_) {};
+        public:
+                Forced() = default;
+                Forced(const VectorXr * up_): up(up_) {};
 
-        void set_all_forced(const VectorXr * up_)
-        {
-                set_up(up_);
-        }
+                inline void set_all_forced(const VectorXr * up_)
+                {
+                        set_up(up_);
+                }
 
-        // Getters
-        inline const VectorXr * get_up(void) const {return this->up;}
+                // Getters
+                inline const VectorXr * get_up(void) const {return this->up;}
 
-        // Setters
-        inline void set_up(const VectorXr * up_) {this->up = up_;}
+                // Setters
+                inline void set_up(const VectorXr * up_) {this->up = up_;}
 };
 
 class Temporal

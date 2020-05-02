@@ -1,11 +1,14 @@
+#ifndef __TIMING_HPP__
+#define __TIMING_HPP__
+
 #include <iostream>
 #include <iomanip>
 #include <ctime>
 #include <R.h>
 #include <Rdefines.h>
-#include <Rinternals.h> 
+#include <Rinternals.h>
 
-//! a class to measure the code performance in terms of time 
+//! a class to measure the code performance in terms of time
 class timer {
 public:
   void start() {
@@ -15,7 +18,7 @@ public:
   timespec stop() {
     timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
-    
+
     timespec difference = diff(begin, end);
     Rprintf("It took %u.%09us\n", difference.tv_sec, difference.tv_nsec);
 //    std::cout << "It took " << difference.tv_sec << "."
@@ -40,3 +43,5 @@ private:
 private:
   timespec begin;
 };
+
+#endif

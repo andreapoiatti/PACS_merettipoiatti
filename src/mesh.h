@@ -32,9 +32,7 @@ public:
     MeshHandler(Real* points, UInt* edges, UInt* triangles, UInt* neighbors, UInt num_nodes, UInt num_edges, UInt num_triangles):
 			points_(points), edges_(edges), elements_(triangles), neighbors_(neighbors), num_nodes_(num_nodes), num_edges_(num_edges), num_elements_(num_triangles) {};
 
-    #ifdef R_VERSION_
 	MeshHandler(SEXP Rmesh);
-	#endif
 
 	~MeshHandler(){};
 
@@ -79,9 +77,9 @@ public:
 
     //! A normal member returning an Element
     /*!
-     * \param id an Id argument 
+     * \param id an Id argument
       \return The element with order coerent to that of the mesh with the specified id
-    */ 
+    */
     Element<3*ORDER,2,2>  getElement(Id id) const;
 
     //The "number" neighbor of element i is opposite the "number" corner of element i
@@ -126,9 +124,7 @@ public:
 
 
 private:
-	#ifdef R_VERSION_
 	SEXP mesh_;
-	#endif
 	Real *points_;
 	UInt *edges_;
 	UInt *elements_;
@@ -152,7 +148,7 @@ class MeshHandler<ORDER,2,3> {
 public:
 	typedef int UInt;
 	//! A constructor.
-    
+
     MeshHandler(Real* points, UInt* triangles, UInt num_nodes, UInt num_triangles)
 	{
 	  num_nodes_=num_nodes;
@@ -160,30 +156,28 @@ public:
 	  points_.assign(points, points+3*num_nodes_);
 	  elements_.assign(triangles, triangles+3*ORDER*num_elements_);
 	};
-	
+
 	//! A constructor.
     /*!
       * The constructor permits the initialization of the mesh from a .csv file, useful for
       * debugging purposes
     */
-	
+
     MeshHandler(std::string &filename){
 
        if(filename.find(".csv") != std::string::npos){
        		importfromCSV(filename);
        }
     }
-	
+
 
     void importfromCSV(std::string &filename);
-	
+
 	//! A constructor.
     /*!
       * The constructor permits the initialization of the mesh from an R object
     */
-    #ifdef R_VERSION_
 	MeshHandler(SEXP Rmesh);
-	#endif
 
 	~MeshHandler(){};
 
@@ -215,7 +209,7 @@ public:
 
     void printPoints(std::ostream & out);
     void printElements(std::ostream & out);
-   
+
 
      //! A normal member returning the element on which a point is located
     /*!
@@ -234,9 +228,7 @@ public:
 
 
 private:
-	#ifdef R_VERSION_
 	SEXP mesh_;
-	#endif
 
 	std::vector<Real> points_;
 	std::vector<UInt> elements_;
@@ -259,7 +251,7 @@ class MeshHandler<ORDER,3,3> {
 public:
 	typedef int UInt;
 	//! A constructor.
-    
+
     MeshHandler(Real* points, UInt* tetrahedrons, UInt num_nodes, UInt num_tetrahedrons)
 	{
 		num_nodes_=num_nodes;
@@ -267,14 +259,12 @@ public:
 		points_.assign(points, points+3*num_nodes_);
 		elements_.assign(tetrahedrons, tetrahedrons+(6*ORDER-2)*num_elements_);
 	};
-	
+
 	//! A constructor.
     /*!
       * The constructor permits the initialization of the mesh from an R object
     */
-    #ifdef R_VERSION_
 	MeshHandler(SEXP Rmesh);
-	#endif
 
 	~MeshHandler(){};
 
@@ -306,7 +296,7 @@ public:
 
     void printPoints(std::ostream & out);
     void printElements(std::ostream & out);
-   
+
 
      //! A normal member returning the element on which a point is located
     /*!
@@ -325,9 +315,7 @@ public:
 
 
 private:
-	#ifdef R_VERSION_
 	SEXP mesh_;
-	#endif
 
 	std::vector<Real> points_;
 	std::vector<UInt> elements_;

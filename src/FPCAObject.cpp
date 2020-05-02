@@ -1,13 +1,11 @@
-#ifndef __FPCAOBJECT_IMP_HPP__
-#define __FPCAOBJECT_IMP_HPP__
-
-#include<chrono>
+#include <chrono>
+#include "FPCAObject.h"
 
 FPCAObject::FPCAObject(const MatrixXr& datamatrix_)
 {
 	//Initialize loadings vector
 	Eigen::JacobiSVD<MatrixXr> svd(datamatrix_, Eigen::ComputeThinU | Eigen::ComputeThinV);
-		
+
 	loadings_=svd.matrixV().col(0);
 	scores_=svd.matrixU().col(0); // (U * S)[:,1] / ||(U * S)[:,1]|| where X = USV^T
 }
@@ -60,7 +58,7 @@ void FPCAObject::setObservationData(const MatrixXr& datamatrix_)
 }
 
 void FPCAObject::setLoadingsPsi(UInt nnodes, const VectorXr& f_sol, const SpMat& psi_)
-{	
+{
 	//VectorXr load_=psi_.transpose()*f_sol.topRows(nnodes); dimensioni incompatibili
 	VectorXr load_=psi_*f_sol.topRows(nnodes); // dimensioni qui dovrebbero essere giuste
 
@@ -81,6 +79,3 @@ void FPCAObject::finalizeLoadings(const std::vector<UInt>& obs_indices,UInt nloc
 		finalize_(obs_indices[i])=loadings_(i);
 	loadings_=finalize_;
 }
-
-#endif
-
