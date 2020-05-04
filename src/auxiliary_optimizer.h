@@ -247,10 +247,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
         AuxiliaryOptimizer::universal_R_setter(MatrixXr & R, const InputCarrier & carrier, AuxiliaryData<InputCarrier> & adt)
         {
                 const SpMat * R1p_= carrier.get_R1p();         // Get the value of matrix R1
-                Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
-                solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-                R = (*R1p_).transpose()*solver.solve(*R1p_);            // R == _R1^t*R0^{-1}*R1
-                adt.f_ = ((*R1p_).transpose())*solver.solve(*carrier.get_up());
+                //Sparse_LU solver;
+                Eigen::LLT<MatrixXr> factorized_R0p(MatrixXr(*(carrier.get_R0p())));	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
+                //solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
+                R = (*R1p_).transpose()*factorized_R0p.solve(MatrixXr(*R1p_));            // R == _R1^t*R0^{-1}*R1
+                adt.f_ = ((*R1p_).transpose())*factorized_R0p.solve((MatrixXr(*carrier.get_up())));
 
                 return 0;
         }
@@ -260,9 +261,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
         AuxiliaryOptimizer::universal_R_setter(MatrixXr & R, const InputCarrier & carrier, AuxiliaryData<InputCarrier> & adt)
         {
                 const SpMat * R1p_= carrier.get_R1p();         // Get the value of matrix R1
-                Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
-                solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-                R = (*R1p_).transpose()*solver.solve(*R1p_);            // R == _R1^t*R0^{-1}*R1
+                //Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
+                //solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
+                Eigen::LLT<MatrixXr> factorized_R0p(MatrixXr(*(carrier.get_R0p())));
+
+                R = (*R1p_).transpose()*factorized_R0p.solve(MatrixXr(*R1p_));            // R == _R1^t*R0^{-1}*R1
 
                 return 0;
         }

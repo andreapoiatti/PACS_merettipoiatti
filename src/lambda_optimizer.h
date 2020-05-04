@@ -120,17 +120,16 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                         Lambda_optimizer<InputCarrier, 1>(the_carrier_)
                         {
                                 this->gu.initialize(std::vector<Real>{-1.,-1.,-1.});
-                                compute_s();
-                                set_R_();
+                                this->compute_s();
+
                         }
 
                 //! Initial guess about lambda
                 GCV_Family<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
                         Lambda_optimizer<InputCarrier, 1>(the_carrier_)
                         {
-                                compute_s();
-                                set_R_();
-                                update_family(lambda0);
+                                this->compute_s();
+                                this->update_family(lambda0);
                                 this->gu.initialize(std::vector<Real>{lambda0,-1.,-1.});
                         }
 
@@ -173,13 +172,16 @@ class GCV_Exact<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
 
         public:
                 GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_):
-                        GCV_Family<InputCarrier, 1>(the_carrier_) {}
+                        GCV_Family<InputCarrier, 1>(the_carrier_) {
+                                this->set_R_();
+                        }
 
                 GCV_Exact<InputCarrier, 1>(InputCarrier & the_carrier_, Real lambda0):
                         GCV_Family<InputCarrier, 1>(the_carrier_, lambda0)
                         {
-                                update_dof(lambda0);
-                                update_dor(lambda0);
+                                this->update_dor(lambda0);
+                                this->update_dof(lambda0);
+                                this->set_R_();
                         }
 
                 void update_parameters(Real lambda) override;

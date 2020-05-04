@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include "timing.h"
 
 // *** GCV-based ***
 // Setters
@@ -40,7 +41,13 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_R_(void)
 {
+timer Time_partial_n;
+		Time_partial_n.start();
+
+		Rprintf("WARNING: start taking time to build R inverse_news \n");
         const UInt ret =  AuxiliaryOptimizer::universal_R_setter<InputCarrier>(this->R_, this->the_carrier, this->adt);
+  Rprintf("WARNING: partial time after the building R inverse_news\n");
+	timespec T_n = Time_partial_n.stop();
 }
 
 //! Method to set the value of member SpMat T_
@@ -399,7 +406,7 @@ void GCV_Exact<InputCarrier, 1>::update_parameters(Real lambda)
 template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
 {
-	UInt nnodes    = this->R_.rows();
+	UInt nnodes    = this->the_carrier.get_R0p()->rows();
         UInt nr        = this->the_carrier.get_opt_data()->get_nrealizations_();
 
         if(this->us == false)
@@ -463,7 +470,7 @@ void GCV_Stochastic<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
         this->the_carrier.get_tracep()->apply(lambda);
 
-        const UInt nnodes    = this->R_.rows();
+        const UInt nnodes    = this->the_carrier.get_R0p()->rows();;
         const VectorXr f_hat = this->the_carrier.get_tracep()->getSolution().head(nnodes);
 
 

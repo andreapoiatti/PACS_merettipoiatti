@@ -28,9 +28,17 @@ SEXP regression_skeleton(InputHandler & regressionData, SEXP Rmesh, Optimization
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
 
+        timer Time_partial_JJ;
+	Time_partial_JJ.start();
+        Rprintf("WARNING: start taking time JJ is the matter\n");
 	// Build the mixer
 	MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim> regression(mesh,regressionData,optimizationData);
 	regression.preapply();
+	Rprintf("WARNING: JJ is the matter done\n");
+        timespec T_JJ = Time_partial_JJ.stop();
+        
+
+
 
 	//Build the carrier
 	if(regression.check_is_space_varying())
@@ -95,11 +103,17 @@ SEXP optimizer_method_selection(CarrierType & carrier)
 
 template<typename EvaluationType, typename CarrierType>
 SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
-{
+{         timer Time_partial_n;
+		Time_partial_n.start();
+
+		Rprintf("WARNING: start taking time to build newton method\n");
 	// Build wraper and newton method
 	Function_Wrapper<Real, Real, Real, Real, EvaluationType> Fun(optim);
 	typedef Function_Wrapper<Real, Real, Real, Real, EvaluationType> FunWr;
 
+        Rprintf("WARNING: partial time after the building newton method\n");
+		timespec T_n = Time_partial_n.stop();
+ 
 	const OptimizationData * optr = carrier.get_opt_data();
 	if(optr->get_criterion_() == "batch")
 	{       timer Time_partial;
@@ -122,11 +136,16 @@ SEXP optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
                 return Solution_builders::GCV_batch_sol(solution, output_vec, T);
 	}
 	else
-	{
+	{      
+
+
 		std::unique_ptr<Opt_methods<Real,Real,EvaluationType>> optim_p =
 			Opt_method_factory<FunWr, Real, Real, EvaluationType>::create_Opt_method(optr->get_criterion_(), Fun);
 
-		// Compute optimal lambda
+		
+
+
+                // Compute optimal lambda
 		Checker ch;
 		Real lambda = optr->get_initial_lambda_();
 		if(lambda <=0)
