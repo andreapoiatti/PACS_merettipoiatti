@@ -464,6 +464,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
                 }
                 adt.h_ = temp*adt.g_;
                 adt.left_multiply_by_psi(carrier, adt.p_, adt.h_);
+                adt.p_ -= adt.t_;
                 adt.a_ = eps.transpose()*adt.p_;  // note different from previous case!!
 
                 return 0;

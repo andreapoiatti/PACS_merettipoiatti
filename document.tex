@@ -113,7 +113,7 @@ $\implies  \frac{d^2GCV}{d\lambda^2}(\lambda) =
 \section{GCV-I-derivative}
 $ \frac{dGCV}{d\lambda}(\lambda) = \frac{d(s\frac{SS_{res}(\lambda)}{dor^2(\lambda)})}{d\lambda} = s (\frac{dSS_{res}}{d\lambda}\frac{1}{dor^2} + SS_{res}\frac{d(dor^{-2})}{d\lambda}) $\\
 \\
-$[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\mathbold{\varepsilon}}> )}{d\lambda} = 2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\hat{\mathbold{\varepsilon}}> = 2 < \frac{d((\mathbold{Q}-\mathbold{Q}\mathbold{S})\mathbold{z}-\mathbf{r})}{d\lambda}, \hat{\mathbold{\varepsilon}}> = -2<\mathbold{Q}(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}), \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}\in Sym}{=}\\ -2<\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda},\mathbold{Q} \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}^2 = \mathbold{Q}}{=} 2<\mathbold{\Psi}\mathbold{h}  +\mathbold{t}, \hat{\mathbold{\varepsilon}}> = 2a$\\
+$[1] = \frac{dSS_{res}}{d\lambda} = \frac{d(<\hat{\mathbold{\varepsilon}},\hat{\mathbold{\varepsilon}}> )}{d\lambda} = 2<\frac{d\hat{\mathbold{\varepsilon}}}{d\lambda},\hat{\mathbold{\varepsilon}}> = 2 < \frac{d((\mathbold{Q}-\mathbold{Q}\mathbold{S})\mathbold{z}-\mathbf{r})}{d\lambda}, \hat{\mathbold{\varepsilon}}> = -2<\mathbold{Q}(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}), \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}\in Sym}{=}\\ -2<\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda},\mathbold{Q} \hat{\mathbold{\varepsilon}}> \overset{\mathbold{Q}^2 = \mathbold{Q}}{=} 2<\mathbold{\Psi}\mathbold{h} - \mathbold{t}, \hat{\mathbold{\varepsilon}}> = 2a$\\
 \\
 $[2]= \frac{d(dor^{-2})}{d\lambda} = -2\frac{1}{dor^3}\frac{d(dor)}{d\lambda} = -2\frac{1}{dor^3}\frac{d(s-q-tr(\mathbold{S}))}{d\lambda} = 2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})$\\
 \\
@@ -131,7 +131,7 @@ $\implies \frac{dGCV}{d\lambda}(\lambda) = s (\frac{2a}{dor^2} + SS_{res}\frac{2
 	\item $ \mathbf{f} = \textbf{R}_1^T\textbf{R}_0^{-1}\textbf{u} $
 	\item $ \mathbf{g} = \textbf{T}^{-1}\textbf{f} $
 	\item $ \mathbf{h} = (\lambda\mathbf{K}-\mathbf{I})\mathbf{g} $
-	\item $ \mathbf{p} = -(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}) =  \boldsymbol{\Psi}\mathbf{h}  +\mathbf{t} $
+	\item $ \mathbf{p} = -(\frac{d\mathbold{S}}{d\lambda}\mathbold{z} + \frac{d\mathbold{s}}{d\lambda}) =  \boldsymbol{\Psi}\mathbf{h}  -\mathbf{t} $
 \end{enumerate}
 
 \paragraph{Redefined factors}
@@ -145,7 +145,7 @@ $ \frac{d^2GCV}{d\lambda^2}(\lambda) = 2s\frac{d({dor}^{-2}(\hat{\sigma}^2tr(\fr
 \\
 $ [1] = \frac{d(dor^{-2})}{d\lambda}(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + <\boldsymbol{p}, \hat{\mathbold{\varepsilon}}>) =  2\frac{1}{dor^3}tr(\frac{d\mathbold{S}}{d\lambda})(\hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}) + <\boldsymbol{p}, \hat{\mathbold{\varepsilon}}>)$\\
 \\
-$ [2] = \frac{1}{dor^2}\frac{d(\hat{\sigma}^2)}{d\lambda}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{\frac{d(SS_{res})}{d\lambda}dor - SS_{res}\frac{d(dor)}{d\lambda}}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{<\mathbold{p}, \hat{\mathbold{\varepsilon}}>dor + SS_{res}tr(\frac{d\mathbold{S}}{d\lambda})}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^3}(2<\mathbold{p}, \hat{\mathbold{\varepsilon}}> + \hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}))tr(\frac{d\mathbold{S}}{d\lambda})$\\
+$ [2] = \frac{1}{dor^2}\frac{d(\hat{\sigma}^2)}{d\lambda}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{\frac{d(SS_{res})}{d\lambda}dor - SS_{res}\frac{d(dor)}{d\lambda}}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^2}\frac{2<\mathbold{p}, \hat{\mathbold{\varepsilon}}>dor + SS_{res}tr(\frac{d\mathbold{S}}{d\lambda})}{dor^2}tr(\frac{d\mathbold{S}}{d\lambda}) = \frac{1}{dor^3}(2<\mathbold{p}, \hat{\mathbold{\varepsilon}}> + \hat{\sigma}^2tr(\frac{d\mathbold{S}}{d\lambda}))tr(\frac{d\mathbold{S}}{d\lambda})$\\
 \\
 $ [3] =  \frac{1}{dor^2}\hat{\sigma}^2tr(\frac{d^2\mathbold{S}}{d\lambda^2})$\\
 \\
