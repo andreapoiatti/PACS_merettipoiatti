@@ -37,16 +37,77 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
         return this->output;
 }
 
+//! Utility to compute the predicted residuals in the locations
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::compute_eps_hat(void)
+{
+        this->eps_hat = (*this->the_carrier.get_zp())-this->z_hat;
+
+        // Debugging purpose
+        // Rprintf("Eps_hat \n");
+        // for(UInt i = 0; i < this->s; i++)
+        //        Rprintf("%f, ", this->eps_hat[i]);
+        // Rprintf("\n");
+}
+
+//! Utility to compute the sum of the squares of the residuals
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::compute_SS_res(void)
+{
+        this->SS_res = this->eps_hat.squaredNorm();
+
+        // Debugging purpose
+        // Rprintf("SS_res  = %f\n", this->SS_res);
+}
+
+//! Utility to compute the estimated variance of the error
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
+{
+        this->sigma_hat_sq = this->SS_res/Real(this->dor);
+
+        // Debugging purpose
+        // Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
+}
+
+//! Utility to compute the size of the model
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::compute_s(void)
+{
+        this->s = this->the_carrier.get_n_obs();
+}
+
+
+// Updaters
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::update_errors(Real lambda)
+{
+        this->compute_eps_hat();
+        this->compute_SS_res();
+        this->update_dof(lambda);
+        this->update_dor(lambda);
+        this->compute_sigma_hat_sq();
+}
 
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_R_(void)
+void GCV_Family<InputCarrier, 1>::zero_updater(Real lambda)
 {
-timer Time_partial_n;
-		Time_partial_n.start();
+        this->update_parameters(lambda);  // Update all parameters depending on lambda
+}
 
-		Rprintf("WARNING: start taking time to build R inverse_news \n");
+//----------------------------------------------------------------------------//
+// ** GCV_Exact **
+
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::set_R_(void)
+{
+        timer Time_partial_n;
+	Time_partial_n.start();
+
+        Rprintf("WARNING: start taking time to build R inverse_news \n");
         const UInt ret =  AuxiliaryOptimizer::universal_R_setter<InputCarrier>(this->R_, this->the_carrier, this->adt);
-  Rprintf("WARNING: partial time after the building R inverse_news\n");
+
+        Rprintf("WARNING: partial time after the building R inverse_news\n");
 	timespec T_n = Time_partial_n.stop();
 }
 
@@ -57,7 +118,7 @@ timer Time_partial_n;
  * /sa {set_R_(void), getDataMatrix(SpMat & DMat)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
+void GCV_Exact<InputCarrier, 1>::set_T_(Real lambda)
 {
         this->T_ = lambda*this->R_;
         const UInt ret =  AuxiliaryOptimizer::universal_T_setter<InputCarrier>(this->T_, this->the_carrier);
@@ -70,7 +131,7 @@ void GCV_Family<InputCarrier, 1>::set_T_(Real lambda)
  * /sa {set_T_(Real lambda)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_V_(void)
+void GCV_Exact<InputCarrier, 1>::set_V_(void)
 {
         const UInt ret =  AuxiliaryOptimizer::universal_V_setter<InputCarrier>(this->V_, this->T_, this->R_, this->the_carrier, this->adt);
 }
@@ -82,7 +143,7 @@ void GCV_Family<InputCarrier, 1>::set_V_(void)
  * /sa {set_V_(void)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_S_and_trS_(void)
+void GCV_Exact<InputCarrier, 1>::set_S_and_trS_(void)
 {
         // S = Psi*V
         this->trS_ = 0.0;
@@ -96,7 +157,7 @@ void GCV_Family<InputCarrier, 1>::set_S_and_trS_(void)
  * /sa {set_V_(void)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_dS_and_trdS_(void)
+void GCV_Exact<InputCarrier, 1>::set_dS_and_trdS_(void)
 {
         // dS_ = -Psi*(Psi^t*Q*Psi+lambda*R1^t*R0^-1*R1)^{-1}*R1^t*R0^{-1}*R1*(Psi^t*Q*Psi+lambda*R1^t*R0^{-1}*R1)^{-1}*Psi^t*Q
         //     = -Psi*T^{-1}*R*V
@@ -115,7 +176,7 @@ void GCV_Family<InputCarrier, 1>::set_dS_and_trdS_(void)
  * /sa {set_V_(void), set_dS_and_trdS_(void)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_ddS_and_trddS_(void)
+void GCV_Exact<InputCarrier, 1>::set_ddS_and_trddS_(void)
 {
         // ddS_ = -
         //      = -
@@ -136,7 +197,7 @@ void GCV_Family<InputCarrier, 1>::set_ddS_and_trddS_(void)
  * /sa {set_S_and_trS_(void), set_dS_and_trdS_(void), set_ddS_and_trddS_(void)}
  */
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, MatrixXr & ret, const MatrixXr & mat)
+void GCV_Exact<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, MatrixXr & ret, const MatrixXr & mat)
 {
         if (this->the_carrier.loc_are_nodes())
         {
@@ -152,11 +213,11 @@ void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, Matrix
                 // we reserve a vector containing such entries and
                 // we set the final matrix from these triplets
 
-                ret = MatrixXr::Zero(s,s);
+                ret = MatrixXr::Zero(this->s,this->s);
 
                 const std::vector<UInt> * kp = this->the_carrier.get_obs_indicesp();
-                for (UInt i = 0; i < s; i++)
-                        for (UInt j = 0; j < s; j++)
+                for (UInt i = 0; i < this->s; i++)
+                        for (UInt j = 0; j < this->s; j++)
                         {
                                 if (i == j)
                                 {
@@ -174,13 +235,146 @@ void GCV_Family<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, Matrix
         {
                 // Psi is full
                 ret = (*this->the_carrier.get_psip())*mat;
-                for (int i = 0; i < s; ++i)
+                for (int i = 0; i < this->s; ++i)
                         trace += ret.coeff(i, i);
         }
 }
 
+//! Utility to compute the predicted values in the locations
 template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::set_US_(void)
+void GCV_Exact<InputCarrier, 1>::compute_z_hat(Real lambda)
+{
+        UInt ret = AuxiliaryOptimizer::universal_z_hat_setter<InputCarrier>(this->z_hat, this->the_carrier, this->S_, this->adt, lambda);
+
+        // Debugging purpose
+        // Rprintf("z_hat: \n");
+        // for(int i = 0; i < 20; i++)
+        //        Rprintf("%f, ", this->z_hat[i]);
+	// Rprintf("\n");
+}
+
+
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::update_dof(Real lambda)
+{
+	this->dof = this->trS_;
+
+        if(this->the_carrier.has_W())
+                this->dof += (*this->the_carrier.get_Wp()).cols();
+
+        // Debugging purpose
+        // Rprintf("DOF: %f\n", this->dof);
+}
+
+//! Utility to compute the degrees of freedom of the residuals
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::update_dor(Real lambda)
+{
+        this->dor = this->s-this->dof;
+
+        if (this->dor < 0)   // Just in case of bad computation
+        {
+                Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
+        }
+}
+
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::first_updater(Real lambda)
+{
+        this->set_dS_and_trdS_();
+        UInt ret = AuxiliaryOptimizer::universal_first_updater<InputCarrier>(this->adt, this->the_carrier, this->dS_, this->eps_hat, lambda);
+}
+
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::second_updater(Real lambda)
+{
+        this->set_ddS_and_trddS_();
+        UInt ret = AuxiliaryOptimizer::universal_second_updater<InputCarrier>(this->adt, this->the_carrier, this->ddS_, this->eps_hat, lambda);
+}
+
+// Derivatives
+
+// GCV function and derivatives
+template<typename InputCarrier>
+Real GCV_Exact<InputCarrier, 1>::compute_f(Real lambda)
+{
+        // GCV = s*(z-zhat)^t*(z-zhat)/(s-(q+trS))^2
+        //     = SS_res*s/(dor^2)
+        //     = sigma_hat_^2*s/dor
+        this->gu.call_to(0, lambda, this);
+
+        // Compute the value of the GCV and print it
+        Real GCV_val =
+                AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
+
+        Rprintf("LAMBDA = %f\n",lambda);
+	Rprintf("GCV = %f\n",GCV_val);
+
+	return GCV_val;
+}
+
+template<typename InputCarrier>
+Real GCV_Exact<InputCarrier, 1>::compute_fp(Real lambda)
+{
+        // dGCV(lambda)/dlambda = s * (d(1/dor(lambda)^2)/dlambda * SSres + dSSres(lambda)/dlambda * 1/dor^2)
+        //                                    [1]                                        [2]
+        // where [1] = 2/dor^3 * d(tr(S))/dlambda = 2/dor^3 * tr(Phi*T^{-1}*R*V)
+        // and   [2] = 2*eps_hat^t*d(eps_hat)/dlambda = -2*eps^hat*dS
+        // summing: 2*s/(dor^2) * (sigma_hat_^2*tr(dS/dlambda) - eps_hat*dS/dlambda*z)
+
+        this->gu.call_to(1, lambda, this);
+
+        // Compute the value of the GCV first derivative and print it
+	Real GCV_der_val =
+                AuxiliaryOptimizer::universal_GCV_d<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_);
+
+	Rprintf("GCV_derivative = %f\n", GCV_der_val);
+
+
+	return GCV_der_val;
+}
+
+template<typename InputCarrier>
+Real GCV_Exact<InputCarrier, 1>::compute_fs(Real lambda)
+{
+        this->gu.call_to(2, lambda, this);
+
+        // Compute second derivative and print it
+	Real GCV_sec_der_val =
+                AuxiliaryOptimizer::universal_GCV_dd<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_, this->trddS_);
+
+	Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
+
+	return GCV_sec_der_val;
+}
+
+
+// Updaters
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::update_matrices(Real lambda)
+{
+        this->set_T_(lambda);
+        this->set_V_();
+        this->set_S_and_trS_();
+        this->compute_z_hat(lambda);
+}
+
+//! Setting all the parameters which are recursively lambda dependent
+/*
+ * /remark{The order in which functions are invoked is essential for the consistency of the procedure}
+ */
+template<typename InputCarrier>
+void GCV_Exact<InputCarrier, 1>::update_parameters(Real lambda)
+{
+        this->update_matrices(lambda);
+        this->update_errors(lambda);
+}
+
+//----------------------------------------------------------------------------//
+// ** GCV_Stochastic **
+
+template<typename InputCarrier>
+void GCV_Stochastic<InputCarrier, 1>::set_US_(void)
 {
         // Creation of the random matrix
         std::default_random_engine generator;
@@ -206,202 +400,6 @@ void GCV_Family<InputCarrier, 1>::set_US_(void)
 
         this->us = true;
 }
-
-//! Utility to compute the predicted values in the locations
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_z_hat(Real lambda)
-{
-        UInt ret = AuxiliaryOptimizer::universal_z_hat_setter<InputCarrier>(this->z_hat, this->the_carrier, this->S_, this->adt, lambda);
-
-        // Debugging purpose
-        // Rprintf("z_hat: \n");
-        // for(int i = 0; i < 20; i++)
-        //        Rprintf("%f, ", this->z_hat[i]);
-	// Rprintf("\n");
-}
-
-//! Utility to compute the predicted residuals in the locations
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_eps_hat(void)
-{
-        this->eps_hat = (*this->the_carrier.get_zp())-this->z_hat;
-
-        // Debugging purpose
-        // Rprintf("Eps_hat \n");
-        // for(UInt i = 0; i < this->s; i++)
-        //        Rprintf("%f, ", this->eps_hat[i]);
-        // Rprintf("\n");
-}
-
-//! Utility to compute the sum of the squares of the residuals
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_SS_res(void)
-{
-        this->SS_res = this->eps_hat.squaredNorm();
-
-        // Debugging purpose
-        // Rprintf("SS_res  = %f\n", this->SS_res);
-}
-
-//! Utility to compute the size of the model
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_s(void)
-{
-        this->s = this->the_carrier.get_n_obs();
-}
-
-
-//! Utility to compute the estimated variance of the error
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::compute_sigma_hat_sq(void)
-{
-        this->sigma_hat_sq = this->SS_res/Real(this->dor);
-
-        // Debugging purpose
-        // Rprintf("sigma_hat_sq = %f\n", this->sigma_hat_sq);
-}
-
-// Updaters
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::update_family_p1(Real lambda)
-{
-        this->set_T_(lambda);
-        this->set_V_();
-        this->set_S_and_trS_();
-        this->compute_z_hat(lambda);
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::update_family_p2(void)
-{
-        this->compute_eps_hat();
-        this->compute_SS_res();
-}
-
-//! Setting all the parameters which are recursively lambda dependent
-/*
- * /remark{The order in which functions are invoked is essential for the consistency of the procedure}
- */
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::update_family(Real lambda)
-{
-        this->update_family_p1(lambda);
-        this->update_family_p2();
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::zero_updater(Real lambda)
-{
-        this->update_parameters(lambda);  // Update all parameters depending on lambda
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::first_updater(Real lambda)
-{
-        this->set_dS_and_trdS_();
-        UInt ret = AuxiliaryOptimizer::universal_first_updater<InputCarrier>(this->adt, this->the_carrier, this->dS_, this->eps_hat, lambda);
-}
-
-template<typename InputCarrier>
-void GCV_Family<InputCarrier, 1>::second_updater(Real lambda)
-{
-        this->set_ddS_and_trddS_();
-        UInt ret = AuxiliaryOptimizer::universal_second_updater<InputCarrier>(this->adt, this->the_carrier, this->ddS_, this->eps_hat, lambda);
-}
-
-// GCV function and derivatives
-template<typename InputCarrier>
-Real GCV_Family<InputCarrier, 1>::compute_f(Real lambda)
-{
-        // GCV = s*(z-zhat)^t*(z-zhat)/(s-(q+trS))^2
-        //     = SS_res*s/(dor^2)
-        //     = sigma_hat_^2*s/dor
-        this->gu.call_to(0, lambda, this);
-
-        // Compute the value of the GCV and print it
-        Real GCV_val =
-                AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
-
-                Rprintf("LAMBDA = %f\n",lambda);
-	        Rprintf("GCV = %f\n",GCV_val);
-
-	return GCV_val;
-}
-
-template<typename InputCarrier>
-Real GCV_Family<InputCarrier, 1>::compute_fp(Real lambda)
-{
-        // dGCV(lambda)/dlambda = s * (d(1/dor(lambda)^2)/dlambda * SSres + dSSres(lambda)/dlambda * 1/dor^2)
-        //                                    [1]                                        [2]
-        // where [1] = 2/dor^3 * d(tr(S))/dlambda = 2/dor^3 * tr(Phi*T^{-1}*R*V)
-        // and   [2] = 2*eps_hat^t*d(eps_hat)/dlambda = -2*eps^hat*dS
-        // summing: 2*s/(dor^2) * (sigma_hat_^2*tr(dS/dlambda) - eps_hat*dS/dlambda*z)
-
-        this->gu.call_to(1, lambda, this);
-
-        // Compute the value of the GCV first derivative and print it
-	Real GCV_der_val =
-                AuxiliaryOptimizer::universal_GCV_d<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_);
-
-		Rprintf("GCV_derivative = %f\n", GCV_der_val);
-
-
-	return GCV_der_val;
-}
-
-template<typename InputCarrier>
-Real GCV_Family<InputCarrier, 1>::compute_fs(Real lambda)
-{
-        this->gu.call_to(2, lambda, this);
-
-        // Compute second derivative and print it
-	Real GCV_sec_der_val =
-                AuxiliaryOptimizer::universal_GCV_dd<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_, this->trddS_);
-
-		Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
-
-	return GCV_sec_der_val;
-}
-
-//----------------------------------------------------------------------------//
-// ** GCV_Exact **
-
-template<typename InputCarrier>
-void GCV_Exact<InputCarrier, 1>::update_dof(Real lambda)
-{
-	this->dof = this->trS_;
-
-        if(this->the_carrier.has_W())
-                this->dof += (*this->the_carrier.get_Wp()).cols();
-
-        // Debugging purpose
-        // Rprintf("DOF: %f\n", this->dof);
-}
-
-//! Utility to compute the degrees of freedom of the residuals
-template<typename InputCarrier>
-void GCV_Exact<InputCarrier, 1>::update_dor(Real lambda)
-{
-        this->dor = this->s-this->dof;
-
-        if (this->dor < 0)   // Just in case of bad computation
-        {
-                              Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
-        }
-}
-
-template<typename InputCarrier>
-void GCV_Exact<InputCarrier, 1>::update_parameters(Real lambda)
-{
-        this->update_family(lambda);
-        this->update_dof(lambda);
-        this->update_dor(lambda);
-        this->compute_sigma_hat_sq();
-}
-
-//----------------------------------------------------------------------------//
-// ** GCV_Stochastic **
 
 template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
@@ -461,7 +459,7 @@ void GCV_Stochastic<InputCarrier, 1>::update_dor(Real lambda)
 
         if (this->dor < 0)   // Just in case of bad computation
         {
-                              Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
+                Rprintf("WARNING: Some values of the trace of the matrix S('lambda') are inconstistent. This might be due to ill-conditioning of the linear system. Try increasing value of 'lambda'. Value of 'lambda' that produces an error is: %d \n", lambda);
         }
 }
 
@@ -470,7 +468,7 @@ void GCV_Stochastic<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
         this->the_carrier.get_tracep()->apply(lambda);
 
-        const UInt nnodes    = this->the_carrier.get_R0p()->rows();;
+        const UInt nnodes    = this->the_carrier.get_R0p()->rows();
         const VectorXr f_hat = this->the_carrier.get_tracep()->getSolution().head(nnodes);
 
 
@@ -485,14 +483,30 @@ void GCV_Stochastic<InputCarrier, 1>::compute_z_hat(Real lambda)
         }
 }
 
+// GCV function and derivatives
+template<typename InputCarrier>
+Real GCV_Stochastic<InputCarrier, 1>::compute_f(Real lambda)
+{
+        // GCV = s*(z-zhat)^t*(z-zhat)/(s-(q+trS))^2
+        //     = SS_res*s/(dor^2)
+        //     = sigma_hat_^2*s/dor
+        this->gu.call_to(0, lambda, this);
+
+        // Compute the value of the GCV and print it
+        Real GCV_val =
+                AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
+
+        Rprintf("LAMBDA = %f\n",lambda);
+	Rprintf("GCV = %f\n",GCV_val);
+
+	return GCV_val;
+}
+
 template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_parameters(Real lambda)
 {
         this->compute_z_hat(lambda);
-        this->update_family_p2();
-        this->update_dof(lambda);
-        this->update_dor(lambda);
-        this->compute_sigma_hat_sq();
+        this->update_errors(lambda);
 }
 
 //----------------------------------------------------------------------------//
