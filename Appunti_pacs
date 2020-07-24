@@ -80,3 +80,38 @@ nel computedeoffreedom parte in cui usa Qe_i per trovare la colonna i-esima si p
 ???controllare perchè la traccia è calcolata su num nodes e non num locations?? forse perchè nnodes>num locations e dove non c'è mette zero?
 
 
+8 luglio
+NB inputhandler e datahandler ora coincidono, messo wrapper per apply e aplly to b per evitare di avere puntatore pubblico
+nel newton modificato controllo adattivo che se lambda è negativo riparte da un sottomultiplo del flesso+ controllo per capire se sono dentro o fuori-> rapporto incrementale in relativo e controllo se è maggiore o minore del 10%
+
+
+interessante lasciare opzione verbose o no, in modo da dare più o meno info delle varie parti
+
+
+Fondamentale : sistemato questione errore calcolo S da colli colombo LDLT-> usata partial piv LU per areale, con agggiunta genitale del metodo coi type traits per scegliere il tipo 
+
+
+questione seed da sistemare
+
+
+corretto il segno meno per la forzante, ora coincide tutto (già notato in ardenghi vicini)-> attenzione alla matrix no cov che in realtà nel secondo blocco ha i segni invertiti!!
+
+
+metodo più efficace per trovare se la forma gcv è buona oppure no
+
+
+NB aggiungere in output per newton il valore ottimo della GCV
+
+
+
+NB far notare che nel batch si aus il .at per accedere, safer in caso ci fossero stati errori e il vettore non fosse stato costruito
+
+ardenghi vicini
+
+NB questione N_, al momento è nel cosntructor di mixed ferregression il numero di nodi
+
+NB dà errore se ripeto i <Order, mydim, ndim> in ::apply<...>(), funziona probabilmente con automatic template deduction
+
+
+
+
