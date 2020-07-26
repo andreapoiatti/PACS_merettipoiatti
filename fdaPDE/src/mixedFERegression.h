@@ -15,7 +15,7 @@
 
 /*! A base class for the smooth regression.
 */
-template<typename InputHandler, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
+template<typename InputHandler>
 class MixedFERegressionBase
 {
 	protected:
@@ -44,7 +44,11 @@ class MixedFERegressionBase
 	SpMat R1_;	 //!< R1 matrix of the model
 	SpMat R0_;	 //!< Mass matrix in space
 	SpMat psi_;  //!< Psi matrix of the model
+	SpMat psi_t_;  //!< Psi ^T matrix of the model
 	MatrixXr R_; //!< R1 ^T * R0^-1 * R1
+	SpMat 		DMat_;
+	MatrixXr 	H_; 		//! The hat matrix of the regression
+	MatrixXr	Q_; 		//! Identity - H, projects onto the orthogonal subspace
 
 
 	SpMat Ptk_; 	//!< kron(Pt,IN) (separable version)
@@ -85,7 +89,7 @@ class MixedFERegressionBase
 
 	bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
 
-	//! A member function computing the Psi matrix
+        //Setters
 
 	template<UInt ORDER, UInt mydim, UInt ndim>
         void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
@@ -103,6 +107,7 @@ class MixedFERegressionBase
 	//! A member function returning the system right hand data
 	void getRightHandData(VectorXr& rightHandData);
 	//! A method which builds all the matrices needed for assembling matrixNoCov_
+        template<typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 	void buildSpaceTimeMatrices();
 	//! A method computing dofs in case of exact GCV, it is called by computeDegreesOfFreedom
 	void computeDegreesOfFreedomExact(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
@@ -123,7 +128,7 @@ class MixedFERegressionBase
 	MixedFERegressionBase( const InputHandler& regressionData, const UInt& nnodes_):
 			 N_(nnodes_), M_(1), regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
 
-	MixedFERegressionBase(const std::vector<Real>& mesh_time, const InputHandler& regressionData, const UInt& nnodes_): mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic()? mesh_time.size()-1 : mesh_time.size()+SPLINE_DEGREE-1), regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
+	MixedFERegressionBase(const std::vector<Real>& mesh_time, const InputHandler& regressionData, const UInt& nnodes_, const UInt& spline_degree): mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic()? mesh_time.size()-1 : mesh_time.size()+spline_degree-1), regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
 
 	//! The function solving the system, used by the children classes. Saves the result in _solution
 	/*!
@@ -131,7 +136,7 @@ class MixedFERegressionBase
 	    \param u the forcing term, will be used only in case of anysotropic nonstationary regression
 	*/
 	//! A method which builds all the space matrices
-	template<typename A, UInt ORDER, UInt mydim, UInt ndim>
+	template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE, typename A>
 	void apply(EOExpr<A> oper,const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
 
 	//! A member function computing the dofs for external calls
@@ -143,7 +148,7 @@ class MixedFERegressionBase
 	//! A method that set WTW flag to false, in order to recompute the matrix WTW.
 	inline void recomputeWTW(){ this->isWTWfactorized_ = false;}
 	//! A function returning the computed barycenters of the locationss
-	inline MatrixXr const & getBarycenters() const{return barycenters_;};
+	inline MatrixXr const & getBarycenters() const{return barycenters_;}; //returns a const reference as in rergressionData
 	//! A function returning the element ids of the locations
 	inline VectorXi const & getElementIds() const{return element_ids_;};
 	//! A inline member that returns a VectorXr, returns the whole solution_.
@@ -159,24 +164,41 @@ class MixedFERegressionBase
 	//! A method returning the index of the best lambdaT according to GCV
 	inline UInt getBestLambdaT(){return bestLambdaT_;}
 	//! A method returning the psi matrix
-	inline SpMat const getPsi()const{return psi_;}
+	inline const SpMat * getpsi_() const   {return &this->psi_;}
+	//! A method returning the psi matrix transposed
+	inline const SpMat * getpsi_t_(void) const  {return &this->psi_t_;}
 	//! A method returning the R0 matrix
-	inline SpMat const getR0()const{return R0_;}
+	inline const SpMat * getR0_()const {return &this->R0_;}
 	//! A method returning the R1 matrix
-	inline SpMat const getR1()const{return R1_;}
+	inline const SpMat * getR1_()const {return &this->R1_;}
+	//! A method returning the DMat matrix, da implementare la DMat
+	inline const SpMat * getDMat_(void) const {return &this->DMat_;}
+	//! A method returning the Q_ matrix -> da impementare la Q
+	inline const MatrixXr *	getQ_(void) const {return &this->Q_;}
+	//! A method returning the H_ matrix da implementare la H
+	inline const MatrixXr *	getH_(void) const {return &this->H_;}
+	//! A method returning the A_ matrix
+	inline const VectorXr *	getA_(void) const {return &this->A_;}
+	//! A method returning the rhs
+	inline const VectorXr *		getrhs_(void)		const	{return &this->_rightHandSide;}
+	//! A method returning the forcing term
+	inline const VectorXr *		getu_(void)		const	{return &this->rhs_ft_correction_;}
+	//! A method returning the number of nodes of the mesh
+	inline UInt			getnnodes_(void)	const	{return this->N_;}
+
 
 
 
 };
 
-template<typename InputHandler, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
-class MixedFERegression : public MixedFERegressionBase<InputHandler,IntegratorSpace,IntegratorTime,SPLINE_DEGREE,ORDER_DERIVATIVE>
+template<typename InputHandler>
+class MixedFERegression : public MixedFERegressionBase<InputHandler>
 {
 public:
 	MixedFERegression(const InputHandler& regressionData, const UInt& nnodes_):
-			MixedFERegressionBase<InputHandler,IntegratorSpace,IntegratorTime,SPLINE_DEGREE,ORDER_DERIVATIVE>(regressionData, nnodes_){};
-	MixedFERegression(const std::vector<Real>& mesh_time, const InputHandler& regressionData, const UInt& nnodes_):
-			MixedFERegressionBase<InputHandler,IntegratorSpace,IntegratorTime,SPLINE_DEGREE,ORDER_DERIVATIVE>( mesh_time, regressionData, nnodes_){};
+			MixedFERegressionBase<InputHandler>(regressionData, nnodes_){};
+	MixedFERegression(const std::vector<Real>& mesh_time, const InputHandler& regressionData, const UInt& nnodes_, const UInt& spline_degree):
+			MixedFERegressionBase<InputHandler>( mesh_time, regressionData, nnodes_, spline_degree){};
 
 	void apply()
 	{

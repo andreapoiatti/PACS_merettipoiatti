@@ -32,9 +32,9 @@ template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UIn
 SEXP regression_skeleton(InputHandler &regressionData, SEXP Rmesh)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
-	MixedFERegression<InputHandler, Integrator, IntegratorGaussP3, 0, 0> regression(regressionData, mesh.num_nodes());
+	MixedFERegression<InputHandler> regression(regressionData, mesh.num_nodes());
 
-	regression.apply(mesh);
+	regression.template apply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh);
 
 	const MatrixXv& solution = regression.getSolution();
 	const MatrixXr& dof = regression.getDOF();
@@ -159,9 +159,9 @@ SEXP regression_skeleton_time(InputHandler &regressionData, SEXP Rmesh, SEXP Rme
 	{
 		mesh_time[i] = REAL(Rmesh_time)[i];
 	}
-	MixedFERegression<InputHandler, IntegratorSpace, IntegratorTime, SPLINE_DEGREE, ORDER_DERIVATIVE> regression(mesh_time,regressionData, mesh.num_nodes());//! load data in a C++ object
+	MixedFERegression<InputHandler> regression(mesh_time,regressionData, mesh.num_nodes(), SPLINE_DEGREE);//! load data in a C++ object
 
-	regression.apply(mesh); //! solve the problem (compute the _solution, _dof, _GCV, _beta)
+	regression.template apply<ORDER,mydim,ndim, IntegratorSpace, IntegratorTime, SPLINE_DEGREE, ORDER_DERIVATIVE>(mesh); //! solve the problem (compute the _solution, _dof, _GCV, _beta)
 
 	//! copy result in R memory
 	MatrixXv const & solution = regression.getSolution();

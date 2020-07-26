@@ -113,8 +113,8 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::update_solution(UI
 
   // Here we have to solve a weighted regression problem.
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
-  regression_.apply(this->mesh_);
-  const SpMat& Psi = regression_.getPsi(); // get Psi matrix. It is used for the computation of fn_hat.
+  regression_. template apply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(this->mesh_);
+  const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
   // get the solutions from the regression object.
   _solution(lambda_index,0) = regression_.getSolution()(0,0);
@@ -124,7 +124,7 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::update_solution(UI
     _beta_hat(lambda_index,0) = regression_.getBeta()(0,0);
   }
 
-  _fn_hat(lambda_index,0) = Psi *_solution(lambda_index,0).topRows(Psi.cols());
+  _fn_hat(lambda_index,0) = (*Psi) *_solution(lambda_index,0).topRows(Psi->cols());
 
 
 }
@@ -243,7 +243,7 @@ std::array<Real,2> FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::comp
       Lf = Lf - forcingTerm;
   }
 
-  non_parametric_value = Lf.transpose() * regression_.getR0() * Lf;
+  non_parametric_value = Lf.transpose() * (*(regression_.getR0_())) * Lf;
   non_parametric_value = (*(inputData_.getGlobalLambda()))[lambda_index]*non_parametric_value;
 
   std::array<Real,2> returnObject{parametric_value, non_parametric_value};

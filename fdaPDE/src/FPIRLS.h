@@ -18,7 +18,7 @@ class FPIRLS_Base {
 
    const MeshHandler<ORDER, mydim, ndim> &mesh_;
    InputHandler& inputData_; //!< It contains the data of the problem (RegressionDataGAM)
-   MixedFERegression<InputHandler, Integrator,IntegratorGaussP3, 0, 0>  regression_;
+   MixedFERegression<InputHandler>  regression_;
 
 
    std::vector<VectorXr> mu_; //!< Mean vector

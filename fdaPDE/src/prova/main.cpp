@@ -2,9 +2,13 @@
 
 dummy foo(const dummy & d) {return d;}
 
+template <int N>
+void func(void)
+{ std::cout<<N<<std::endl;}
+
 int main()
 {
-std::vector<double> v(100000000,0.1);
+std::vector<double> v(100,0.1);
 dummy d(v),t;
 box box(d);
 std::cout<<"start test:"<<std::endl;
@@ -27,8 +31,9 @@ std::cout<<"start test print pure copy: ";
 //const dummy* dd=box.f3();
 //dd->setv();
 //t=foo(d);
-double pp=0.01;
-const double * p=&pp;
+//double pp=0.01;
+//const double * p=&pp;
 //*p=3.3;
+func<356>();
 return 0;
 };

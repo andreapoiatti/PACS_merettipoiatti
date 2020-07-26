@@ -110,8 +110,13 @@ ardenghi vicini
 
 NB questione N_, al momento è nel cosntructor di mixed ferregression il numero di nodi
 
-NB dà errore se ripeto i <Order, mydim, ndim> in ::apply<...>(), funziona probabilmente con automatic template deduction
+NB mettere sempre, per apply, template A alla fine, per far automatic template deduction
 
+da completare set H, set Q e set DMat.
+
+per il reposrt inizializzazione mostrare grafico gcv e i vari possibili valori di lambda iniziali. Eventuale dividere per 5 e non per 10 il vlaroe lambda scelto
+
+lasciati const ref e non puntatore get solutions ecc, per cerenza col vecchio codice. ciò che serve al carriere è pointer
 
 
 
