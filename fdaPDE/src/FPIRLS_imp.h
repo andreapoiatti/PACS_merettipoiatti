@@ -113,7 +113,8 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::update_solution(UI
 
   // Here we have to solve a weighted regression problem.
   regression_.recomputeWTW(); // at each iteration of FPIRLS W is updated, so WTW has to be recomputed as well.
-  regression_. template apply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(this->mesh_);
+  regression_. template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(this->mesh_);
+  regression_.apply();
   const SpMat * Psi = regression_.getpsi_(); // get Psi matrix. It is used for the computation of fn_hat.
 
   // get the solutions from the regression object.

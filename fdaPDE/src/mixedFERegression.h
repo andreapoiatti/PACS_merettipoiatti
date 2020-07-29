@@ -23,6 +23,8 @@ class MixedFERegressionBase
 	const std::vector<Real> mesh_time_;
 	const UInt N_; //!< Number of spatial basis functions.
 	const UInt M_;
+        Real lambda_=0.0; //! Lambda used in spatial regression
+	Real last_lambda=0.0; //! Previous Lambda computed
 
 	const InputHandler& regressionData_;
 
@@ -43,6 +45,8 @@ class MixedFERegressionBase
 
 	SpMat R1_;	 //!< R1 matrix of the model
 	SpMat R0_;	 //!< Mass matrix in space
+	SpMat R0_lambda;
+	SpMat R1_lambda;
 	SpMat psi_;  //!< Psi matrix of the model
 	SpMat psi_t_;  //!< Psi ^T matrix of the model
 	MatrixXr R_; //!< R1 ^T * R0^-1 * R1
@@ -62,8 +66,15 @@ class MixedFERegressionBase
 	MatrixXr barycenters_; //!< barycenter information
 	VectorXi element_ids_; //!< elements id information
 
-	Eigen::SparseLU<SpMat> matrixNoCovdec_; //!< Stores the factorization of matrixNoCov_
-	Eigen::PartialPivLU<MatrixXr> Gdec_;	//!< Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
+	//Eigen::SparseLU<SpMat> matrixNoCovdec_; //!< Stores the factorization of matrixNoCov_
+	//Eigen::PartialPivLU<MatrixXr> Gdec_;	//!< Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
+	// Factorization
+	std::unique_ptr<Eigen::SparseLU<SpMat>> matrixNoCovdec_{new Eigen::SparseLU<SpMat>}; // Stores the factorization of matrixNoCov_
+	//std::unique_ptr<Eigen::PartialPivLU<MatrixXr>>  matrixNoCovdec_{new Eigen::PartialPivLU<MatrixXr>}; // Stores the factorization of matrixNoCov_
+	std::unique_ptr<Eigen::PartialPivLU<MatrixXr>> Gdec_{new Eigen::PartialPivLU<MatrixXr>};	// Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
+
+
+
 	Eigen::PartialPivLU<MatrixXr> WTW_;	//!< Stores the factorization of W^T * W
 	bool isWTWfactorized_ = false;
 	bool isRcomputed_ = false;
@@ -94,16 +105,30 @@ class MixedFERegressionBase
 	template<UInt ORDER, UInt mydim, UInt ndim>
         void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 	//! A method computing the no-covariates version of the system matrix
-	void buildMatrixNoCov(const SpMat& NWblock,  const SpMat& SWblock,  const SpMat& SEblock);
+	void buildMatrixNoCov(const SpMat& SWblock,  const SpMat& SEblock);
 	//! A function that given a vector u, performs Q*u efficiently
 	MatrixXr LeftMultiplybyQ(const MatrixXr& u);
 	//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 	void addDirichletBC();
 	//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 	void addNA();
+
+        //Setters
+
  	//! A member function which builds the A vector containing the areas of the regions in case of areal data
         template<UInt ORDER, UInt mydim, UInt ndim>
 	void setA(const MeshHandler<ORDER, mydim, ndim> & mesh_);
+
+        //! A member function which builds DMat, to be changed in apply for the temporal case
+	void setDMat(void);
+
+	//! A member function which builds the Q matrix
+	void setQ(void);
+	//! A member function which builds the H matrix
+	void setH(void);
+
+        inline void set_lambda(Real lambda) {this->lambda_=lambda;}
+
 	//! A member function returning the system right hand data
 	void getRightHandData(VectorXr& rightHandData);
 	//! A method which builds all the matrices needed for assembling matrixNoCov_
@@ -115,6 +140,13 @@ class MixedFERegressionBase
 	void computeDegreesOfFreedomStochastic(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
 	//! A method computing GCV from the dofs
 	void computeGeneralizedCrossValidation(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT);
+
+	// Composed actios
+	 //! Spatial version
+	void buildSystemMatrix(Real lambda);
+	//! Space-time version
+	void buildSystemMatrix(Real lambdaS, Real lambdaT);
+
 
   	//! A function to factorize the system, using Woodbury decomposition when there are covariates
 	void system_factorize();
@@ -137,7 +169,10 @@ class MixedFERegressionBase
 	*/
 	//! A method which builds all the space matrices
 	template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE, typename A>
-	void apply(EOExpr<A> oper,const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
+	void preapply(EOExpr<A> oper,const ForcingTerm & u, const MeshHandler<ORDER, mydim, ndim> & mesh_ );
+
+        MatrixXv apply(void);
+        MatrixXr apply_to_b(const MatrixXr & b);
 
 	//! A member function computing the dofs for external calls
 	//template<typename A>

@@ -120,3 +120,16 @@ lasciati const ref e non puntatore get solutions ecc, per cerenza col vecchio co
 
 
 
+CONTROLLARE: mettere virtual la compute specific parameters? 
+controllare output cosa restituisce il batch
+
+
+
+modifiche a mixed: spezzato apply e preapply, costruite due versioni, temporale e non di buildsystem_matrix, resa più efficient DMat per evitare di ricostruire ogni volta. Membro interno lambda, per non avere apply che prende in ingresso lambda, più generale. Sintassia puntatore per salvare le decomposizioni di matrici
+
+NB questione R defined
+
+da sistemare: cfr con last lambda e question fpirls
+
+
+
