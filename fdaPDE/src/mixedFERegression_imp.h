@@ -12,7 +12,7 @@
 // Dirichlet BC
 
 template<typename InputHandler>
-void MixedFERegressionBase<InputHandler>::addDirichletBC()
+void MixedFERegressionBase<InputHandler>::addDirichletBC() //adds boundary conditions to all
 {
 	UInt id1,id3;
 
@@ -39,6 +39,35 @@ void MixedFERegressionBase<InputHandler>::addDirichletBC()
 
 	matrixNoCov_.makeCompressed();
 }
+
+
+template<typename InputHandler>
+void MixedFERegressionBase<InputHandler>::addDirichletBC_matrix() //adds boundary conditions to all
+{
+	UInt id1,id3;
+
+	UInt nnodes = N_*M_;
+
+	const std::vector<UInt> * bc_indices = regressionData_.getDirichletIndices();
+	const std::vector<Real> * bc_values = regressionData_.getDirichletValues();
+	UInt nbc_indices = bc_indices->size();
+
+	Real pen=10e20;
+
+	for( auto i=0; i<nbc_indices; i++)
+	 {
+			id1=(*bc_indices)[i];
+			id3=id1+nnodes;
+
+			matrixNoCov_.coeffRef(id1,id1)=pen;
+			matrixNoCov_.coeffRef(id3,id3)=pen;
+	 }
+
+	matrixNoCov_.makeCompressed();
+}
+
+
+
 
 //Add NA
 template<typename InputHandler>
@@ -911,10 +940,10 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 
 	//Applying boundary conditions if necessary
 	//DA sistemare
-	//if(lambda != last_lambda && regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
-	//{
-	//	this->addDirichletBC_matrix();
-	//}
+	if(lambda_ != last_lambda && regressionData_.getDirichletIndices()->size() > 0)  // if areal data NO BOUNDARY CONDITIONS
+	{
+		this->addDirichletBC_matrix();
+	}
 
         last_lambda = lambda_;
 

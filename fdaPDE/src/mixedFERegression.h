@@ -110,6 +110,8 @@ class MixedFERegressionBase
 	MatrixXr LeftMultiplybyQ(const MatrixXr& u);
 	//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 	void addDirichletBC();
+	//! A function which adds Dirichlet boundary conditions only to MatrixnoCov( Remark: BC for areal data are not implemented!)
+	void addDirichletBC_matrix();
 	//! A method which takes care of missing values setting to 0 the corresponding rows of B_
 	void addNA();
 
