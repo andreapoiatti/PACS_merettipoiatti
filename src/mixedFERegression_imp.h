@@ -947,7 +947,8 @@ template<typename InputHandler>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 
 	{
-
+if (isGAMData||regressionData_.isSpaceTime()||lambda_!=last_lambda)
+{
 	UInt nnodes = N_*M_;
 	VectorXr rightHandData;
 	getRightHandData(rightHandData); //updated
@@ -1007,8 +1008,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			// system solution
 			_solution(s,t) = this->template system_solve(this->_rightHandSide);
 
-                        //quando sarà agganciato, andrà fatto solo nel caso space time e per FPIRLS
-			if(regressionData_.computeGCV())
+
+			if(regressionData_.computeGCV()&&(isGAMData||regressionData_.isSpaceTime()))
 			{
 				if (regressionData_.computeDOF())
 					computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
@@ -1021,7 +1022,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 
 			// covariates computation
-			if(regressionData_.getCovariates()->rows()!=0)
+			if(regressionData_.getCovariates()->rows()!=0&&(isGAMData||regressionData_.isSpaceTime()))
 			{
 				MatrixXr W(*(this->regressionData_.getCovariates()));
 				VectorXr P(*(this->regressionData_.getWeightsMatrix()));
@@ -1035,6 +1036,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 		}
 	}
+if (!(isGAMData||regressionData_.isSpaceTime())&&lambda_!=last_lambda)
+    this->last_lambda=lambda_;
+  }
 //std::cout<<_solution(0,0).size()<<std::endl; per il caso GCV semplice la solution è il valore in posizione 0,0
 return this->_solution;
 }

@@ -11,7 +11,7 @@
 #include "integratePsi.h"
 #include "kronecker_product.h"
 #include <memory>
-
+#include <type_traits>
 
 /*! A base class for the smooth regression.
 */
@@ -23,7 +23,7 @@ class MixedFERegressionBase
 	const std::vector<Real> mesh_time_;
 	const UInt N_; //!< Number of spatial basis functions.
 	const UInt M_;
-        Real lambda_=0.0; //! Lambda used in spatial regression
+        Real lambda_=0.5; //! Lambda used in spatial regression
 	Real last_lambda=0.0; //! Previous Lambda computed
 
 	const InputHandler& regressionData_;
@@ -99,6 +99,8 @@ class MixedFERegressionBase
 	bool isR1Computed = false;
 
 	bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
+
+	bool isGAMData= std::is_same<InputHandler, GAMDataLaplace>::value||std::is_same<InputHandler, GAMDataEllipticSpaceVarying>::value||std::is_same<InputHandler, GAMDataElliptic>::value;
 
         //Setters
 
