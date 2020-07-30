@@ -4,14 +4,7 @@
 #include "Skeletons/Regression_Skeleton_Time.h"
 #include "Skeletons/GAM_Skeleton.h"
 #include "regressionData.h"
-#include "mesh_objects.h"
-#include "mesh.h"
-#include "finite_element.h"
-#include "matrix_assembler.h"
-
-// GAM
-#include "FPIRLS.h"
-#include "FPIRLSfactory.h"
+#include "integration.h"
 
 extern "C"
 {

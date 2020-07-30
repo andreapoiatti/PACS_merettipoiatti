@@ -1,14 +1,9 @@
 #ifndef __REGRESSION_SKELETON_TIME_H__
 #define __REGRESSION_SKELETON_TIME_H__
 
-#include "../finite_element.h"
 #include "../fdaPDE.h"
-#include "../mesh_objects.h"
 #include "../mesh.h"
 #include "../mixedFERegression.h"
-#include "../matrix_assembler.h"
-#include "../regressionData.h"
-#include "../solverdefinitions.h"
 
 template<typename InputHandler, typename IntegratorSpace, UInt ORDER, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE, UInt mydim, UInt ndim>
 SEXP regression_skeleton_time(InputHandler &regressionData, SEXP Rmesh, SEXP Rmesh_time)

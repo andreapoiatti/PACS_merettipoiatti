@@ -2,14 +2,9 @@
 #define __AUXILIARY_SKELETON_H__
 
 #include "../fdaPDE.h"
-#include "../regressionData.h"
-#include "../mesh_objects.h"
-#include "../mesh.h"
 #include "../finite_element.h"
 #include "../matrix_assembler.h"
-#include "../FPCAData.h"
-#include "../FPCAObject.h"
-#include "../solverdefinitions.h"
+#include "../mesh.h"
 
 template<typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP get_integration_points_skeleton(SEXP Rmesh)

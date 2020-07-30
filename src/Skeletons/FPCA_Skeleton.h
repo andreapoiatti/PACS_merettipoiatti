@@ -1,16 +1,10 @@
 #ifndef __FPCA_SKELETON_H__
 #define __FPCA_SKELETON_H__
 
-#include "../finite_element.h"
 #include "../fdaPDE.h"
-#include "../FPCAData.h"
-#include "../FPCAObject.h"
-#include "../matrix_assembler.h"
-#include "../mesh_objects.h"
 #include "../mesh.h"
 #include "../mixedFEFPCA.h"
 #include "../mixedFEFPCAfactory.h"
-#include "../solverdefinitions.h"
 
 template<typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
 SEXP FPCA_skeleton(FPCAData &fPCAData, SEXP Rmesh, std::string validation)

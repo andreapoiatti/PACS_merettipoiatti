@@ -1,10 +1,6 @@
 #include "fdaPDE.h"
 #include "Skeletons/Auxiliary_Skeleton.h"
-#include "regressionData.h"
-#include "mesh_objects.h"
-#include "mesh.h"
-#include "finite_element.h"
-#include "matrix_assembler.h"
+#include "integration.h"
 
 extern "C"
 {
