@@ -1,9 +1,9 @@
 #ifndef __REGRESSION_SKELETON_H__
 #define __REGRESSION_SKELETON_H__
 
-#include "../fdaPDE.h"
-#include "../mesh.h"
-#include "../mixedFERegression.h"
+#include "../FdaPDE.h"
+#include "../Mesh/Mesh.h"
+#include "../Regression_Headers/MixedFERegression.h"
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler &regressionData, SEXP Rmesh)

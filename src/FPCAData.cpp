@@ -1,4 +1,4 @@
-#include "FPCAData.h"
+#include "FPCA_Headers/FPCAData.h"
 
 FPCAData::FPCAData(std::vector<Point>& locations, MatrixXr& datamatrix, UInt order, MatrixXi& incidenceMatrix,
 					std::vector<Real> lambda, UInt nPC, UInt nFolds, UInt search):

@@ -1,10 +1,10 @@
 #ifndef __FPCA_SKELETON_H__
 #define __FPCA_SKELETON_H__
 
-#include "../fdaPDE.h"
-#include "../mesh.h"
-#include "../mixedFEFPCA.h"
-#include "../mixedFEFPCAfactory.h"
+#include "../FdaPDE.h"
+#include "../Mesh/Mesh.h"
+#include "../FPCA_Headers/MixedFEFPCA.h"
+#include "../FPCA_Headers/MixedFEFPCAfactory.h"
 
 template<typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
 SEXP FPCA_skeleton(FPCAData &fPCAData, SEXP Rmesh, std::string validation)

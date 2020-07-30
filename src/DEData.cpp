@@ -1,4 +1,4 @@
-#include "DEData.h"
+#include "Density_Estimation_Headers/DEData.h"
 
 DEData::DEData(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
   SEXP Rtol1, SEXP Rtol2, SEXP Rprint, SEXP Rsearch)

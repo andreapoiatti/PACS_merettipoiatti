@@ -6,12 +6,12 @@
  */
 
 
-#include "fdaPDE.h"
+#include "FdaPDE.h"
 //#include "IO_handler.h"
-#include "Finite_Elements/Mesh_Objects.h"
-#include "mesh.h"
-#include "evaluator.h"
-#include "projection.h"
+#include "Finite_Elements/Elements_Handlers/Mesh_Objects.h"
+#include "Mesh/Mesh.h"
+#include "Finite_Elements/Assemblers/Evaluator.h"
+#include "Finite_Elements/Assemblers/Projection.h"
 
 template<UInt ORDER, UInt mydim, UInt ndim>
 SEXP tree_mesh_skeleton(SEXP Rmesh) {

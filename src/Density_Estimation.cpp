@@ -1,23 +1,23 @@
-#include "fdaPDE.h"
+#include "FdaPDE.h"
 #include "Skeletons/DE_Skeleton.h"
 #include "Skeletons/DE_Initialization_Skeleton.h"
-#include "regressionData.h"
-#include "Finite_Elements/Mesh_Objects.h"
-#include "Finite_Elements/Integration.h"
-#include "mesh.h"
-#include "finite_element.h"
-#include "matrix_assembler.h"
+#include "Regression_Headers/RegressionData.h"
+#include "Finite_Elements/Elements_Handlers/Mesh_Objects.h"
+#include "Finite_Elements/Assemblers/Integration.h"
+#include "Mesh/Mesh.h"
+#include "Finite_Elements/Assemblers/Finite_Element.h"
+#include "Finite_Elements/Assemblers/Matrix_Assembler.h"
 #include "Global_Utilities/Solver_Definitions.h"
 //#include <chrono>
 
-#include "mixedFERegression.h"
+#include "Regression_Headers/MixedFERegression.h"
 
 //Density Estimation
-#include "DataProblem.h"
-#include "FunctionalProblem.h"
-#include "OptimizationAlgorithm.h"
-#include "OptimizationAlgorithm_factory.h"
-#include "FEDensityEstimation.h"
+#include "Density_Estimation_Headers/DataProblem.h"
+#include "Density_Estimation_Headers/FunctionalProblem.h"
+#include "Density_Estimation_Headers/OptimizationAlgorithm.h"
+#include "Density_Estimation_Headers/OptimizationAlgorithm_factory.h"
+#include "Density_Estimation_Headers/FEDensityEstimation.h"
 
 
 extern "C" {

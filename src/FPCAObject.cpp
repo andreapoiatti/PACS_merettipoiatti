@@ -1,4 +1,4 @@
-#include "FPCAObject.h"
+#include "FPCA_Headers/FPCAObject.h"
 #include<chrono>
 
 FPCAObject::FPCAObject(const MatrixXr& datamatrix_)

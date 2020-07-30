@@ -1,10 +1,10 @@
 #ifndef __AUXILIARY_SKELETON_H__
 #define __AUXILIARY_SKELETON_H__
 
-#include "../fdaPDE.h"
-#include "../finite_element.h"
-#include "../matrix_assembler.h"
-#include "../mesh.h"
+#include "../FdaPDE.h"
+#include "../Finite_Elements/Assemblers/Finite_Element.h"
+#include "../Finite_Elements/Assemblers/Matrix_Assembler.h"
+#include "../Mesh/Mesh.h"
 
 template<typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP get_integration_points_skeleton(SEXP Rmesh)

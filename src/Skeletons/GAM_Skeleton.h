@@ -1,10 +1,10 @@
 #ifndef __GAM_SKELETON_H__
 #define __GAM_SKELETON_H__
 
-#include "../fdaPDE.h"
-#include "../FPIRLS.h"
-#include "../FPIRLSfactory.h"
-#include "../mesh.h"
+#include "../FdaPDE.h"
+#include "../Regression_Headers/GAM_Headers/FPIRLS.h"
+#include "../Regression_Headers/GAM_Headers/FPIRLSfactory.h"
+#include "../Mesh/Mesh.h"
 
 template<typename InputHandler,typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
 SEXP GAM_skeleton(InputHandler &GAMData, SEXP Rmesh, SEXP Rmu0, std::string family, SEXP RscaleParam)

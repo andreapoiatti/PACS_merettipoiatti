@@ -2,7 +2,7 @@
 #define __SOLVER_DEFINITIONS_H__
 
 //Take the code from the linked RcppEigen
-#include "../fdaPDE.h"
+#include "../FdaPDE.h"
 
 //#include <Eigen/SuperLUSupport>
 //#include <Eigen/UmfPackSupport>

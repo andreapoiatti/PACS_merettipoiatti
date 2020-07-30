@@ -1,10 +1,12 @@
-#include "fdaPDE.h"
+#include "FdaPDE.h"
 #include "Skeletons/Auxiliary_Skeleton.h"
 #include "Skeletons/Regression_Skeleton.h"
 #include "Skeletons/Regression_Skeleton_Time.h"
 #include "Skeletons/GAM_Skeleton.h"
-#include "regressionData.h"
-#include "Finite_Elements/Integration.h"
+#include "Regression_Headers/RegressionData.h"
+#include "Finite_Elements/Assemblers/Integration.h"
+
+
 
 extern "C"
 {

@@ -1,21 +1,21 @@
 #ifndef __DE_SKELETON_H__
 #define __DE_SKELETON_H__
 
-#include "../finite_element.h"
-#include "../fdaPDE.h"
-#include "../Finite_Elements/Mesh_Objects.h"
-#include "../mesh.h"
-#include "../mixedFERegression.h"
-#include "../matrix_assembler.h"
-#include "../regressionData.h"
+#include "../Finite_Elements/Assemblers/Finite_Element.h"
+#include "../FdaPDE.h"
+#include "../Finite_Elements/Elements_Handlers/Mesh_Objects.h"
+#include "../Mesh/Mesh.h"
+#include "../Regression_Headers/MixedFERegression.h"
+#include "../Finite_Elements/Assemblers/Matrix_Assembler.h"
+#include "../Regression_Headers/RegressionData.h"
 #include "../Global_Utilities/Solver_Definitions.h"
 
 //Density Estimation
-#include "../DataProblem.h"
-#include "../FunctionalProblem.h"
-#include "../OptimizationAlgorithm.h"
-#include "../OptimizationAlgorithm_factory.h"
-#include "../FEDensityEstimation.h"
+#include "../Density_Estimation_Headers/DataProblem.h"
+#include "../Density_Estimation_Headers/FunctionalProblem.h"
+#include "../Density_Estimation_Headers/OptimizationAlgorithm.h"
+#include "../Density_Estimation_Headers/OptimizationAlgorithm_factory.h"
+#include "../Density_Estimation_Headers/FEDensityEstimation.h"
 
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 SEXP DE_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,
