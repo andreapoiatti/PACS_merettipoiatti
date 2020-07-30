@@ -4,8 +4,6 @@
 #include "fdaPDE.h"
 #include "mesh_objects.h"
 
-
-
 class IntegratorTriangleP2{
 	public:
 	static const UInt ORDER = 1;
@@ -93,7 +91,4 @@ class IntegratorGaussTetra3
 		static const VectorXr WEIGHTS;
 };
 
-
-
-//#include "integration_imp.hpp"
 #endif

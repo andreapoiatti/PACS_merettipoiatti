@@ -7,9 +7,6 @@
 
 #include "integration.h"
 
-//#ifndef __INTEGRATION_IMP_HPP__
-//#define __INTEGRATION_IMP_HPP__
-
 const std::vector<Real> IntegratorTriangleP2::WEIGHTS = std::vector<Real>{ {1./3, 1./3, 1./3} };
 const std::vector<Point> IntegratorTriangleP2::NODES = std::vector<Point> { {Point(1./6,1./6),Point(2./3,1./6),Point(1./6,2./3)} };
 
@@ -149,6 +146,3 @@ Point(0.500000000000000, 0.250000000000000, 0.028175416344815),
 Point(0.500000000000000, 0.250000000000000, 0.221824583655185),
 Point(0.500000000000000, 0.250000000000000, 0.125000000000000)
 } };
-
-
-//#endif
