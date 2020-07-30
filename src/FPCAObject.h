@@ -2,7 +2,7 @@
 #define __FPCAOBJECT_HPP__
 
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "param_functors.h"
 
 //!  A class for handling the update of the loadings, the scores and the observation data at each iteration

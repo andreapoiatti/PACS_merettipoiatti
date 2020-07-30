@@ -1,13 +1,13 @@
-#ifndef SOLVERDEFINITIONS_H_
-#define SOLVERDEFINITIONS_H_
+#ifndef __SOLVER_DEFINITIONS_H__
+#define __SOLVER_DEFINITIONS_H__
 
 //Take the code from the linked RcppEigen
-#include "fdaPDE.h"
+#include "../fdaPDE.h"
 
 //#include <Eigen/SuperLUSupport>
 //#include <Eigen/UmfPackSupport>
 
-//! Some linear solvers definitions that may be useful for the future 
+//! Some linear solvers definitions that may be useful for the future
 
 typedef Eigen::SparseLU<SpMat> Sparse_LU;
 typedef Eigen::SimplicialLDLT<SpMat> Sparse_Cholesky;
@@ -17,4 +17,4 @@ typedef Eigen::BiCGSTAB<SpMat,Eigen::IncompleteLUT<Real>> Sparse_BiCGSTAB_ILUT;
 //typedef Eigen::UmfPackLU<SpMat> Sparse_UmfLU;
 //typedef Eigen::SuperLU<SpMat> Sparse_SuperLU;
 
-#endif 
+#endif

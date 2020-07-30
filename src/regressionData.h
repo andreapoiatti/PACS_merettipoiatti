@@ -2,7 +2,7 @@
 #define __REGRESSIONDATA_HPP__
 
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "param_functors.h"
 
 //!  An IO handler class for objects passed from R

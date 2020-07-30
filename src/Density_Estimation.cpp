@@ -2,11 +2,12 @@
 #include "Skeletons/DE_Skeleton.h"
 #include "Skeletons/DE_Initialization_Skeleton.h"
 #include "regressionData.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
+#include "Finite_Elements/Integration.h"
 #include "mesh.h"
 #include "finite_element.h"
 #include "matrix_assembler.h"
-#include "solverdefinitions.h"
+#include "Global_Utilities/Solver_Definitions.h"
 //#include <chrono>
 
 #include "mixedFERegression.h"

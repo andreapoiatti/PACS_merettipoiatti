@@ -2,6 +2,7 @@
 #define _PREPROCESS_FACTORY_HPP_
 
 #include <memory>
+#include "Global_Utilities/Make_Unique.h"
 
 //! @brief A Factory class: a class for the choice of the cross-validation method.
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>

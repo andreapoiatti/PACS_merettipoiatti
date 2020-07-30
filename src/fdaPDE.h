@@ -1,5 +1,5 @@
-#ifndef FDAPDE_H_
-#define FDAPDE_H_
+#ifndef __FDAPDE_H__
+#define __FDAPDE_H__
 
 // Insert principal libraries
 #define R_NO_REMAP
@@ -16,7 +16,7 @@
 #include <vector>
 #include <stack>
 #include <set>
-#include "make_unique.h"
+#include "Global_Utilities/Make_Unique.h"
 
 // For debugging purposes
 //#include <Eigen/StdVector>

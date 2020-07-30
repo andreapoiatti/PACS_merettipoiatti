@@ -1,5 +1,5 @@
-#ifndef __MIXEDFEREGRESSION_IMP_HPP__
-#define __MIXEDFEREGRESSION_IMP_HPP__
+#ifndef __MIXEDFEREGRESSION_IMP_H__
+#define __MIXEDFEREGRESSION_IMP_H__
 
 #include <iostream>
 #include <chrono>

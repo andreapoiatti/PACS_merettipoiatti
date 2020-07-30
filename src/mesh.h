@@ -2,7 +2,7 @@
 #define MESH_H_
 
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "bounding_box.h"
 #include "tree_header.h"
 #include "domain.h"

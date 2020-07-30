@@ -2,6 +2,7 @@
 #define __MIXEDFEFPCAFACTORY_HPP__
 
 #include "fdaPDE.h"
+#include "Global_Utilities/Make_Unique.h"
 #include "finite_element.h"
 #include "matrix_assembler.h"
 #include "mesh.h"

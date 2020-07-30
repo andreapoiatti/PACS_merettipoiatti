@@ -1,5 +1,5 @@
-#ifndef __FINITE_ELEMENT_IMP_HPP__
-#define __FINITE_ELEMENT_IMP_HPP__
+#ifndef __FINITE_ELEMENT_IMP_H__
+#define __FINITE_ELEMENT_IMP_H__
 
 #include<iostream>
 

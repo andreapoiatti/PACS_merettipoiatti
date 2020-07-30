@@ -3,12 +3,12 @@
 
 #include "../finite_element.h"
 #include "../fdaPDE.h"
-#include "../mesh_objects.h"
+#include "../Finite_Elements/Mesh_Objects.h"
 #include "../mesh.h"
 #include "../mixedFERegression.h"
 #include "../matrix_assembler.h"
 #include "../regressionData.h"
-#include "../solverdefinitions.h"
+#include "../Global_Utilities/Solver_Definitions.h"
 
 //Density Estimation
 #include "../DataProblem.h"

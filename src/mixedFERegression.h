@@ -1,5 +1,5 @@
-#ifndef __MIXEDFEREGRESSION_HPP__
-#define __MIXEDFEREGRESSION_HPP__
+#ifndef __MIXEDFEREGRESSION_H__
+#define __MIXEDFEREGRESSION_H__
 
 #include "fdaPDE.h"
 #include "finite_element.h"

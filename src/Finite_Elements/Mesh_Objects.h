@@ -2,7 +2,7 @@
 #define __MESH_OBJECTS_H__
 
 
-#include "fdaPDE.h"
+#include "../fdaPDE.h"
 
 //Accord the NotValid meaning value
 //const UInt NVAL=std::numeric_limits<UInt>::max();
@@ -42,7 +42,7 @@ public:
 	static const UInt myDim=3;  //mydim is the dimension of the object
 	//set as default 3
    //myDim setting is used when calling T::dp() as template (used in domain_imp.h)
-	
+
 	Point(): Identifier(NVAL, NVAL){coord_.resize(3);
 			ndim=3;}
    	Point(Real x, Real y):Identifier(NVAL, NVAL)
@@ -68,7 +68,7 @@ public:
 
 private:
 	std::vector<Real> coord_;
-							  
+
 };
 
 
@@ -167,7 +167,7 @@ public:
 
 	// Returns the number of physical space dimension.
 	inline static constexpr int dp() { return nDim; }
-	
+
 	// Returns the number of dimensions used for the search (2*2)
 	inline static constexpr int dt() { return nDim*2; }
 
@@ -294,7 +294,7 @@ public:
 
 	// Returns the number of physical space dimension.
 	inline static constexpr int dp() { return nDim; }
-	
+
 	// Returns the number of dimensions used for the search (3*2)
 	inline static constexpr int dt() { return nDim*2; }
 
@@ -340,8 +340,8 @@ private:
 
 //fine implementazione triangolo 3d
 
-//!  This class implements a Tetrahedron as an objects composed by four or ten nodes, embedded in a 3-dimensional space. 
-// Currently, only the 4 nodes version is implemented. 
+//!  This class implements a Tetrahedron as an objects composed by four or ten nodes, embedded in a 3-dimensional space.
+// Currently, only the 4 nodes version is implemented.
 // The tetrahedron is an Element with mydim=3 and ndim=3
 
 template <UInt NNODES>
@@ -371,7 +371,7 @@ public:
 	tmp[3]=(Point(points[9],points[10],points[11]));
 	points_ = tmp;
 	this->computeProperties();
-	}	
+	}
 
 	//! Overloading of the operator [],  taking the Node number and returning a node as Point object.
     /*!
@@ -383,7 +383,7 @@ public:
 
 	// Returns the number of physical space dimension.
 	inline static constexpr int dp() { return nDim; }
-	
+
 	// Returns the number of dimensions used for the search (3*2)
 	inline static constexpr int dt() { return nDim*2; }
 
@@ -432,7 +432,7 @@ private:
 };
 
 
-//fine implementazione tetraedro 3d 
+//fine implementazione tetraedro 3d
 
 
 
@@ -543,7 +543,7 @@ inline Eigen::Matrix<Real,2,1> evaluate_der_point<6,2,2>(const Element<6,2,2>& t
 
 template <>
 inline Eigen::Matrix<Real,3,1> evaluate_der_point<4,3,3>(const Element<4,3,3>& t, const Point& point, const Eigen::Matrix<Real,4,1>& coefficients)
-{	
+{
 
 	Eigen::Matrix<Real,3,4> B1;
 	B1 << -1,1,0,0,
@@ -560,7 +560,7 @@ inline Eigen::Matrix<Real,3,1> evaluate_der_point<4,3,3>(const Element<4,3,3>& t
 	B1(2,0)=-t.getM_J()(1,1)*t.getM_J()(2,0) + t.getM_J()(1,0)*t.getM_J()(2,1);
 	B1(2,1)= t.getM_J()(0,1)*t.getM_J()(2,0) - t.getM_J()(0,0)*t.getM_J()(1,2);
 	B1(2,2)=-t.getM_J()(0,1)*t.getM_J()(1,0) + t.getM_J()(0,0)*t.getM_J()(1,1);
-	
+
 	B1 = B1 / (6*std::sqrt(t.getDetJ()));
 	*/
 
@@ -570,5 +570,5 @@ inline Eigen::Matrix<Real,3,1> evaluate_der_point<4,3,3>(const Element<4,3,3>& t
 
 
 
-#include "mesh_objects_imp.h"
+#include "Mesh_Objects_imp.h"
 #endif

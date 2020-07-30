@@ -2,11 +2,11 @@
 #define _OPT_ALGO_HPP_
 
 #include <memory>
-
+#include "Global_Utilities/Make_Unique.h"
 #include "DescentDirection.h"
 #include "DescentDirection_factory.h"
 
-// This file contains info of the optimization algorithm of the Density Estimation problem 
+// This file contains info of the optimization algorithm of the Density Estimation problem
 
 //! @brief An abtract base class to perform the minimization algorithm.
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>

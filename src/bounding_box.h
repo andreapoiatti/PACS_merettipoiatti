@@ -4,7 +4,7 @@
 
 
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 
 /**	\class Box
  * 	\brief Policy used when boxes have to be stored in the tree.

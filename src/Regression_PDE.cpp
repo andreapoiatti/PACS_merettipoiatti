@@ -4,7 +4,7 @@
 #include "Skeletons/Regression_Skeleton_Time.h"
 #include "Skeletons/GAM_Skeleton.h"
 #include "regressionData.h"
-#include "integration.h"
+#include "Finite_Elements/Integration.h"
 
 extern "C"
 {

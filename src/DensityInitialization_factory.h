@@ -1,7 +1,8 @@
-#ifndef _DENS_INIT_FACTORY_HPP_
-#define _DENS_INIT_FACTORY_HPP_
+#ifndef __DENSITY_INITIALIZATION_FACTORY_H__
+#define __DENSITY_INITIALIZATION_FACTORY_H__
 
 #include <memory>
+#include "Global_Utilities/Make_Unique.h"
 
 //! brief@ A Factory class: a class for the choice of the density initialization.
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>

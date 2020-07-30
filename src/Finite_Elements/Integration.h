@@ -1,8 +1,8 @@
-#ifndef __INTEGRATION_HPP__
-#define __INTEGRATION_HPP__
+#ifndef __INTEGRATION_H__
+#define __INTEGRATION_H__
 
-#include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "../fdaPDE.h"
+#include "Mesh_Objects.h"
 
 class IntegratorTriangleP2{
 	public:

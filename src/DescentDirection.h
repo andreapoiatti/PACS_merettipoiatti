@@ -1,7 +1,9 @@
 #ifndef _DESCENT_DIRECTION_HPP_
 #define _DESCENT_DIRECTION_HPP_
 
-// This file contains the direction search technique useful for the optimization algorithm of the Density Estimation problem 
+#include "Global_Utilities/Make_Unique.h"
+
+// This file contains the direction search technique useful for the optimization algorithm of the Density Estimation problem
 
 /*! @brief An abstract class for computing the descent direction. The father is pure virtual; the right direction
 is computed inside the children according to a proper method chosen.

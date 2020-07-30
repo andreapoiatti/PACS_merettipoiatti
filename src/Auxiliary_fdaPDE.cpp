@@ -1,6 +1,6 @@
 #include "fdaPDE.h"
 #include "Skeletons/Auxiliary_Skeleton.h"
-#include "integration.h"
+#include "Finite_Elements/Integration.h"
 
 extern "C"
 {

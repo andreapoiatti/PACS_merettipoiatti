@@ -12,7 +12,7 @@
 
 #include "fdaPDE.h"
 #include "tree_header.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "bounding_box.h"
 #include "domain.h"
 #include "treenode.h"
@@ -93,8 +93,8 @@ public:
 
   // constructor in case there is already tree information
   ADTree(TreeHeader<Shape> const & header, std::vector<TreeNode<Shape>> const & data):header_(header), data_(data) {};
-  
-  /** It fills all the locations of the tree. Object's coordinates are stored to perform searching operations. 
+
+  /** It fills all the locations of the tree. Object's coordinates are stored to perform searching operations.
    * 	See mesh_handler to verify what points and triangle must contain.
    */
   ADTree(Real const * const points, UInt const * const triangle, UInt num_nodes, UInt num_triangle);

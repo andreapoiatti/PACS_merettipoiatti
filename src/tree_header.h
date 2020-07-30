@@ -9,7 +9,7 @@
 #define TREE_HEADER_H_
 
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "bounding_box.h"
 #include "domain.h"
 #include "treenode.h"
@@ -19,11 +19,11 @@
 
 /**	\class Header
  * 	\brief It contains general information about the tree.
-* 	\param	T The template parameter expresses the original objects for the construction of the tree, it is used to store Domain<T>, 
+* 	\param	T The template parameter expresses the original objects for the construction of the tree, it is used to store Domain<T>,
 				T::dp() gives the physical dimension of the object and T::dt() gives the search dimension \n
  * 				The tree always store Box<NDIMP> and the index to find the original object (Triangle...).
  				If we want to store a point, we have to create a box from point.
- 				(for example repeating the same coordinates for Min_point and Max_point) 
+ 				(for example repeating the same coordinates for Min_point and Max_point)
  				In the simplest case, or to change the structure adding the poin case everywhere (treenode...)
  *
  * 	Default copy constructor and default destructor work fine.
@@ -47,7 +47,7 @@ protected:
 	int nele_;
 
 	/**	@name Tree indices
-	 *	The use of iava and iend avoids the necessity of initializing the stack of available locations. 
+	 *	The use of iava and iend avoids the necessity of initializing the stack of available locations.
 	 * In fact, the stack contains only locations that have been previously deleted from the tree.
 	 */
 	//@{
@@ -69,7 +69,7 @@ protected:
 
 	// Tree's domain.
 	Domain<T> tree_domain_;
-	
+
 	/**	A protected constructor.
 	 *
 	 *	\param[in] ntree Tree dimension needed.
@@ -87,13 +87,13 @@ public:
 	 * 	It's fundamental in creating an ADTree object from a MeshFile::ff2dmesh or a MeshFile::ff3dmesh object.
 	 */
 	TreeHeader():tree_loc_(0), tree_lev_(0), ndimp_(T::dp()), ndimt_(T::dt()), nele_(0), iava_(1), iend_(1), tree_domain_(){}
-	
+
 	// constructor in case there is already tree information
-	TreeHeader(int const & tree_loc, int const & tree_lev, int const & ndimp, int const & ndimt, 
+	TreeHeader(int const & tree_loc, int const & tree_lev, int const & ndimp, int const & ndimt,
 		int const & nele, int const & iava, int const & iend, Domain<T> const & tree_domain):
-			tree_loc_(tree_loc), tree_lev_(tree_lev), ndimp_(ndimp), ndimt_(ndimt), 
+			tree_loc_(tree_loc), tree_lev_(tree_lev), ndimp_(ndimp), ndimt_(ndimt),
 			nele_(nele), iava_(iava), iend_(iend), tree_domain_(tree_domain){}
-	
+
 	/// Gets the number of tree memory locations.
 	inline int gettreeloc() const { return tree_loc_; }
 	/// Sets the number of tree memory locations (handles a LocLengthError exception).

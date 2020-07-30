@@ -2,6 +2,7 @@
 #define _DESC_DIR_CONST_HPP
 
 #include <memory>
+#include "Global_Utilities/Make_Unique.h"
 
 //! brief@ A Factory class: a class for the choice of the step mehod for the optimization algorithm.
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>

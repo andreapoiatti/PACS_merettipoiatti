@@ -1,5 +1,5 @@
 #include "fdaPDE.h"
-#include "mesh_objects.h"
+#include "Finite_Elements/Mesh_Objects.h"
 #include "bounding_box.h"
 #include "domain.h"
 #include "treenode.h"
@@ -9,17 +9,17 @@
 
 extern "C"{
 void Test_Point_c(int *n){
-	
+
 	try{
 	//2-dimen
 	Point a(10,20);     //Point with coordinates
 	Point b(1,2,15,25); //Point with Id, bcId and coordinates
-	
+
 	//3-dimen
 	Point c;	//default constructor
 	Point d(10,20,30);     //Point with coordinates
 	Point e(1,2,15,25,35); //Point with Id, bcId and coordinates
-	
+
 	std::cout << std::endl << std::endl;
 	std::cout << "Print the 1st point (inizialized by 2-dimen coordinates):  " <<std::endl;
 	a.print(std::cout);
@@ -62,8 +62,8 @@ void Test_Point_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
 
@@ -98,19 +98,19 @@ void Test_Element_c(int *n){
 
 	std::vector<Point> vec3{g,h,i};
 	std::vector<Point> vec4{g,h,i,j};
-	
+
 	//case 2: Triangle in 3-dimen
 	Element<3,2,3> Te;		//default constructor
 	Element<3,2,3> Tf(3, vec3);	//constructor from id and a vector of point
 
 	//case 3: Tetrahedron in 3-dimen (there are 4 nodes for tetrahedron)
 	Element<4,3,3> Tg(4, vec4);	//constructor from id and a vector of point
-	
+
 
 	std::cout << "Print the 1st triangle in 2 dimension (default constructor, 3 nodes):  " <<std::endl;
 	Ta.print(std::cout);
 	std::cout << "Print each node: " << std::endl;
-	Ta[0].print(std::cout); 
+	Ta[0].print(std::cout);
 	Ta[1].print(std::cout);
 	Ta[2].print(std::cout);
 	std::cout << "physical dimension:  " << Ta.dp() <<std::endl;
@@ -122,10 +122,10 @@ void Test_Element_c(int *n){
 	std::cout << "Print the 2nd triangle 2 dimension (default constructor, 6 nodes):  " <<std::endl;
 	Tb.print(std::cout);
 	std::cout << "Print each node: " << std::endl;
-	Tb[0].print(std::cout); 
+	Tb[0].print(std::cout);
 	Tb[1].print(std::cout);
 	Tb[2].print(std::cout);
-	Tb[3].print(std::cout); 
+	Tb[3].print(std::cout);
 	Tb[4].print(std::cout);
 	Tb[5].print(std::cout);
 	std::cout << "physical dimension:  " << Tb.dp() <<std::endl;
@@ -137,7 +137,7 @@ void Test_Element_c(int *n){
 	std::cout << "Print the 3rd triangle 2 dimension (construct by coordinates Points a(1,2,1,1), b(2,3,3,1),c(3,4,2,2), 3 nodes):  " <<std::endl;
 	Tc.print(std::cout);
 	std::cout << "Print each node: " << std::endl;
-	Tc[0].print(std::cout); 
+	Tc[0].print(std::cout);
 	Tc[1].print(std::cout);
 	Tc[2].print(std::cout);
 	std::cout << "physical dimension:  " << Tc.dp() <<std::endl;
@@ -145,7 +145,7 @@ void Test_Element_c(int *n){
 	std::cout << "test: is point (2, 1.5) inside? (1 if true): " << Tc.isPointInside(test)<<std::endl;
 	std::cout << "coordsize():  " << Tc.coordsize() << std::endl;
 	std::cout << std::endl << std::endl;
-	
+
 	std::cout << "Print the 4th triangle 2 dimension (construct by coordinates Points a(1,2,1,1), b(2,3,3,1), c(3,4,2,2), d(4,5,2.5,1.5), e(5,6,1.5,1.5), f(6,7,2,1), 6 nodes):  " <<std::endl;
 	Td.print(std::cout);
 	std::cout << "Print each node: " << std::endl;
@@ -202,7 +202,7 @@ void Test_Element_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
+	*n = 1;
 	}
 }
 }
@@ -210,7 +210,7 @@ void Test_Element_c(int *n){
 
 extern "C"{
 void Test_Box_c(int *n){
-	
+
 	try{
 	//Point in 2-dimen
 	Point a(1,2,1,1); //Point with Id, bcId and coordinates
@@ -225,15 +225,15 @@ void Test_Box_c(int *n){
 	std::vector<Point> vec{a,b,c};
 	std::vector<Point> vec2{a,b,c,d,e,f};
 	Element<3,2,2> Tb(1, vec);
-	Element<6,2,2> Td(2, vec2);	
-	
-	
+	Element<6,2,2> Td(2, vec2);
+
+
 	//Point in 3-dimen
 	Point g(1,2,1,1,2); //Point with Id, bcId and coordinates
 	Point h(2,3,3,1,3); //Point with Id, bcId and coordinates
 	Point i(3,4,2,2,1); //Point with Id, bcId and coordinates
 	Point j(4,5,4,3,2); //Point with Id, bcId and coordinates
-	
+
 	//******* node validation to be tested
 	// Point d(4,5,2.5,1.5); //Point with Id, bcId and coordinates
 	// Point e(5,6,1.5,1.5); //Point with Id, bcId and coordinates
@@ -246,12 +246,12 @@ void Test_Box_c(int *n){
 	//Tetrahedron in 3-dimen
 	std::vector<Point> vec4{g,h,i,j};
 	Element<3,3,3> Tc(4, vec4);
-	
+
 	std::vector<Real> coord{1,1,4,3};
 	std::vector<Real> coord2{1,1,1,4,3,5};
 	std::vector<Real> coord3{2,2,5,4};
 	std::vector<Real> coord4{2,2,2,5,4,6};
-	
+
 
 	//case 1: Triangle with 2-dimen Box
 	Box<2> Ba;	//default constructor, 2D box
@@ -267,7 +267,7 @@ void Test_Box_c(int *n){
 
 	//case 3: Tetrahedron with 3-dimen Box
 	Box<3> Bi(Tc);	//construct from a Element<3,3,3>
-	
+
 
 	std::cout << "Print the 1st box (default constructor, NDIMP = 2):  " <<std::endl;
 	Ba.print(std::cout);
@@ -387,14 +387,14 @@ void Test_Box_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
+	*n = 1;
 	}
 }
 }
 
 extern "C"{
 void Test_Domain_c(int *n){
-	
+
 	try{
 	std::vector<std::vector<Real>> coord;
 	coord.resize(2);
@@ -402,7 +402,7 @@ void Test_Domain_c(int *n){
 	{
 		coord[i].resize(10);
 		for(int j = 0; j < 10; j++)
-			coord[i][j] = i+j;	
+			coord[i][j] = i+j;
 	}
 	// 0 1 2 3 4 5 6 7 8 9
 	// 1 2 3 4 5 6 7 8 9 10
@@ -419,7 +419,7 @@ void Test_Domain_c(int *n){
 	// 1 2 3 4 5 6 7 8 9  10
 	// 2 3 4 5 6 7 8 9 10 11
 
-	
+
 
 	//default constructor
 	Domain<Point> Pa;
@@ -428,7 +428,7 @@ void Test_Domain_c(int *n){
 
 	Domain<Element<3,2,3>> Tb;
 	Domain<Box<3>> Bb;
-	
+
 	Domain<Element<3,3,3>> Tc;
 	Domain<Box<3>> Bc;
 
@@ -445,8 +445,8 @@ void Test_Domain_c(int *n){
 
 	Domain<Element<3,3,3>> Tf(coord2);
 	Domain<Box<3>> Bf(coord2);
-	
-	
+
+
 	std::cout << "Print the 1st domain (constructor default, shape = Point, NDIMP = 3):  " <<std::endl;
 	std::cout << Pa << std::endl;
 	std::cout << "origin of the object: " << std::endl;
@@ -595,7 +595,7 @@ void Test_Domain_c(int *n){
 	// Bc.setmindiff(0.005);
 	// std::cout << "print new minimum difference between coordinates:  " << Bc.getmindiff() << std::endl;
 	std::cout << std::endl << std::endl;
-	
+
 
 	std::cout << "Print the 8th domain (constructor from coordinates (x1 from 0 to 9, x2 from 1 to 10), shape = Point, NDIMP = 2):  " <<std::endl;
 	std::cout << Pd << std::endl;
@@ -769,7 +769,7 @@ void Test_Domain_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
+	*n = 1;
 	}
 
 }
@@ -778,15 +778,15 @@ void Test_Domain_c(int *n){
 
 extern "C"{
 void Test_TreeNode_c(int *n){
-	
+
 	try{
-	
+
 	Point a(1,2,1,1); //Point with Id, bcId and coordinates
 	Point b(2,3,3,1); //Point with Id, bcId and coordinates
 	Point c(3,4,2,2); //Point with Id, bcId and coordinates
 
 	std::vector<Point> vec{a,b,c};
-	
+
 	Point e(1,1,1,1,1);
 	Point f(1,1,3,1,1);
 	Point g(1,1,2,1,3);
@@ -797,7 +797,7 @@ void Test_TreeNode_c(int *n){
 	Element<3,2,2> triangle(1, vec);
 	Element<3,2,3> triangle2(2, vec2);
 	Element<3,3,3> tetrahedron(3, vec3);
-	
+
 	std::vector<Real> coord{0,1,2,3}; //used below to set new coord
 	// {100, 24, 35, 21}; ************doesn't validate xmin, ymin, xmax, ymax
 	std::vector<Real> coord1 {1,1,4,3};
@@ -819,7 +819,7 @@ void Test_TreeNode_c(int *n){
 	TreeNode<Element<3,2,2>> treec(1, triangle); //3rd
 	TreeNode<Element<3,2,3>> treed(2, triangle2); //4th
 	TreeNode<Element<3,3,3>> treee(3, tetrahedron); //5th
-	
+
 
 	TreeNode<Box<2>> treef(2, ba); //6th
 	TreeNode<Box<3>> treeg(3, bb); //7th
@@ -1069,14 +1069,14 @@ void Test_TreeNode_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
 
 extern "C"{
 void Test_TreeHeader_c(int *n){
-	
+
 	try{
 	std::vector<std::vector<Real>> coord;
 	coord.resize(2);
@@ -1084,7 +1084,7 @@ void Test_TreeHeader_c(int *n){
 	{
 		coord[i].resize(10);
 		for(int j = 0; j < 10; j++)
-			coord[i][j] = i+j;	
+			coord[i][j] = i+j;
 	}
 	// 0 1 2 3 4 5 6 7 8 9
 	// 1 2 3 4 5 6 7 8 9 10
@@ -1114,7 +1114,7 @@ void Test_TreeHeader_c(int *n){
 	TreeHeader<Element<3,3,3>> THc; //3rd
 	TreeHeader<Box<2>> THd; //4th
 	TreeHeader<Box<3>> THe; //5th
-	
+
 	//Default consturctor with createtreeheader function
 	TreeHeader<Element<3,2,2>> THf = createtreeheader(1, mydomb); //6th
 	TreeHeader<Element<3,2,3>> THg = createtreeheader(2, mydomc); //7th
@@ -1467,15 +1467,15 @@ void Test_TreeHeader_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
 
 
 extern "C"{
 void Test_ADTree1_c(int *n){
-	
+
 	try{
 	//costruisco una mesh semplice a mano salvata come quella che serve al costruttore
 	/* the simple mesh is:
@@ -1527,10 +1527,10 @@ void Test_ADTree1_c(int *n){
 	// TreeHeader<Element<3,3,3>> THc;
 	// TreeHeader<Box<2>> THd;
 	// TreeHeader<Box<3>> THe;
-	
+
 
 	//default constructor
-	// ADTree<Element<3,2,2>> ADTa; //1st		
+	// ADTree<Element<3,2,2>> ADTa; //1st
 	// ADTree<Element<3,2,3>> ADTb; //2nd
 	// ADTree<Element<3,3,3>> ADTc; //3rd
 	// ADTree<Box<2>> ADTd; //4th
@@ -1543,7 +1543,7 @@ void Test_ADTree1_c(int *n){
 	// ADTree<Box<2>> ADTi(THd); //9th
 	// ADTree<Box<3>> ADTj(THe); //10th
 
-	
+
 	//*************only possible for triangle to have this kind of constructor
 	//constructor from 2D/2.5D/3D mesh
 	ADTree<Element<3,2,2>> ADTk(points, triangle, num_nodes, num_triangle); //11th
@@ -1551,7 +1551,7 @@ void Test_ADTree1_c(int *n){
 	// ADTree<Element<3,3,3>> ADTm(points, triangle, num_nodes, num_triangle); //13th
 	///*******Can there be ADTree<Box<2>> or ADTree<Box<3>> as well??? I assume that
 	//*********Shape will always be Element so I am using that logic at ADTree constructor
-	
+
 
 
 
@@ -1614,21 +1614,21 @@ void Test_ADTree1_c(int *n){
 	(ADTk.gettreenode(*i)).print(std::cout);
 	}
 	std::cout << std::endl << std::endl;
-	
+
 	*n = 0;
 	}
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
 
 
 extern "C"{
 void Test_ADTree2_c(int *n){
-	
+
 	try{
 	//costruisco una mesh semplice a mano salvata come quella che serve al costruttore
 	/* the simple mesh is:
@@ -1668,7 +1668,7 @@ void Test_ADTree2_c(int *n){
 	|0 /|2 /|4 /|6 /|
 	| / | / | / | / |
 	|/_1|/_3|/_5|/_7|
-*/ 
+*/
 	UInt num_nodes = 25;
 	UInt num_triangle = 32;
 	Real points[] = {0., 0.25, 0.5, 0.75, 1., 0.,   0.25, 0.5,  0.75,  1.,   0.,  0.25, 0.5, 0.75, 1.,  0.,   0.25, 0.5,  0.75, 1.,   0., 0.25, 0.5, 0.75, 1.,
@@ -1687,17 +1687,17 @@ void Test_ADTree2_c(int *n){
 	std::set<int> found;
 	int loc;
 
-	
+
 	//default tree_header
 	// TreeHeader<Element<3,2,2>> THa;
 	// TreeHeader<Element<3,2,3>> THb;
 	// TreeHeader<Element<3,3,3>> THc;
 	// TreeHeader<Box<2>> THd;
 	// TreeHeader<Box<3>> THe;
-	
+
 
 	//default constructor
-	// ADTree<Element<3,2,2>> ADTa; //1st		
+	// ADTree<Element<3,2,2>> ADTa; //1st
 	// ADTree<Element<3,2,3>> ADTb; //2nd
 	// ADTree<Element<3,3,3>> ADTc; //3rd
 	// ADTree<Box<2>> ADTd; //4th
@@ -1710,7 +1710,7 @@ void Test_ADTree2_c(int *n){
 	// ADTree<Box<2>> ADTi(THd); //9th
 	// ADTree<Box<3>> ADTj(THe); //10th
 
-	
+
 	//*************only possible for triangle to have this kind of constructor
 	//constructor from 2D/2.5D/3D mesh
 	ADTree<Element<3,2,2>> ADTk(points, triangle, num_nodes, num_triangle); //11th
@@ -1718,7 +1718,7 @@ void Test_ADTree2_c(int *n){
 	// ADTree<Element<3,3,3>> ADTm(points, triangle, num_nodes, num_triangle); //13th
 	///*******Can there be ADTree<Box<2>> or ADTree<Box<3>> as well??? I assume that
 	//*********Shape will always be Element so I am using that logic at ADTree constructor
-	
+
 
 
 
@@ -1781,24 +1781,24 @@ void Test_ADTree2_c(int *n){
 	(ADTk.gettreenode(*i)).print(std::cout);
 	}
 	std::cout << std::endl << std::endl;
-	
+
 	*n = 0;
 	}
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
 
 
 extern "C"{
 void Test_MeshHandler_c(int *n){
-	
+
 	try{
 	//costruisco una mesh semplice a mano salvata come quella che serve al costruttore
-	Real points[] = {0., 0.5, 1.,  0., 0.5,  1.,  0., 0.5, 1., 
+	Real points[] = {0., 0.5, 1.,  0., 0.5,  1.,  0., 0.5, 1.,
 					 0., 0.,  0., 0.5, 0.5,  0.5, 1., 1.,  1.};
 	UInt triangle[] = {0,0,1,1,3,3,4,4,
 					   4,1,5,2,7,4,8,5,
@@ -1840,7 +1840,7 @@ void Test_MeshHandler_c(int *n){
 
 
 
-*/ 
+*/
 	MeshHandler<1,2,2> mesh(points, edge, triangle, neighbors, num_nodes, num_edges, num_triangle);
 	Element<3,2,2> res;
 
@@ -1852,7 +1852,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationTree(point1);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1862,7 +1862,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationNaive(point1);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1874,7 +1874,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationTree(point2);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1884,7 +1884,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationNaive(point2);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1895,7 +1895,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationTree(point3);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1905,7 +1905,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationNaive(point3);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1916,7 +1916,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationTree(point4);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1926,7 +1926,7 @@ void Test_MeshHandler_c(int *n){
 	res = mesh.findLocationNaive(point4);
 	res.print(std::cout);
 	res[0].print(std::cout);
-	std::cout << std::endl; 
+	std::cout << std::endl;
 	res[1].print(std::cout);
 	std::cout << std::endl;
 	res[2].print(std::cout);
@@ -1943,14 +1943,7 @@ void Test_MeshHandler_c(int *n){
 	catch(...)
 	{
 	std::cout <<"Exception caugth " << std::endl;
-	*n = 1;	
-	}	
+	*n = 1;
+	}
 }
 }
-
-
-
-
-
-
-

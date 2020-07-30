@@ -1,3 +1,6 @@
+#ifndef __TIMING_H__
+#define __TIMING_H__
+
 #include <iostream>
 #include <iomanip>
 #include <ctime>
@@ -33,7 +36,7 @@ public:
 
   timespec stop() {
     timespec end;
-    
+
     #ifdef __MACH__ // OS X does not have clock_gettime, use clock_get_time
     clock_serv_t cclock;
     mach_timespec_t mts;
@@ -71,3 +74,5 @@ private:
 private:
   timespec begin;
 };
+
+#endif
