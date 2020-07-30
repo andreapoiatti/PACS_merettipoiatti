@@ -1,3 +1,27 @@
+# fdaPDE 1.1-1
+
+## New features
+
+1) smooth regression for non-gaussian data (GLM model)
+
+# fdaPDE 1.1-0
+
+## New features
+
+1) smooth regression for space-time data
+2) density estimation
+3) faster search algorithm 
+
+# fdaPDE 1.0-8
+
+## Bug fixes
+Compilation errors with clang fixed.
+
+# fdaPDE 1.0-7
+
+## Bug fixes
+Compilation error in macOS fixed.
+
 # fdaPDE 1.0-6
 
 ## Bug fixes
