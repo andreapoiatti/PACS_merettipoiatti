@@ -232,7 +232,7 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 
 	psi_.makeCompressed();
 
-	// Additional storae of the transposed
+	// Additional storage of the transposed
 	psi_t_ = SpMat(psi_.transpose());
 	psi_t_.makeCompressed(); // Compress sparse matrix
 
@@ -328,6 +328,9 @@ void MixedFERegressionBase<InputHandler>::setA(const MeshHandler<ORDER, mydim, n
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::setDMat(void)
 {
+        //Additional storage of the transpose, which changes in case of spacetime
+	psi_t_ = SpMat(psi_.transpose());
+	psi_t_.makeCompressed(); // Compress sparse matrix
 
 	if(regressionData_.getWeightsMatrix()->size() == 0) // no weights
 		DMat_ = psi_;
@@ -856,8 +859,6 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 		isPsiComputed = true;
 	}
 
-	setDMat();	// Set matrix DMat for NOT temporal case
-
 	// If there are covariates in the model set H and Q
 	if(Wp->rows() != 0)
 	{
@@ -887,6 +888,8 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	{
 		this->template buildSpaceTimeMatrices<IntegratorTime, SPLINE_DEGREE, ORDER_DERIVATIVE>();
 	}
+
+	setDMat();	// Set matrix DMat for all cases
 
 	// Debugging purpose
 	Rprintf("Preliminary problem matrices building phase completed\n");
