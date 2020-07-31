@@ -96,30 +96,51 @@ template<typename InputHandler>
 template<UInt ORDER, UInt mydim, UInt ndim>
 void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_)
 {
-	UInt nnodes = mesh_.num_nodes();
+	// Psi is a nlocations x nnodes  matrix, first fetch the dimensions
+	UInt nnodes = mesh_.num_nodes();	// Define the number of nodes
+	// Set the number of locations depending on presence or not of temporal data
 	UInt nlocations = regressionData_.isSpaceTime() ? regressionData_.getNumberofSpaceObservations() : regressionData_.getNumberofObservations();
+	psi_.resize(nlocations, nnodes);	// Resize the matrix
 
-	psi_.resize(nlocations, nnodes);
-	if (regressionData_.isLocationsByNodes() & !regressionData_.isLocationsByBarycenter()) //pointwise data
+	// Optimized strategies according to the presence of locations
+	if(regressionData_.isLocationsByNodes() & !regressionData_.isLocationsByBarycenter()) // .Pointwise data -- no barycenters
 	{
 		std::vector<coeff> tripletAll;
-		if(!regressionData_.isSpaceTime())
+		if(!regressionData_.isSpaceTime()) // Just spatial case
 		{
-			const auto k = regressionData_.getObservationsIndices();
-			tripletAll.reserve(k->size());
-			for (int i = 0; i< k->size(); ++i){
+			// THEORETICAL REMARK:
+			// If isLocationsByNodes is active it entails that nodes are used as locations
+			// However, maybe, NOT IN ALL nodes evaluations are performed: some might be utility nodes not
+			// associated with values:
+			// e.g. think about a triangle with 6 nodes, probably only the main 3 might be associated
+			// with a value with the others not, but this is only one possible choice:
+			// The efficent fact is that anyway Phi_j(p_i) will be either 1 if i is the Lagrange
+			// node of j or 0 if it is not. Note that since Phi are as many as the nodes, but only
+			// some of the nodes are locations some columns of Phi = [Phi_j(p_i)]_ij might be of
+			// all zeros: i.e. that Phi_j is linked to a node which is not a location since it's value is NA.
+			// In such a case Phi is NOT a sqare matrix and there are more culumns than rows
+			// If all nodes == locations then Phi == square Identity, but this is just a particular case
+			// and, even though isLocationsByNodes is true, this might not be veriefied
+			const std::vector<UInt> * k = regressionData_.getObservationsIndices();
+			UInt k_size = k->size();
+			tripletAll.reserve(k_size);
+
+			for (UInt i=0; i< k_size; ++i)
+			{
+				// Add a value 1 for each valid index in row i
+				// and column k[i] (under psi_k[i], the associated node)
 				tripletAll.push_back(coeff(i,(*k)[i],1.0));
 			}
 		}
 		else
 		{
 			tripletAll.reserve(nlocations);
-			for (int i = 0; i< nlocations; ++i){
+			for (UInt i=0; i<nlocations; ++i)
+			{
 				tripletAll.push_back(coeff(i,i,1.0));
 			}
 		}
 		psi_.setFromTriplets(tripletAll.begin(),tripletAll.end());
-		psi_.makeCompressed();
 	}
 	else if (regressionData_.isLocationsByBarycenter() && (regressionData_.getNumberOfRegions() == 0)) //pointwise data
 	{
@@ -143,7 +164,6 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 				}
 			}
 		} //end of for loop
-		psi_.makeCompressed();
 	}
 	else if ((!regressionData_.isLocationsByBarycenter()) && (regressionData_.getNumberOfRegions() == 0))
 	{
@@ -178,7 +198,6 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 				}
 			}
 		} //end of for loop
-		psi_.makeCompressed();
 	}
 	else //areal data
 	{
@@ -209,10 +228,11 @@ void MixedFERegressionBase<InputHandler>::setPsi(const MeshHandler<ORDER, mydim,
 			}
 		}
 		free(tab);
-		psi_.makeCompressed();
 	}
 
-	//ADDED
+	psi_.makeCompressed();
+
+	// Additional storae of the transposed
 	psi_t_ = SpMat(psi_.transpose());
 	psi_t_.makeCompressed(); // Compress sparse matrix
 
@@ -276,24 +296,29 @@ template<typename InputHandler>
 template<UInt ORDER, UInt mydim, UInt ndim>
 void MixedFERegressionBase<InputHandler>::setA(const MeshHandler<ORDER, mydim, ndim> & mesh_)
 {
-	UInt nRegions = regressionData_.getNumberOfRegions();
+	UInt nRegions = regressionData_.getNumberOfRegions();	// Number of regions for areal partition
+	// If the problem is temporal, m stores the number of temporal nodes, else is defaulted as 1
 	UInt m = regressionData_.isSpaceTime() ? regressionData_.getNumberofTimeObservations():1;
-	if( !this->regressionData_.isArealDataAvg() ){//areal data for FPIRLS
-		A_ = VectorXr::Ones(m*nRegions);
-	}else{
-		A_=VectorXr::Zero(m*nRegions);
-		for (int i=0; i<nRegions; i++)
+	if(!this->regressionData_.isArealDataAvg())
+	{ //areal data for FPIRLS
+		A_ = VectorXr::Ones(m*nRegions);	// vector of pure ones
+	}
+	else
+	{
+		A_ = VectorXr::Zero(m*nRegions);	// neutral vector to be filled
+		for(UInt i=0; i<nRegions; i++)		// fill the vector
 		{
-			for (int j=0; j<regressionData_.getIncidenceMatrix()->cols(); j++)
+			const MatrixXi * imp = regressionData_.getIncidenceMatrix();
+			for(UInt j=0; j<imp->cols(); j++)
 			{
-				if ((*(regressionData_.getIncidenceMatrix()))(i,j) == 1)
+				if((*imp)(i,j) == 1)	// Valid input for region
 				{
-					A_(i)+=mesh_.elementMeasure(j);
+					A_(i) += mesh_.elementMeasure(j); // Add area
 				}
 			}
-			for(int k=1; k<m; k++)
+			for(UInt k=1; k<m; k++) // if m=1 we avoid the step
 			{
-				A_(i+k*nRegions)=A_(i);
+				A_(i+k*nRegions) = A_(i); // Replicate the vector m times
 			}
 		}
 	}
@@ -815,14 +840,17 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 {
 	const MatrixXr * Wp = regressionData_.getCovariates();
 
-	UInt nnodes = N_*M_;
+	UInt nnodes = N_*M_;	// total number of spatio-temporal nodes
 	FiniteElement<IntegratorSpace, ORDER, mydim, ndim> fe;
 
-	if(regressionData_.getNumberOfRegions()>0 && !isAComputed){
+	// Set Areal data if present and no already done
+	if(regressionData_.getNumberOfRegions()>0 && !isAComputed)
+	{
 		this->template setA<ORDER, mydim, ndim>(mesh_);
 		isAComputed = true;
 	}
 
+	// Set psi matrix if not already done
 	if(!isPsiComputed){
 		this->template setPsi<ORDER, mydim, ndim>(mesh_);
 		isPsiComputed = true;

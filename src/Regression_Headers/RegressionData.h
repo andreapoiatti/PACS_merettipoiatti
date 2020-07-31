@@ -439,6 +439,6 @@ typedef RegressionDataGAM<RegressionDataElliptic> GAMDataElliptic;
 /**  GAMDataEllipticSpaceVarying type definition */
 typedef RegressionDataGAM<RegressionDataEllipticSpaceVarying> GAMDataEllipticSpaceVarying;
 
-#include "regressionData_imp.h"
+#include "RegressionData_imp.h"
 
 #endif
