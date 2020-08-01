@@ -198,7 +198,7 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda){
                         this->model->set_lambda(lambda); // set the lambda value
-                        return (this->model->apply_to_b(b))(0,0);} //specific for spatial case
+                        return this->model->apply_to_b(b);} //specific for spatial case
 
                 //! Method to the system given a lambda [rith hand sde is the usual of the problem]
                 /*!
