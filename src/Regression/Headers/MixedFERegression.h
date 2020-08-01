@@ -96,9 +96,9 @@ class MixedFERegressionBase
 		template<UInt ORDER, UInt mydim, UInt ndim>
 	        void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A method computing the no-covariates version of the system matrix
-		void buildMatrixNoCov(const SpMat& SWblock,  const SpMat& SEblock);
+		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
 		//! A function that given a vector u, performs Q*u efficiently
-		MatrixXr LeftMultiplybyQ(const MatrixXr& u);
+		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 		//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 		void addDirichletBC();
 		//! A function which adds Dirichlet boundary conditions only to MatrixnoCov( Remark: BC for areal data are not implemented!)
@@ -108,6 +108,8 @@ class MixedFERegressionBase
 	 	//! A member function which builds the A vector containing the areas of the regions in case of areal data
 	        template<UInt ORDER, UInt mydim, UInt ndim>
 		void setA(const MeshHandler<ORDER, mydim, ndim> & mesh_);
+		//! A member function which sets psi_t_
+		void setpsi_t_(void);
 	        //! A member function which builds DMat, to be changed in apply for the temporal case
 		void setDMat(void);
 		//! A member function which builds the Q matrix
@@ -144,10 +146,10 @@ class MixedFERegressionBase
 
 	public:
 		//!A Constructor.
-		MixedFERegressionBase( const InputHandler & regressionData, const UInt & nnodes_):
+		MixedFERegressionBase( const InputHandler & regressionData, UInt nnodes_):
 			N_(nnodes_), M_(1), regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
 
-		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, const UInt & nnodes_, const UInt & spline_degree):
+		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, UInt nnodes_, UInt spline_degree):
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
 			regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
 
