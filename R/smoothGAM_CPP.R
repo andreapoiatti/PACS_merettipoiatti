@@ -87,7 +87,7 @@ CPP_smooth.GAM.FEM<-function(locations, observations, FEMbasis, covariates = NUL
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ## Call C++ function
@@ -193,7 +193,7 @@ CPP_smooth.GAM.FEM.PDE.basis<-function(locations, observations, FEMbasis, covari
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   
   ## Call C++ function
@@ -305,7 +305,7 @@ CPP_smooth.GAM.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, cov
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ## Call C++ function
@@ -410,7 +410,7 @@ CPP_smooth.manifold.GAM.FEM.basis<-function(locations, observations, FEMbasis, c
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   
   ## Call C++ function
@@ -516,7 +516,7 @@ CPP_smooth.volume.GAM.FEM.basis<-function(locations, observations, FEMbasis, cov
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   
   ## Call C++ function

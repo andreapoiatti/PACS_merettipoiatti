@@ -53,8 +53,7 @@ image(output_CPP$fit.FEM)
 #### Test 1.2: With exact GCV
 GCVFLAG=TRUE
 GCVMETHODFLAG='Exact'
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
 plot(log10(lambda), output_CPP$GCV)
 image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
 

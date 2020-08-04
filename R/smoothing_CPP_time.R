@@ -96,7 +96,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
 
@@ -298,7 +298,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
 
@@ -491,7 +491,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ICsol=NA

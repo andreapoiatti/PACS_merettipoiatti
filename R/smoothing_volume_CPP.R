@@ -78,7 +78,7 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ## Call C++ function

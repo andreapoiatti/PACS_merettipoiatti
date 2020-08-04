@@ -71,7 +71,7 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   
   ## Call C++ function
@@ -160,7 +160,7 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ## Call C++ function
@@ -256,7 +256,7 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
   storage.mode(nrealizations) <- "integer"
-  storage.mde(seed) <- "integer"
+  storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
   ## Call C++ function
