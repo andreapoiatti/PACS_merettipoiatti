@@ -41,7 +41,7 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
         }
 
         // Tuning parameter
-        this->set_tuning(INTEGER(Rtune)[0]);
+        this->set_tuning(REAL(Rtune)[0]);
 
         // DOF_matrix
         UInt n_ = INTEGER(Rf_getAttrib(RDOF_matrix, R_DimSymbol))[0];
