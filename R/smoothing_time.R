@@ -134,13 +134,13 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Preliminary consistency of optimization parameters
   if(optimization == "batch")
   {
-    optim = 0  
+    optm = 0  
   }else if(optimization == "newton")
   {
-    optim = 1
+    optm = 1
   }else if(optimization == "newton_fd")
   {
-    optim = 2
+    optm = 2
   }else
   {
     stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
