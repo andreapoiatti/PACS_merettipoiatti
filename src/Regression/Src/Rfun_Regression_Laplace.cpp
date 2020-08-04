@@ -4,6 +4,7 @@
 #include "../../Skeletons/Headers/GAM_Skeleton.h"
 #include "../Headers/RegressionData.h"
 #include "../../FE_Assemblers_Solvers/Headers/Integration.h"
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 
 // GAM
 #include "../GAM_Headers/FPIRLS.h"
@@ -32,28 +33,28 @@ extern "C"
 
 		\return R-vector containg the coefficients of the solution
 	*/
-
 	SEXP regression_Laplace(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-						SEXP Rlambda, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues,
-						SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP Rtune, SEXP RarealDataAvg )
+		SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
+		SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
 	{
-	    //Set input data
-		RegressionData regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rlambda, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rtune, RarealDataAvg );
+		//Set input data
+		RegressionData regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
+		OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-		UInt mydim=INTEGER(Rmydim)[0];
-		UInt ndim=INTEGER(Rndim)[0];
+		UInt mydim = INTEGER(Rmydim)[0];
+		UInt ndim = INTEGER(Rndim)[0];
 
-	    if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
-	    	return(regression_skeleton<RegressionData,IntegratorTriangleP2, 1, 2, 2>(regressionData, Rmesh));
-	    else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
-			return(regression_skeleton<RegressionData,IntegratorTriangleP4, 2, 2, 2>(regressionData, Rmesh));
-	    else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
-			return(regression_skeleton<RegressionData,IntegratorTriangleP2, 1, 2, 3>(regressionData, Rmesh));
-	   else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
-			return(regression_skeleton<RegressionData,IntegratorTriangleP4, 2, 2, 3>(regressionData, Rmesh));
+		if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
+			return(regression_skeleton<RegressionData,IntegratorTriangleP2, 1, 2, 2>(regressionData, optimizationData, Rmesh));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
+			return(regression_skeleton<RegressionData,IntegratorTriangleP4, 2, 2, 2>(regressionData, optimizationData, Rmesh));
+		else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
+			return(regression_skeleton<RegressionData,IntegratorTriangleP2, 1, 2, 3>(regressionData, optimizationData, Rmesh));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
+			return(regression_skeleton<RegressionData,IntegratorTriangleP4, 2, 2, 3>(regressionData, optimizationData, Rmesh));
 		else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
-			return(regression_skeleton<RegressionData,IntegratorTetrahedronP2, 1, 3, 3>(regressionData, Rmesh));
-	    return(NILSXP);
+			return(regression_skeleton<RegressionData,IntegratorTetrahedronP2, 1, 3, 3>(regressionData, optimizationData, Rmesh));
+		return(NILSXP);
 	}
 
 	//! This function manages the various options for Spatial Regression, Sangalli et al version
@@ -87,28 +88,29 @@ extern "C"
 
 		\return R-vector containg the coefficients of the solution
 	*/
-
-	SEXP regression_Laplace_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-						SEXP RlambdaS, SEXP RlambdaT, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric,
-						SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP Rtune, SEXP RarealDataAvg)
+	SEXP regression_Laplace_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder, SEXP Rmydim, SEXP Rndim,
+		SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch,
+		SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
 	{
-	    //Set input data
-		RegressionData regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RlambdaS, RlambdaT, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, Rflag_mass, Rflag_parabolic, Ric, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rtune, RarealDataAvg);
+	    	//Set input data
+		RegressionData regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues,
+			RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
+		OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-		UInt mydim=INTEGER(Rmydim)[0];
-		UInt ndim=INTEGER(Rndim)[0];
+		UInt mydim = INTEGER(Rmydim)[0];
+		UInt ndim = INTEGER(Rndim)[0];
 
-	    if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
-	    	return(regression_skeleton_time<RegressionData,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, Rmesh, Rmesh_time));
-	    else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
-			return(regression_skeleton_time<RegressionData,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, Rmesh, Rmesh_time));
-	    else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
-			return(regression_skeleton_time<RegressionData,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, Rmesh, Rmesh_time));
-	   else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
-			return(regression_skeleton_time<RegressionData,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, Rmesh, Rmesh_time));
+		if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
+			return(regression_skeleton_time<RegressionData,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
+			return(regression_skeleton_time<RegressionData,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+		else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
+			return(regression_skeleton_time<RegressionData,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
+			return(regression_skeleton_time<RegressionData,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
 		else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
-			return(regression_skeleton_time<RegressionData,IntegratorTetrahedronP2, 1, IntegratorGaussP5, 3, 2, 3, 3>(regressionData, Rmesh, Rmesh_time));
-	    return(NILSXP);
+			return(regression_skeleton_time<RegressionData,IntegratorTetrahedronP2, 1, IntegratorGaussP5, 3, 2, 3, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+	    	return(NILSXP);
 	}
 
 	/*!
@@ -139,31 +141,30 @@ extern "C"
 
 		\return R-vector containg the outputs.
 	*/
-
-
 	 SEXP gam_Laplace(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-	  					SEXP Rlambda, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues,
-	  					SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations , SEXP Rfamily, SEXP Rmax_num_iteration, SEXP Rtreshold, SEXP Rtune, SEXP Rmu0, SEXP RscaleParam, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP RarealDataAvg )
+		SEXP Rcovariates,  SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
+		SEXP Rfamily, SEXP Rmax_num_iteration, SEXP Rtreshold, SEXP Rmu0, SEXP RscaleParam, SEXP Rsearch,
+		SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
 	{
-	    // set up the GAMdata structure for the laplacian case
-		GAMDataLaplace regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rlambda, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rmax_num_iteration, Rtreshold, Rtune, RarealDataAvg);
+	    	// Set up the GAMdata structure for the laplacian case
+		GAMDataLaplace regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch, Rmax_num_iteration, Rtreshold);
+		OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-	 	UInt mydim=INTEGER(Rmydim)[0];// set the mesh dimension form R to C++
-		UInt ndim=INTEGER(Rndim)[0];// set the mesh space dimension form R to C++
-
+	 	UInt mydim = INTEGER(Rmydim)[0]; // Set the mesh dimension form R to C++
+		UInt ndim = INTEGER(Rndim)[0]; // Set the mesh space dimension form R to C++
 
 	  	std::string family = CHAR(STRING_ELT(Rfamily,0));
 
-	    if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
-	    	return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP2, 1, 2, 2>(regressionData, Rmesh, Rmu0 , family, RscaleParam));
-	    else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
-			return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP4, 2, 2, 2>(regressionData, Rmesh, Rmu0, family, RscaleParam));
-	    else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
-	    	return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP2, 1, 2, 3>(regressionData, Rmesh, Rmu0, family, RscaleParam));
-	   	else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
-	   		return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP4, 2, 2, 3>(regressionData, Rmesh, Rmu0, family, RscaleParam));
+		if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
+			return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP2, 1, 2, 2>(regressionData, optimizationData, Rmesh, Rmu0 , family, RscaleParam));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
+			return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP4, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==1 && mydim==2 && ndim==3)
+			return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP2, 1, 2, 3>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
+		else if(regressionData.getOrder()==2 && mydim==2 && ndim==3)
+			return(GAM_skeleton<GAMDataLaplace,IntegratorTriangleP4, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
 		else if(regressionData.getOrder()==1 && mydim==3 && ndim==3)
-			return(GAM_skeleton<GAMDataLaplace,IntegratorTetrahedronP2, 1, 3, 3>(regressionData, Rmesh, Rmu0, family, RscaleParam));
-	    return(R_NilValue);
+			return(GAM_skeleton<GAMDataLaplace,IntegratorTetrahedronP2, 1, 3, 3>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
+		return(R_NilValue);
 	}
 }

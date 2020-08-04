@@ -4,12 +4,13 @@
 #include "../../FdaPDE.h"
 #include "../../Mesh/Headers/Mesh.h"
 #include "../../Regression/Headers/MixedFERegression.h"
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
-SEXP regression_skeleton(InputHandler &regressionData, SEXP Rmesh)
+SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, SEXP Rmesh)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
-	MixedFERegression<InputHandler> regression(regressionData, mesh.num_nodes());
+	MixedFERegression<InputHandler> regression(regressionData, optimizationData, mesh.num_nodes());
 
 	regression.template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh);
         regression.apply();
@@ -17,7 +18,7 @@ SEXP regression_skeleton(InputHandler &regressionData, SEXP Rmesh)
 	const MatrixXv& solution = regression.getSolution();
 	const MatrixXr& dof = regression.getDOF();
 	const MatrixXr & GCV = regression.getGCV();
-	UInt bestLambda = regression.getBestLambdaS();
+	UInt bestLambda = optimizationData.get_best_lambda_S();
 	MatrixXv beta;
 	if(regressionData.getCovariates()->rows()==0)
 	{

@@ -652,12 +652,12 @@ MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBa
 template<typename InputHandler>
 void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedom(UInt output_indexS, UInt output_indexT, Real lambdaS, Real lambdaT)
 {
-	int GCVmethod = regressionData_.getGCVmethod();
-	switch (GCVmethod) {
+	std::string GCVmethod = optimizationData_.get_DOF_evaluation();
+	switch (GCVmethod == "exact") {
 		case 1:
 			computeDegreesOfFreedomExact(output_indexS, output_indexT, lambdaS, lambdaT);
 			break;
-		case 2:
+		case 0:
 			computeDegreesOfFreedomStochastic(output_indexS, output_indexT, lambdaS, lambdaT);
 			break;
 	}
@@ -683,12 +683,12 @@ void MixedFERegressionBase<InputHandler>::computeGeneralizedCrossValidation(UInt
 			n-=observations_na->size();
 		}
 //! GCV computation
-	_GCV(output_indexS,output_indexT) = (n / ((n - regressionData_.getTuneParam()*_dof(output_indexS, output_indexT)) * (n - regressionData_.getTuneParam()*_dof(output_indexS, output_indexT)))) * (*z-dataHat).dot(*z-dataHat);
-	if (_GCV(output_indexS,output_indexT) < _bestGCV)
+	_GCV(output_indexS,output_indexT) = (n / ((n - optimizationData_.get_tuning()*_dof(output_indexS, output_indexT)) * (n - optimizationData_.get_tuning()*_dof(output_indexS, output_indexT)))) * (*z-dataHat).dot(*z-dataHat);
+	if (_GCV(output_indexS,output_indexT) < optimizationData_.get_best_value())
 	{
-		bestLambdaS_ = output_indexS;
-		bestLambdaT_ = output_indexT;
-		_bestGCV = _GCV(output_indexS,output_indexT);
+		optimizationData_.set_best_lambda_S(output_indexS);
+		optimizationData_.set_best_lambda_T(output_indexT);
+		optimizationData_.set_best_value(_GCV(output_indexS,output_indexT));
 	}
 }
 
@@ -814,7 +814,7 @@ void MixedFERegressionBase<InputHandler>::computeDegreesOfFreedomStochastic(UInt
 	std::default_random_engine generator(seed);
 	// Creation of the random matrix
 	std::bernoulli_distribution distribution(0.5);
-	UInt nrealizations = regressionData_.getNrealizations();
+	UInt nrealizations = optimizationData_.get_nrealizations();
 	MatrixXr u(nlocations, nrealizations);
 	for (int j=0; j<nrealizations; ++j) {
 		for (int i=0; i<nlocations; ++i) {
@@ -964,6 +964,8 @@ void MixedFERegressionBase<InputHandler>::buildSystemMatrix(Real lambdaS, Real l
 template<typename InputHandler>
 MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 {
+	const Real last_lambda = optimizationData_.get_last_lS_used();
+	const Real lambda_ = optimizationData_.get_current_lambdaS();
         if(lambda_ != last_lambda)
         {
                 this->buildSystemMatrix(lambda_);
@@ -976,7 +978,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
                 this->systemFactorize();
         }
 
-        last_lambda = lambda_;
+	optimizationData_.set_last_lS_used(lambda_);
 
         return this->template system_solve(b);
 }
@@ -985,13 +987,13 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 template<typename InputHandler>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
-	if (isGAMData||regressionData_.isSpaceTime()||lambda_!=last_lambda)
+	if (isGAMData||regressionData_.isSpaceTime()||optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
 	{
 		UInt nnodes = N_*M_; // Define nuber of nodes
-		const VectorXr* obsp = regressionData_.getObservations(); // Get observations
+		const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 
-		UInt sizeLambdaS = regressionData_.getLambdaS()->size();
-		UInt sizeLambdaT = regressionData_.getLambdaT()->size();
+		UInt sizeLambdaS = optimizationData_.get_size_S();
+		UInt sizeLambdaT = optimizationData_.get_size_T();
 
 		this->_solution.resize(sizeLambdaS,sizeLambdaT);
 		this->_dof.resize(sizeLambdaS,sizeLambdaT);
@@ -1007,18 +1009,26 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 		{
 			for(UInt t=0; t<sizeLambdaT; ++t)
 			{
-				Real lambdaS = (*(regressionData_.getLambdaS()))[s];
-				Real lambdaT = (*(regressionData_.getLambdaT()))[t];
-				_rightHandSide = rhs;
-				if(!regressionData_.isSpaceTime())
-				{ //DEBUGGING, poi si elimina e si setta tramite carrier
-					set_lambda(lambdaS);
-					buildSystemMatrix(lambda_);
-				}
+                                Real lambdaS;
+				if(!regressionData_.isSpaceTime() && !isGAMData) //at the moment only space is implemented
+					{
+						optimizationData_.set_current_lambdaS(lambdaS); //lo setterà il carrier tramite optdata
+						lambdaS=optimizationData_.get_current_lambdaS();
+					}
 				else
-				{
-					buildSystemMatrix(lambdaS, lambdaT);
-				}
+				 	lambdaS = (optimizationData_.get_lambda_S())[s];
+
+				Real lambdaT = (optimizationData_.get_lambda_T())[t];
+				_rightHandSide = rhs;
+
+				if (!regressionData_.isSpaceTime())
+					{
+						buildSystemMatrix(lambdaS);
+					}
+                                	else
+					{
+						buildSystemMatrix(lambdaS, lambdaT);
+					}
 
 				// Right-hand side correction for space varying PDEs
 				if(this->isSpaceVarying)
@@ -1047,9 +1057,9 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				_solution(s,t) = this->template system_solve(this->_rightHandSide);
 
 
-				if(regressionData_.computeGCV()&&(isGAMData||regressionData_.isSpaceTime()))
+				if(optimizationData_.get_loss_function()=="GCV"&&(isGAMData||regressionData_.isSpaceTime()))
 				{
-					if (regressionData_.computeDOF())
+					if (optimizationData_.get_DOF_evaluation()!="not_required")
 						computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
 					computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
 				}
@@ -1077,8 +1087,8 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 				}
 			}
 		}
-		if(!(isGAMData||regressionData_.isSpaceTime())&&lambda_!=last_lambda)
-			this->last_lambda = lambda_;
+		if(!(isGAMData||regressionData_.isSpaceTime())&&optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
+			optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
 		_rightHandSide = rhs; // Return rhs to original status for next apply call
 	}
 	//std::cout<<_solution(0,0).size()<<std::endl; per il caso GCV semplice la solution è il valore in posizione 0,0
@@ -1091,10 +1101,10 @@ template<>
 class MixedFERegression<RegressionData>: public MixedFERegressionBase<RegressionData>
 {
 	public:
-		MixedFERegression(const RegressionData & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionData>(regressionData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionData & regressionData, UInt nnodes_, UInt spline_degree):
-			MixedFERegressionBase<RegressionData>(mesh_time, regressionData, nnodes_, spline_degree) {};
+		MixedFERegression(const RegressionData & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
+		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionData & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
+			MixedFERegressionBase<RegressionData>(mesh_time, regressionData, optimizationData, nnodes_, spline_degree) {};
 
 		template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
@@ -1109,10 +1119,10 @@ template<>
 class MixedFERegression<RegressionDataElliptic>: public MixedFERegressionBase<RegressionDataElliptic>
 {
 	public:
-		MixedFERegression(const RegressionDataElliptic & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataElliptic>(regressionData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataElliptic & regressionData, UInt nnodes_, UInt spline_degree):
-			MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, nnodes_, spline_degree) {};
+		MixedFERegression(const RegressionDataElliptic & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
+		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataElliptic & regressionData,  OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
+			MixedFERegressionBase<RegressionDataElliptic>(mesh_time, regressionData, optimizationData, nnodes_, spline_degree) {};
 
 		template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
@@ -1141,10 +1151,10 @@ template<>
 class MixedFERegression<RegressionDataEllipticSpaceVarying> : public MixedFERegressionBase<RegressionDataEllipticSpaceVarying>
 {
 	public:
-		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(regressionData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataEllipticSpaceVarying & regressionData, UInt nnodes_, UInt spline_degree):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, nnodes_, spline_degree) {};
+		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(regressionData, optimizationData, nnodes_) {};
+		MixedFERegression(const std::vector<Real> & mesh_time, const RegressionDataEllipticSpaceVarying & regressionData,  OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
+			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>(mesh_time, regressionData, optimizationData, nnodes_, spline_degree) {};
 
 
 		template< UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
@@ -1256,8 +1266,8 @@ template<>
 class MixedFERegression<GAMDataLaplace>: public MixedFERegressionBase<RegressionData>
 {
 	public:
-		MixedFERegression(const RegressionData & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionData>(regressionData, nnodes_) {};
+		MixedFERegression(const RegressionData & regressionData, OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionData>(regressionData, optimizationData, nnodes_) {};
 
 		template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
@@ -1272,8 +1282,8 @@ template<>
 class MixedFERegression<GAMDataElliptic>: public MixedFERegressionBase<RegressionDataElliptic>
 {
 	public:
-		MixedFERegression(const RegressionDataElliptic & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataElliptic>(regressionData, nnodes_) {};
+		MixedFERegression(const RegressionDataElliptic & regressionData, OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionDataElliptic>(regressionData, optimizationData, nnodes_) {};
 
 		template< UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)
@@ -1302,8 +1312,8 @@ template<>
 class MixedFERegression<GAMDataEllipticSpaceVarying>: public MixedFERegressionBase<RegressionDataEllipticSpaceVarying>
 {
 	public:
-		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, UInt nnodes_):
-			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>( regressionData, nnodes_) {};
+		MixedFERegression(const RegressionDataEllipticSpaceVarying & regressionData, OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<RegressionDataEllipticSpaceVarying>( regressionData, optimizationData, nnodes_) {};
 
 		template<UInt ORDER, UInt mydim, UInt ndim, typename IntegratorSpace, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE>
 		void preapply(const MeshHandler<ORDER,mydim,ndim> & mesh)

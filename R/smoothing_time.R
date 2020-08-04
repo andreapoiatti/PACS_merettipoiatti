@@ -106,50 +106,97 @@ NULL
 #'                            FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT)
 #' plot(solution$fit.FEM)
 
-smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, FEMbasis, time_mesh=NULL, lambdaS, lambdaT = 1, covariates = NULL, PDE_parameters=NULL, incidence_matrix = NULL, BC = NULL, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL, GCV = FALSE, GCVmethod = "Stochastic", nrealizations = 100, DOF_matrix=NULL, search = "tree", bary.locations = NULL, GCV.inflation.factor= 1, areal.data.avg = TRUE)
+smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
+                          covariates = NULL, PDE_parameters = NULL,  BC = NULL,
+                          incidence_matrix = NULL, areal.data.avg = TRUE,
+                          FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+                          search = "tree", bary.locations = NULL,
+                          optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  if(class(FEMbasis$mesh) == "mesh.2D")
+  {
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(class(FEMbasis$mesh) == "mesh.2.5D")
+  {
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(class(FEMbasis$mesh) == "mesh.3D")
+  {
     ndim = 3
     mydim = 3
-  }else{
+  }else
+  {
     stop('Unknown mesh class')
   }
   ##################### Checking parameters, sizes and conversion ################################
 
-  if(GCVmethod=="Stochastic"){
-    GCVMETHOD=2
-  }else if(GCVmethod=="Exact"){
-    GCVMETHOD=1
-  }else{
-    stop("GCVmethod must be either Stochastic or Exact")
+  # Preliminary consistency of optimization parameters
+  if(optimization == "batch")
+  {
+    optim = 0  
+  }else if(optimization == "newton")
+  {
+    optim = 1
+  }else if(optimization == "newton_fd")
+  {
+    optim = 2
+  }else
+  {
+    stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
+  }  
+  
+  if(optimization != 'batch')
+    stop("'optimization' = 'batch' is the only method implemented for spatio-temporal problems")
+  
+  
+  if(DOF_evaluation == 'not_required')
+  {
+    optm = c(optm,0)
+  }else if(DOF_evaluation == 'stochastic')
+  {
+    optm = c(optm,1)
+  }else if(DOF_evaluation == 'exact')
+  {
+    optm = c(optm,2)
+  }else
+  {
+    stop("'DOF_evaluation' must be 'not_required', 'stochastic' or 'exact'.")
   }
-
-  if(search=="naive"){
+  
+  if(loss_function == 'unused')
+  {
+    optm = c(optm,0)
+  }else if(loss_function == 'GCV')
+  {
+    optm = c(optm,1)
+  }else
+  {
+    stop("'loss_function' has to be 'GCV'.")
+  }
+  
+  if(any(lambdaS<=0) || any(lambdaT<=0))
+    stop("'lambda' can not be less than or equal to 0")
+  
+  # Search algorithm
+  if(search=="naive")
+  {
     search=1
-  }else if(search=="tree"){
+  }else if(search=="tree")
+  {
     search=2
-  }else{
+  }else
+  {
     stop("search must be either tree or naive.")
   }
 
-  #if locations is null but bary.locations is not null, use the locations in bary.locations
-  if(is.null(locations) & !is.null(bary.locations)) {
+  # If locations is null but bary.locations is not null, use the locations in bary.locations
+  if(is.null(locations) & !is.null(bary.locations))
+  {
     locations = bary.locations$locations
     locations = as.matrix(locations)
   }
   
-  DOF=TRUE
-  if(!is.null(DOF_matrix))
-      DOF=FALSE
-
-  space_varying=checkSmoothingParameters_time(locations, time_locations, observations, FEMbasis, time_mesh, lambdaS, lambdaT, covariates, PDE_parameters, incidence_matrix, BC, FLAG_MASS, FLAG_PARABOLIC, IC, GCV, GCVMETHOD, nrealizations, DOF, DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
   ## Coverting to format for internal usage
   if(!is.null(locations))
     locations = as.matrix(locations)
@@ -158,8 +205,6 @@ smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, F
   if(!is.null(time_mesh))
     time_mesh = as.matrix(time_mesh)
   observations = as.matrix(observations)
-  lambdaS = as.matrix(lambdaS)
-  lambdaT = as.matrix(lambdaT)
   if(!is.null(covariates))
     covariates = as.matrix(covariates)
   if(!is.null(DOF_matrix))
@@ -173,9 +218,17 @@ smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, F
     BC$BC_indices = as.matrix(BC$BC_indices)
     BC$BC_values = as.matrix(BC$BC_values)
   }
+  lambdaS = as.matrix(lambdaS)
+  lambdaT = as.matrix(lambdaT)
+  
+  space_varying = checkSmoothingParameters_time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh = time_mesh,
+                  covariates = covariates, PDE_parameters = PDE_parameters, BC = BC, 
+                  incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
+                  FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+                  search = search, bary.locations = bary.locations,
+                  lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
 
-  # if I have PDE non-sv case I need (constant) matrices as parameters
-
+  # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
   {
     PDE_parameters$K = as.matrix(PDE_parameters$K)
@@ -184,9 +237,14 @@ smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, F
   }
 
 
-  checkSmoothingParametersSize_time(locations, time_locations, observations, FEMbasis, time_mesh, lambdaS, lambdaT, covariates, PDE_parameters, incidence_matrix, BC, FLAG_MASS, FLAG_PARABOLIC, IC, GCV, DOF, DOF_matrix, space_varying, ndim, mydim)
+  checkSmoothingParametersSize_time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh = time_mesh,
+    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix,
+    BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
+    FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+    lambdaS = lambdaS, lambdaT = lambdaT, DOF_matrix = DOF_matrix)
+  
+  # Further check
   observations<-as.vector(observations)
-
   if(is.null(time_locations))
   {
     if(FLAG_PARABOLIC && !is.null(IC))
@@ -204,15 +262,19 @@ smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, F
   }
 
   # Check whether the locations coincide with the mesh nodes (should be put after all the validations)
-  if (!is.null(locations)) {
-    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2]) {
+  if (!is.null(locations))
+  {
+    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2])
+      {
       sum1=0
       sum2=0
-      for (i in 1:nrow(locations)) {
-      sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
-      sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
+      for (i in 1:nrow(locations)) 
+      {
+        sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
+        sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
       }
-      if (sum1==0 & sum2==0) {
+      if (sum1==0 & sum2==0) 
+      {
         message("No search algorithm is used because the locations coincide with the nodes.")
         locations = NULL #In principle, R uses pass-by-value semantics in its function calls. So put ouside of checkSmoothingParameters function.
       }
@@ -220,55 +282,60 @@ smooth.FEM.time<-function(locations = NULL, time_locations=NULL, observations, F
   }
 
   ################## End checking parameters, sizes and conversion #############################
-  if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters)){
-
+  if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
+  {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.FEM.time(locations=locations, time_locations=time_locations, observations=observations, FEMbasis=FEMbasis,
-                                  time_mesh=time_mesh, lambdaS=lambdaS, lambdaT=lambdaT, covariates=covariates, incidence_matrix=incidence_matrix,
-                                  ndim=ndim, mydim=mydim, BC=BC, FLAG_MASS=FLAG_MASS, FLAG_PARABOLIC=FLAG_PARABOLIC, IC=IC, GCV=GCV,
-                                  GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
-  } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE){
-
+    bigsol = CPP_smooth.FEM.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+  }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE)
+  {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.FEM.PDE.time(locations=locations, time_locations=time_locations, observations=observations, FEMbasis=FEMbasis,
-                                      time_mesh=time_mesh, lambdaS=lambdaS, lambdaT=lambdaT, PDE_parameters=PDE_parameters,
-                                      covariates=covariates, incidence_matrix=incidence_matrix,
-                                      ndim=ndim, mydim=mydim, BC=BC, FLAG_MASS=FLAG_MASS, FLAG_PARABOLIC=FLAG_PARABOLIC, IC=IC, GCV=GCV,
-                                      GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
-  } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE){
-
+    bigsol = CPP_smooth.FEM.PDE.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
+       covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+       search = search, bary.locations = bary.locations,
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+                                      
+  }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE)
+  {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.FEM.PDE.sv.time(locations=locations, time_locations=time_locations, observations=observations, FEMbasis=FEMbasis,
-                                        time_mesh=time_mesh, lambdaS=lambdaS, lambdaT=lambdaT, PDE_parameters=PDE_parameters,
-                                        covariates=covariates, incidence_matrix=incidence_matrix,
-                                        ndim=ndim, mydim=mydim, BC=BC, FLAG_MASS=FLAG_MASS, FLAG_PARABOLIC=FLAG_PARABOLIC, IC=IC, GCV=GCV,
-                                        GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
-  }else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-
+    bigsol = CPP_smooth.FEM.PDE.sv.time(locations = locations, time_locations = time_locations, observations = observations, FEMbasis = FEMbasis, time_mesh=time_mesh,
+      covariates = covariates, PDE_parameters=PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+  }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
+  {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.manifold.FEM.time(locations=locations, time_locations=time_locations, observations=observations, FEMbasis=FEMbasis,
-                                          time_mesh=time_mesh, lambdaS=lambdaS, lambdaT=lambdaT, covariates=covariates, incidence_matrix=incidence_matrix,
-                                          ndim=ndim, mydim=mydim, BC=BC, FLAG_MASS=FLAG_MASS, FLAG_PARABOLIC=FLAG_PARABOLIC, IC=IC, GCV=GCV,
-                                          GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
-  }else if(class(FEMbasis$mesh) == 'mesh.3D'){
-
+    bigsol = CPP_smooth.manifold.FEM.time(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+  }else if(class(FEMbasis$mesh) == 'mesh.3D')
+  {
     bigsol = NULL
     print('C++ Code Execution')
-    bigsol = CPP_smooth.volume.FEM.time(locations=locations, time_locations=time_locations, observations=observations, FEMbasis=FEMbasis,
-                                        time_mesh=time_mesh, lambdaS=lambdaS, lambdaT=lambdaT, covariates=covariates, incidence_matrix=incidence_matrix,
-                                        ndim=ndim, mydim=mydim, BC=BC, FLAG_MASS=FLAG_MASS, FLAG_PARABOLIC=FLAG_PARABOLIC, IC=IC, GCV=GCV,
-                                        GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+    bigsol = CPP_smooth.volume.FEM.time(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+      covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+      incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+      FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
+      search = search, bary.locations = bary.locations,
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
   }
 
+  # ---------- Solution -----------
   N = nrow(FEMbasis$mesh$nodes)
   M = ifelse(FLAG_PARABOLIC,length(time_mesh)-1,length(time_mesh) + 2);
   if(is.null(IC) && FLAG_PARABOLIC)

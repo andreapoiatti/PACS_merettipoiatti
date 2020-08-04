@@ -5,8 +5,7 @@
 #include "../../Skeletons/Headers/GAM_Skeleton.h"
 #include "../Headers/RegressionData.h"
 #include "../../FE_Assemblers_Solvers/Headers/Integration.h"
-
-
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 
 extern "C"
 {
@@ -33,24 +32,24 @@ extern "C"
 
         	\return R-vector containg the coefficients of the solution
         */
-
         SEXP regression_PDE(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-        					SEXP Rlambda, SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RincidenceMatrix,
-        					SEXP RBCIndices, SEXP RBCValues, SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP Rtune, SEXP RarealDataAvg)
+                SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch,
+                SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
         {
-        	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rlambda, RK, Rbeta, Rc, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rtune, RarealDataAvg);
+        	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
+                OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-        	UInt mydim=INTEGER(Rmydim)[0];
-        	UInt ndim=INTEGER(Rndim)[0];
+        	UInt mydim = INTEGER(Rmydim)[0];
+        	UInt ndim = INTEGER(Rndim)[0];
 
-        	if(regressionData.getOrder() == 1 && ndim==2)
-        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP2, 1, 2, 2>(regressionData, Rmesh));
-        	else if(regressionData.getOrder() == 2 && ndim==2)
-        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP4, 2, 2, 2>(regressionData, Rmesh));
-        	else if(regressionData.getOrder() == 1 && ndim==3)
-        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP2, 1, 2, 3>(regressionData, Rmesh));
-        	else if(regressionData.getOrder() == 2 && ndim==3)
-        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP4, 2, 2, 3>(regressionData, Rmesh));
+        	if(regressionData.getOrder()==1 && ndim==2)
+        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP2, 1, 2, 2>(regressionData, optimizationData, Rmesh));
+        	else if(regressionData.getOrder()==2 && ndim==2)
+        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP4, 2, 2, 2>(regressionData, optimizationData, Rmesh));
+        	else if(regressionData.getOrder()==1 && ndim==3)
+        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP2, 1, 2, 3>(regressionData, optimizationData, Rmesh));
+        	else if(regressionData.getOrder()==2 && ndim==3)
+        		return(regression_skeleton<RegressionDataElliptic,IntegratorTriangleP4, 2, 2, 3>(regressionData, optimizationData, Rmesh));
         	return(NILSXP);
         }
 
@@ -87,52 +86,27 @@ extern "C"
 
         	\return R-vector containg the coefficients of the solution
         */
-
-        SEXP regression_PDE_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-        					SEXP RlambdaS, SEXP RlambdaT, SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RincidenceMatrix,
-        					SEXP RBCIndices, SEXP RBCValues, SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP Rtune, SEXP RarealDataAvg)
+        SEXP regression_PDE_time(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_locations, SEXP Robservations, SEXP Rmesh, SEXP Rmesh_time, SEXP Rorder, SEXP Rmydim, SEXP Rndim,
+		SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates,	SEXP RBCIndices, SEXP RBCValues,  SEXP RincidenceMatrix, SEXP RarealDataAvg,
+                SEXP Rflag_mass, SEXP Rflag_parabolic, SEXP Ric, SEXP Rsearch, SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
         {
-        	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RlambdaS, RlambdaT, RK, Rbeta, Rc, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, Rflag_mass, Rflag_parabolic, Ric, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rtune, RarealDataAvg);
+        	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc,
+                        Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
+                OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-        	UInt mydim=INTEGER(Rmydim)[0];
-        	UInt ndim=INTEGER(Rndim)[0];
+        	UInt mydim = INTEGER(Rmydim)[0];
+        	UInt ndim = INTEGER(Rndim)[0];
 
-        	if(regressionData.getOrder() == 1 && ndim==2)
-        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, Rmesh, Rmesh_time));
-        	else if(regressionData.getOrder() == 2 && ndim==2)
-        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, Rmesh, Rmesh_time));
-        	else if(regressionData.getOrder() == 1 && ndim==3)
-        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, Rmesh, Rmesh_time));
-        	else if(regressionData.getOrder() == 2 && ndim==3)
-        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, Rmesh, Rmesh_time));
+        	if(regressionData.getOrder()==1 && ndim==2)
+        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+        	else if(regressionData.getOrder()==2 && ndim==2)
+        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmesh_time));
+        	else if(regressionData.getOrder()==1 && ndim==3)
+        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP2, 1, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
+        	else if(regressionData.getOrder()==2 && ndim==3)
+        		return(regression_skeleton_time<RegressionDataElliptic,IntegratorTriangleP4, 2, IntegratorGaussP5, 3, 2, 2, 3>(regressionData, optimizationData, Rmesh, Rmesh_time));
         	return(NILSXP);
         }
-
-        //! A utility, not used for system solution, may be used for debugging
-        SEXP get_FEM_PDE_matrix(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim, SEXP Rlambda, SEXP RK, SEXP Rbeta, SEXP Rc,
-        				   SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues, SEXP GCV,SEXP RGCVmethod, SEXP Rnrealizations, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP Rtune, SEXP RarealDataAvg)
-        {
-        	RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rlambda, RK, Rbeta, Rc, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rtune, RarealDataAvg);
-
-        	//Get mydim and ndim
-        	UInt mydim=INTEGER(Rmydim)[0];
-        	UInt ndim=INTEGER(Rndim)[0];
-
-        	typedef EOExpr<Mass> ETMass;   Mass EMass;   ETMass mass(EMass);
-        	typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
-        	typedef EOExpr<Grad> ETGrad;   Grad EGrad;   ETGrad grad(EGrad);
-
-        	const Real& c = regressionData.getC();
-        	const Eigen::Matrix<Real,2,2>& K = regressionData.getK();
-        	const Eigen::Matrix<Real,2,1>& beta = regressionData.getBeta();
-
-            if(regressionData.getOrder()==1 && ndim==2)
-            	return(get_FEM_Matrix_skeleton<IntegratorTriangleP2, 1,2,2>(Rmesh, c*mass+stiff[K]+dot(beta,grad)));
-        	if(regressionData.getOrder()==2 && ndim==2)
-        		return(get_FEM_Matrix_skeleton<IntegratorTriangleP4, 2,2,2>(Rmesh, c*mass+stiff[K]+dot(beta,grad)));
-        	return(NILSXP);
-        }
-
 
         /*!
         	This function is then called from R code.
@@ -164,25 +138,49 @@ extern "C"
 
         	\return R-vector containg the outputs.
         */
-
-          SEXP gam_PDE(SEXP Rlocations, SEXP RbaryLocations ,SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
-          					SEXP Rlambda, SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RincidenceMatrix, SEXP RBCIndices, SEXP RBCValues,
-          					SEXP GCV, SEXP RGCVmethod, SEXP Rnrealizations , SEXP Rfamily, SEXP Rmax_num_iteration, SEXP Rtreshold, SEXP Rtune, SEXP Rmu0, SEXP RscaleParam, SEXP DOF, SEXP RDOF_matrix, SEXP Rsearch, SEXP RarealDataAvg)
+        SEXP gam_PDE(SEXP Rlocations, SEXP RbaryLocations ,SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim,
+                SEXP RK, SEXP Rbeta, SEXP Rc, SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg,
+          	SEXP Rfamily, SEXP Rmax_num_iteration, SEXP Rtreshold, SEXP Rmu0, SEXP RscaleParam, SEXP Rsearch,
+                SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
         {
+        	GAMDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch, Rmax_num_iteration, Rtreshold);
+                OptimizationData optimizationData(Roptim, Rlambda, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
-        	GAMDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, Rlambda, RK, Rbeta, Rc, Rcovariates, RincidenceMatrix, RBCIndices, RBCValues, GCV, RGCVmethod, Rnrealizations, DOF, RDOF_matrix, Rsearch, Rmax_num_iteration, Rtreshold, Rtune, RarealDataAvg);
-
-        	UInt mydim=INTEGER(Rmydim)[0];
-        	UInt ndim=INTEGER(Rndim)[0];
-
+        	UInt mydim = INTEGER(Rmydim)[0];
+        	UInt ndim = INTEGER(Rndim)[0];
 
           	std::string family = CHAR(STRING_ELT(Rfamily,0));
 
-            if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
-            	return(GAM_skeleton<GAMDataElliptic,IntegratorTriangleP2, 1, 2, 2>(regressionData, Rmesh, Rmu0 , family, RscaleParam));
-            else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
-        		return(GAM_skeleton<GAMDataElliptic,IntegratorTriangleP4, 2, 2, 2>(regressionData, Rmesh, Rmu0, family, RscaleParam));
+                if(regressionData.getOrder()==1 && mydim==2 && ndim==2)
+                	return(GAM_skeleton<GAMDataElliptic,IntegratorTriangleP2, 1, 2, 2>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
+                else if(regressionData.getOrder()==2 && mydim==2 && ndim==2)
+                	return(GAM_skeleton<GAMDataElliptic,IntegratorTriangleP4, 2, 2, 2>(regressionData, optimizationData, Rmesh, Rmu0, family, RscaleParam));
 
             return(R_NilValue);
+        }
+
+        //! A utility, not used for system solution, may be used for debugging
+        SEXP get_FEM_PDE_matrix(SEXP Rlocations, SEXP RbaryLocations, SEXP Robservations, SEXP Rmesh, SEXP Rorder,SEXP Rmydim, SEXP Rndim, SEXP RK, SEXP Rbeta, SEXP Rc,
+                SEXP Rcovariates, SEXP RBCIndices, SEXP RBCValues, SEXP RincidenceMatrix, SEXP RarealDataAvg, SEXP Rsearch)
+        {
+                RegressionDataElliptic regressionData(Rlocations, RbaryLocations, Robservations, Rorder, RK, Rbeta, Rc, Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rsearch);
+
+                // Get mydim and ndim
+                UInt mydim = INTEGER(Rmydim)[0];
+                UInt ndim = INTEGER(Rndim)[0];
+
+                typedef EOExpr<Mass>  ETMass;  Mass  EMass;  ETMass  mass(EMass);
+                typedef EOExpr<Stiff> ETStiff; Stiff EStiff; ETStiff stiff(EStiff);
+                typedef EOExpr<Grad>  ETGrad;  Grad  EGrad;  ETGrad  grad(EGrad);
+
+                const Real& c = regressionData.getC();
+                const Eigen::Matrix<Real,2,2>& K = regressionData.getK();
+                const Eigen::Matrix<Real,2,1>& beta = regressionData.getBeta();
+
+                if(regressionData.getOrder()==1 && ndim==2)
+                        return(get_FEM_Matrix_skeleton<IntegratorTriangleP2, 1,2,2>(Rmesh, c*mass+stiff[K]+dot(beta,grad)));
+                if(regressionData.getOrder()==2 && ndim==2)
+                        return(get_FEM_Matrix_skeleton<IntegratorTriangleP4, 2,2,2>(Rmesh, c*mass+stiff[K]+dot(beta,grad)));
+                return(NILSXP);
         }
 }

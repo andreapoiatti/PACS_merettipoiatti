@@ -278,50 +278,91 @@
 #' image(solution$fit.FEM)
 #'
 
-smooth.FEM<-function(locations = NULL, observations, FEMbasis, lambda,
-                     covariates = NULL, PDE_parameters=NULL, incidence_matrix = NULL,
-                     BC = NULL, GCV = FALSE, GCVmethod = "Stochastic", nrealizations = 100, DOF_matrix=NULL, search = "tree", bary.locations = NULL,
-                     family="gaussian", mu0 = NULL, scale.param=NULL, threshold.FPIRLS=0.0002020, max.steps.FPIRLS=15, GCV.inflation.factor=1, areal.data.avg = TRUE)
+smooth.FEM<-function(locations = NULL, observations, FEMbasis,
+                     covariates = NULL, PDE_parameters = NULL, BC = NULL,
+                     incidence_matrix = NULL, areal.data.avg = TRUE,
+                     search = "tree", bary.locations = NULL,
+                     family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
+                     optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
 {
-  if(class(FEMbasis$mesh) == "mesh.2D"){
+  # Mesh identification
+  if(class(FEMbasis$mesh) == "mesh.2D")
+  {
     ndim = 2
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.2.5D"){
+  }else if(class(FEMbasis$mesh) == "mesh.2.5D")
+  {
     ndim = 3
     mydim = 2
-  }else if(class(FEMbasis$mesh) == "mesh.3D"){
+  }else if(class(FEMbasis$mesh) == "mesh.3D")
+  {
     ndim = 3
     mydim = 3
-  }else{
-    stop('Unknown mesh class')
+  }else
+  {
+    stop('unknown mesh class.')
   }
+  
   ##################### Checking parameters, sizes and conversion ################################
-
-  if(GCVmethod=="Stochastic")
-    GCVMETHOD=2
-  else if(GCVmethod=="Exact")
-    GCVMETHOD=1
-  else{
-    stop("GCVmethod must be either Stochastic or Exact")
+  
+  # Preliminary consistency of optimization parameters
+  if(optimization == "batch")
+  {
+    optim = 0  
+  }else if(optimization == "newton")
+  {
+    optim = 1
+  }else if(optimization == "newton_fd")
+  {
+    optim = 2
+  }else
+  {
+    stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
+  }
+  
+  if(DOF_evaluation == 'not_required')
+  {
+    optm = c(optm,0)
+  }else if(DOF_evaluation == 'stochastic')
+  {
+    optm = c(optm,1)
+  }else if(DOF_evaluation == 'exact')
+  {
+    optm = c(optm,2)
+  }else
+  {
+    stop("'DOF_evaluation' must be 'not_required', 'stochastic' or 'exact'.")
+  }
+    
+  if(loss_function == 'unused')
+  {
+    optm = c(optm,0)
+  }else if(loss_function == 'GCV')
+  {
+    optm = c(optm,1)
+  }else
+  {
+    stop("'loss_function' has to be 'GCV'.")
   }
 
+  if(any(lambda<=0))
+  	stop("'lambda' can not be less than or equal to 0")
+  
+  # Search algorithm
   if(search=="naive")
+  {
     search=1
-  else if(search=="tree")
+  }else if(search=="tree")
+  {
     search=2
-  else{
-    stop("search must be either tree or naive.")
+  }else
+  {
+    stop("'search' must be either 'tree' or 'naive'.")
   }
-
-  if(any(lambda==0))
-  	stop("'lambda' can not be equal to 0")
-
-  DOF=TRUE
-  if(!is.null(DOF_matrix))
-    DOF=FALSE
-
-  #if locations is null but bary.locations is not null, use the locations in bary.locations
-  if(is.null(locations) & !is.null(bary.locations)) {
+  
+  # If locations is null but bary.locations is not null, use the locations in bary.locations
+  if(is.null(locations) & !is.null(bary.locations))
+  {
     locations = bary.locations$locations
     locations = as.matrix(locations)
   }
@@ -329,12 +370,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, lambda,
   ## Converting to format for internal usage
   if(!is.null(locations))
     locations = as.matrix(locations)
-    observations = as.matrix(observations)
-    lambda = as.matrix(lambda)
+  observations = as.matrix(observations)
   if(!is.null(covariates))
     covariates = as.matrix(covariates)
-  if(!is.null(DOF_matrix))
-    DOF_matrix = as.matrix(DOF_matrix)
   if(!is.null(incidence_matrix))
     incidence_matrix = as.matrix(incidence_matrix)
   if(!is.null(BC))
@@ -342,13 +380,20 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, lambda,
     BC$BC_indices = as.matrix(BC$BC_indices)
     BC$BC_values = as.matrix(BC$BC_values)
   }
+  if(!is.null(lambda))
+    lambda = as.matrix(lambda)
+  if(!is.null(DOF_matrix))
+    DOF_matrix = as.matrix(DOF_matrix)
 
-  space_varying=checkSmoothingParameters(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda, covariates=covariates, incidence_matrix=incidence_matrix, 
-    BC=BC, GCV=GCV, PDE_parameters=PDE_parameters, GCVmethod=GCVMETHOD , nrealizations=nrealizations, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
+  space_varying = checkSmoothingParameters(locations = locations, observations = observations, FEMbasis = FEMbasis,
+    covariates = covariates, PDE_parameters = PDE_parameters, BC = BC,
+    incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+    search = search, bary.locations = bary.locations,
+    optimization = optimization, DOF_evaluation = DOF_evaluation, loss_function = loss_function,
+    lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
 
-  # if I have PDE non-sv case I need (constant) matrices as parameters
-
-  if(!is.null(PDE_parameters) & space_varying==FALSE)
+  # If I have PDE non-sv case I need (constant) matrices as parameters
+  if(!is.null(PDE_parameters) & space_varying == FALSE)
   {
     PDE_parameters$K = as.matrix(PDE_parameters$K)
     PDE_parameters$b = as.matrix(PDE_parameters$b)
@@ -356,20 +401,26 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, lambda,
   }
 
 
-  checkSmoothingParametersSize(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda, covariates=covariates, incidence_matrix=incidence_matrix, 
-    BC=BC, GCV=GCV, space_varying=space_varying, PDE_parameters=PDE_parameters, ndim=ndim, mydim=mydim)
+  checkSmoothingParametersSize(locations = locations, observations = observations, FEMbasis = FEMbasis,
+    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix, 
+    BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
+    lambda = lambda, DOF_matrix = DOF_matrix)
 
 
   # Check whether the locations coincide with the mesh nodes (should be put after all the validations)
-  if (!is.null(locations)) {
-    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2]) {
+  if (!is.null(locations))
+  {
+    if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2])
+    {
       sum1=0
       sum2=0
-      for (i in 1:nrow(locations)) {
-      sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
-      sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
+      for (i in 1:nrow(locations))
+      {
+        sum1 = sum1 + abs(locations[i,1]-FEMbasis$mesh$nodes[i,1])
+        sum2 = sum2 + abs(locations[i,2]-FEMbasis$mesh$nodes[i,2])
       }
-      if (sum1==0 & sum2==0) {
+      if (sum1==0 & sum2==0)
+      {
         message("No search algorithm is used because the locations coincide with the nodes.")
         locations = NULL #In principle, R uses pass-by-value semantics in its function calls. So put ouside of checkSmoothingParameters function.
       }
@@ -378,139 +429,142 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis, lambda,
 
   # FAMILY CHECK
   family_admit = c("binomial", "exponential", "gamma", "poisson", "gaussian")
-  if(sum(family==family_admit)==0 ){
+  if(sum(family==family_admit)==0){
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
-
+  
+  # OPTIMIZATION NOT IMPLEMENTED FOR GAM
+  if(family != 'gaussian'& optimization != 'batch')
+    stop("'optimization' = 'batch' is the only method implemented for GAM problems")
 
 
   ################## End checking parameters, sizes and conversion #############################
-  if(family == "gaussian"){
-    
+  if(family == "gaussian")
+  {
+    #----------------------------------------------------#
     ############# Standard Smooth method #################
-    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters)){
-
+    #----------------------------------------------------#
+    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
+    {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.FEM.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-                                    covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-                                    BC=BC, GCV=GCV,GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = nrow(FEMbasis$mesh$nodes)
-
-    } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE){
-
+    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
+    {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.FEM.PDE.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-                                        PDE_parameters = PDE_parameters,
-                                        covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-                                        BC=BC, GCV=GCV,GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = nrow(FEMbasis$mesh$nodes)
-
-    } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE){
-
+    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
+    {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.FEM.PDE.sv.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-                                           PDE_parameters = PDE_parameters,
-                                           covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-                                           BC=BC, GCV=GCV,GCVMETHOD=GCVMETHOD, nrealizations=nrealizations,DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates=covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC=BC,
+        incidence_matrix=incidence_matrix, areal.data.avg = areal.data.avg,
+        search=search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = nrow(FEMbasis$mesh$nodes)
-
-    }else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-
+    }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
+    {
       bigsol = NULL
       print('C++ Code Execution')
       # if(!is.null(locations))
       #   stop("The option locations!=NULL for manifold domains is currently not implemented")
-      bigsol = CPP_smooth.manifold.FEM.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda, 
-                                            covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim, 
-                                            BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.manifold.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+       covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+       search = search, bary.locations = bary.locations,
+       optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = FEMbasis$mesh$nnodes
-
-    }else if(class(FEMbasis$mesh) == 'mesh.3D'){
-
+    }else if(class(FEMbasis$mesh) == 'mesh.3D')
+    {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.volume.FEM.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda, 
-                                          covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim, 
-                                          BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, DOF=DOF,DOF_matrix=DOF_matrix, search=search, bary.locations=bary.locations, GCV.inflation.factor = GCV.inflation.factor, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.volume.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = FEMbasis$mesh$nnodes
     }
-  }else{
+  }else
+  { 
+    #----------------------------------------------------#
     ############# GAMs: FPIRLS algorithm #################
-    checkGAMParameters(observations= observations, max.steps.FPIRLS = max.steps.FPIRLS, mu0 = mu0, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS, family = family)
+    #----------------------------------------------------#
+    checkGAMParameters(observations = observations, max.steps.FPIRLS = max.steps.FPIRLS, mu0 = mu0, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS, family = family)
 
-    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters)){
-
+    if(class(FEMbasis$mesh) == 'mesh.2D' & is.null(PDE_parameters))
+    {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.GAM.FEM(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-              covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-              BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, FAMILY=family,
-              mu0 = mu0, max.steps.FPIRLS=max.steps.FPIRLS,
-              scale.param=scale.param, GCV.inflation.factor=GCV.inflation.factor, threshold.FPIRLS=threshold.FPIRLS , DOF =DOF, DOF_matrix = DOF_matrix, search = search, bary.locations = bary.locations, areal.data.avg = areal.data.avg)
-
+      bigsol = CPP_smooth.GAM.FEM(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        FAMILY=family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = nrow(FEMbasis$mesh$nodes)
-
-      } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE){
-          bigsol = NULL
-          print('C++ Code Execution')
-          bigsol = CPP_smooth.GAM.FEM.PDE.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-              PDE_parameters = PDE_parameters, 
-              covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-              BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, FAMILY=family,
-              mu0 = mu0, max.steps.FPIRLS=max.steps.FPIRLS,
-              scale.param=scale.param, GCV.inflation.factor=GCV.inflation.factor,  threshold.FPIRLS=threshold.FPIRLS,  DOF =DOF, DOF_matrix = DOF_matrix, search = search, bary.locations = bary.locations, areal.data.avg = areal.data.avg)
-
-          numnodes = nrow(FEMbasis$mesh$nodes)
-     
-     } else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE){ 
-      
+    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
+    {
+        bigsol = NULL
+        print('C++ Code Execution')
+        bigsol = CPP_smooth.GAM.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+          covariates = covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+          incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+          FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,  
+          search = search, bary.locations = bary.locations,
+          optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        numnodes = nrow(FEMbasis$mesh$nodes)
+    }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
+    { 
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.GAM.FEM.PDE.sv.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-              PDE_parameters = PDE_parameters, 
-              covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-              BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, FAMILY=family,
-              mu0 = mu0, max.steps.FPIRLS=max.steps.FPIRLS,
-              scale.param=scale.param, GCV.inflation.factor=GCV.inflation.factor, threshold.FPIRLS=threshold.FPIRLS,  DOF =DOF, DOF_matrix = DOF_matrix, search = search, bary.locations = bary.locations, areal.data.avg = areal.data.avg)
-    
+      bigsol = CPP_smooth.GAM.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = nrow(FEMbasis$mesh$nodes)
-    } else if(class(FEMbasis$mesh) == 'mesh.2.5D'){
-      
+    }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
+    {
       bigsol = NULL  
       print('C++ Code Execution')
       if(!is.null(locations))
         stop("The option locations!=NULL for manifold domains is currently not implemented")
-      bigsol = CPP_smooth.manifold.GAM.FEM.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-              covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-              BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, FAMILY=family,
-              mu0 = mu0, max.steps.FPIRLS=max.steps.FPIRLS, 
-              scale.param=scale.param, GCV.inflation.factor=GCV.inflation.factor, threshold.FPIRLS=threshold.FPIRLS, DOF =DOF, DOF_matrix = DOF_matrix, search = search, bary.locations = bary.locations, areal.data.avg = areal.data.avg)
-      
+      bigsol = CPP_smooth.manifold.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS, 
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = FEMbasis$mesh$nnodes
-      
-    }else if(class(FEMbasis$mesh) == 'mesh.3D'){
-        
+    }else if(class(FEMbasis$mesh) == 'mesh.3D')
+    {
       bigsol = NULL  
       print('C++ Code Execution')
-      bigsol = CPP_smooth.volume.GAM.FEM.basis(locations=locations, observations=observations, FEMbasis=FEMbasis, lambda=lambda,
-              covariates=covariates, incidence_matrix=incidence_matrix, ndim=ndim, mydim=mydim,
-              BC=BC, GCV=GCV, GCVMETHOD=GCVMETHOD, nrealizations=nrealizations, FAMILY=family,
-              mu0 = mu0, max.steps.FPIRLS=max.steps.FPIRLS,
-              scale.param=scale.param, GCV.inflation.factor=GCV.inflation.factor, threshold.FPIRLS=threshold.FPIRLS, DOF =DOF, DOF_matrix = DOF_matrix, search = search, bary.locations = bary.locations, areal.data.avg = areal.data.avg)
-      
+      bigsol = CPP_smooth.volume.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
+        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
+        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
+        FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
+        search = search, bary.locations = bary.locations,
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = FEMbasis$mesh$nnodes
     }
-
   }
 
+  # ---------- Solution -----------
   f = bigsol[[1]][1:numnodes,]
   g = bigsol[[1]][(numnodes+1):(2*numnodes),]
 

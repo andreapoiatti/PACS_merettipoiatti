@@ -4,9 +4,10 @@
 #include "../../FdaPDE.h"
 #include "../../Mesh/Headers/Mesh.h"
 #include "../../Regression/Headers/MixedFERegression.h"
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 
 template<typename InputHandler, typename IntegratorSpace, UInt ORDER, typename IntegratorTime, UInt SPLINE_DEGREE, UInt ORDER_DERIVATIVE, UInt mydim, UInt ndim>
-SEXP regression_skeleton_time(InputHandler &regressionData, SEXP Rmesh, SEXP Rmesh_time)
+SEXP regression_skeleton_time(InputHandler & regressionData, OptimizationData & optimizationData, SEXP Rmesh, SEXP Rmesh_time)
 {
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);//! load the mesh
 	UInt n_time = Rf_length(Rmesh_time);
@@ -15,7 +16,7 @@ SEXP regression_skeleton_time(InputHandler &regressionData, SEXP Rmesh, SEXP Rme
 	{
 		mesh_time[i] = REAL(Rmesh_time)[i];
 	}
-	MixedFERegression<InputHandler> regression(mesh_time,regressionData, mesh.num_nodes(), SPLINE_DEGREE);//! load data in a C++ object
+	MixedFERegression<InputHandler> regression(mesh_time, regressionData, optimizationData, mesh.num_nodes(), SPLINE_DEGREE);//! load data in a C++ object
 
 	regression.template preapply<ORDER,mydim,ndim, IntegratorSpace, IntegratorTime, SPLINE_DEGREE, ORDER_DERIVATIVE>(mesh); //! solve the problem (compute the _solution, _dof, _GCV, _beta)
         regression.apply();
@@ -24,8 +25,8 @@ SEXP regression_skeleton_time(InputHandler &regressionData, SEXP Rmesh, SEXP Rme
 	MatrixXv const & solution = regression.getSolution();
 	MatrixXr const & dof = regression.getDOF();
 	MatrixXr const & GCV = regression.getGCV();
-	UInt bestLambdaS = regression.getBestLambdaS();
-	UInt bestLambdaT = regression.getBestLambdaT();
+	UInt bestLambdaS = optimizationData.get_best_lambda_S();
+	UInt bestLambdaT = optimizationData.get_best_lambda_T();
 	MatrixXv beta;
 	if(regressionData.getCovariates()->rows()==0)
 	{

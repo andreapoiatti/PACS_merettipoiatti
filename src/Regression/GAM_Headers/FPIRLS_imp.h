@@ -8,16 +8,15 @@
 
 // Constructor
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
-FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim>& mesh, InputHandler& inputData, VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), inputData_(inputData), regression_(inputData_, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
+FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
+  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData_, optimizationData_, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //initialization of mu, current_J_values and past_J_values.
-  for(UInt j=0; j< inputData.getLambdaS()->size() ; j++){
+  for(UInt j=0; j<optimizationData_.get_size_S() ; j++){
     mu_.push_back(mu0);
     current_J_values.push_back(std::array<Real,2>{1,1});
     past_J_values.push_back(std::array<Real,2>{1,1});
   }
-
 };
 
 // FPIRLS_base methods
@@ -55,7 +54,7 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::apply( const Forci
     current_J_values[i][0] = past_J_values[i][0] + 2*inputData_.get_treshold();
     current_J_values[i][1] = past_J_values[i][1] + 2*inputData_.get_treshold();
 
-    this->inputData_.setCurrentLambda(i); // set right lambda for the current iteration.
+    this->optimizationData_.setCurrentLambda(i); // set right lambda for the current iteration.
 
     Rprintf("Start FPIRLS for the lambda number %d \n", i+1);
 
@@ -89,7 +88,7 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::apply( const Forci
 
     _J_minima.push_back(current_J_values[i][0]+current_J_values[i][1]); // compute the minimum value of the J fuctional
 
-    if(this->inputData_.getGCV_GAM()){ // compute GCV if it is required
+    if(this->optimizationData_.get_loss_function()=="GCV"){ // compute GCV if it is required
       compute_GCV(i);
     }
 
@@ -237,7 +236,7 @@ std::array<Real,2> FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::comp
   }
 
   non_parametric_value = Lf.transpose() * (*(regression_.getR0_())) * Lf;
-  non_parametric_value = (*(inputData_.getGlobalLambda()))[lambda_index]*non_parametric_value;
+  non_parametric_value = (optimizationData_.get_lambda_S())[lambda_index]*non_parametric_value;
 
   std::array<Real,2> returnObject{parametric_value, non_parametric_value};
 
@@ -246,13 +245,14 @@ std::array<Real,2> FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::comp
 
 
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
-void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt& lambda_index){
+void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt & lambda_index){
 
   //GCV COMPUTATION
-  if ( inputData_.computeDOF() ){ // is DOF_matrix to be computed?
-    regression_.computeDegreesOfFreedom(0, 0, (*(this->inputData_.getGlobalLambda()))[lambda_index], 0);
+  if (optimizationData_.get_DOF_evaluation() != "not_required")
+  { // is DOF_matrix to be computed?
+    regression_.computeDegreesOfFreedom(0, 0, optimizationData_.get_lambda_S()[lambda_index], 0);
   }
-  _dof(lambda_index,0) = regression_.getDOF()(0,0);
+  _dof(lambda_index,0) = optimizationData_.get_DOF_matrix()(0,0);
 
   const VectorXr * y = inputData_.getInitialObservations();
   Real GCV_value = 0;
@@ -262,15 +262,15 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt& 
 
   GCV_value *= y->size();
 
-  GCV_value /= (y->size()-inputData_.getTuneParam()*_dof(lambda_index,0))*(y->size()-inputData_.getTuneParam()*_dof(lambda_index,0));
+  GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0))*(y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0));
 
   _GCV[lambda_index] = GCV_value;
 
   //best lambda
-  if ( GCV_value < _bestGCV)
+  if(GCV_value < optimizationData_.get_best_value())
   {
-    bestLambdaS_ = lambda_index;
-    _bestGCV = GCV_value;
+    optimizationData_.set_best_lambda_S(lambda_index);
+    optimizationData_.set_best_value(GCV_value);
   }
 
 }
@@ -278,7 +278,7 @@ void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt& 
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_variance_est(){
   Real phi;
-  if(this->scale_parameter_flag_ && !this->inputData_.getGCV_GAM() ){// if scale param should be
+  if(this->scale_parameter_flag_ && this->optimizationData_.get_loss_function()!="GCV"){// if scale param should be
     _variance_estimates.resize(this->mu_.size(),0);
     const UInt n_obs = this->inputData_.getObservations()->size();
 

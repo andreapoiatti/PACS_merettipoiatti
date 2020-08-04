@@ -11,6 +11,7 @@
 #include "../../FE_Assemblers_Solvers/Headers/Param_Functors.h"
 #include "../../FE_Assemblers_Solvers/Headers/Solver.h"
 #include "../../Mesh/Headers/Mesh.h"
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 #include "RegressionData.h"
 
 /*! A base class for the smooth regression.
@@ -22,11 +23,9 @@ class MixedFERegressionBase
 		const std::vector<Real> mesh_time_;
 		const UInt N_; 			//!< Number of spatial basis functions.
 		const UInt M_;
-	        Real lambda_ = 0.5; 		//!< Lambda used in spatial regression
-		Real last_lambda = 0.0; 	//!< Previous Lambda computed
 
 		const InputHandler & regressionData_;
-
+                OptimizationData & optimizationData_; //!<COnst reference to OptimizationData class
 		// For only space problems
 		//  system matrix= 	|psi^T * A *psi | lambda R1^T  |   +  |psi^T * A * (-H) * psi |  O |   =  matrixNoCov + matrixOnlyCov
 		//	                |     R1        | R0	      |      |         O             |  O |
@@ -75,9 +74,6 @@ class MixedFERegressionBase
 		MatrixXv _solution; 		//!< A Eigen::MatrixXv: Stores the system solution.
 		MatrixXr _dof;      		//!< A Eigen::MatrixXr storing the computed dofs
 		MatrixXr _GCV;			//!< A Eigen::MatrixXr storing the computed GCV
-		UInt	 bestLambdaS_ = 0;	//!< Stores the index of the best lambdaS according to GCV
-		UInt 	 bestLambdaT_ = 0;	//!< Stores the index of the best lambdaT according to GCV
-		Real 	 _bestGCV     = 10e20;	//!< Stores the value of the best GCV
 		MatrixXv _beta;			//!< A Eigen::MatrixXv storing the computed beta coefficients
 
 		//Flag to avoid the computation of R0, R1, Psi_ onece already performed
@@ -116,7 +112,6 @@ class MixedFERegressionBase
 		void setQ(void);
 		//! A member function which builds the H matrix
 		void setH(void);
-	        inline void set_lambda(Real lambda) {this->lambda_ = lambda;}
 		//! A member function returning the system right hand data
 		void getRightHandData(VectorXr& rightHandData);
 		//! A method which builds all the matrices needed for assembling matrixNoCov_
@@ -146,12 +141,12 @@ class MixedFERegressionBase
 
 	public:
 		//!A Constructor.
-		MixedFERegressionBase( const InputHandler & regressionData, UInt nnodes_):
-			N_(nnodes_), M_(1), regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
+		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_):
+			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){};
 
-		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, UInt nnodes_, UInt spline_degree):
+		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
-			regressionData_(regressionData), _dof(regressionData.getDOF_matrix()){};
+			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){};
 
 		//! A member function computing the dofs for external calls
 		//template<typename A>
@@ -176,10 +171,6 @@ class MixedFERegressionBase
 		inline MatrixXr const & getGCV(void) const {return _GCV;}
 		//! A method returning the computed beta coefficients of the model
 		inline MatrixXv const & getBeta(void) const {return _beta;}
-		//! A method returning the index of the best lambdaS according to GCV
-		inline UInt getBestLambdaS(void) {return bestLambdaS_;}
-		//! A method returning the index of the best lambdaT according to GCV
-		inline UInt getBestLambdaT(void) {return bestLambdaT_;}
 		//! A method returning the psi matrix
 		inline const SpMat * getpsi_(void) const {return &this->psi_;}
 		//! A method returning the psi matrix transposed
@@ -223,10 +214,10 @@ template<typename InputHandler>
 class MixedFERegression : public MixedFERegressionBase<InputHandler>
 {
 	public:
-		MixedFERegression(const InputHandler & regressionData, UInt nnodes_):
-			MixedFERegressionBase<InputHandler>(regressionData, nnodes_) {};
-		MixedFERegression(const std::vector<Real> & mesh_time, const InputHandler & regressionData, UInt nnodes_, UInt spline_degree):
-			MixedFERegressionBase<InputHandler>(mesh_time, regressionData, nnodes_, spline_degree) {};
+		MixedFERegression(const InputHandler & regressionData,  OptimizationData & optimizationData, UInt nnodes_):
+			MixedFERegressionBase<InputHandler>(regressionData, optimizationData, nnodes_) {};
+		MixedFERegression(const std::vector<Real> & mesh_time, const InputHandler & regressionData,  OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
+			MixedFERegressionBase<InputHandler>(mesh_time, regressionData, optimizationData, nnodes_, spline_degree) {};
 
 		void apply(void)
 		{

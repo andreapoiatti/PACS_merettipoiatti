@@ -1,10 +1,11 @@
-checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, incidence_matrix = NULL, BC = NULL, GCV = FALSE, PDE_parameters=NULL, GCVmethod = 2, nrealizations = 100, search, bary.locations=bary.locations, GCV.inflation.factor = 1, areal.data.avg = TRUE)
+checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
 {
-  #################### Parameter Check #########################
-
-  if (is.null(FEMbasis))
+  #################### Full Consistency Parameter Check #########################
+  
+  # Mesh type and methods
+  if(is.null(FEMbasis))
     stop("FEMbasis required;  is NULL.")
-  if(class(FEMbasis)!= "FEMbasis")
+  if(class(FEMbasis) != "FEMbasis")
     stop("'FEMbasis' is not class 'FEMbasis'")
 
   if(class(FEMbasis$mesh)!='mesh.2D' & class(FEMbasis$mesh) != "mesh.2.5D" & class(FEMbasis$mesh) != "mesh.3D")
@@ -14,76 +15,44 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, lam
     stop('For mesh classes different from mesh.2D, anysotropic regularization is not yet implemented.
          Use Laplacian regularization instead')
 
-
-
-  if(!is.null(locations))
-  {
+  # Locations & observations & areal
+  if(!is.null(locations)){
     if(any(is.na(locations)))
       stop("Missing values not admitted in 'locations'.")
     if(any(is.na(observations)))
       stop("Missing values not admitted in 'observations' when 'locations' are specified.")
   }
-
-  if (is.null(observations))
+  
+  if(is.null(observations))
     stop("observations required;  is NULL.")
 
-  if (is.null(lambda))
-    stop("lambda required;  is NULL.")
-
-  if (!is.null(locations) && !is.null(incidence_matrix))
+  if(!is.null(locations) & !is.null(incidence_matrix))
     stop("Both 'locations' and 'incidence_matrix' are given. In case of pointwise data, set 'incidence_matrix to NULL. In case of areal data, set 'locations' to NULL.")
 
-  if (any(incidence_matrix!=0 & incidence_matrix!=1))
+  if(any(incidence_matrix != 0 & incidence_matrix != 1))
     stop("Value different than 0 or 1 in 'incidence_matrix'.")
-
-  if(!is.null(BC))
-  {
-    if (is.null(BC$BC_indices))
-      stop("'BC_indices' required in BC;  is NULL.")
-    if (is.null(BC$BC_values))
-      stop("'BC_indices' required in BC;  is NULL.")
-  }
-
-  if (is.null(GCV))
-    stop("GCV required;  is NULL.")
-  if(!is.logical(GCV))
-    stop("'GCV' is not logical")
-
-
-  if(!is.null(PDE_parameters))
-  {
-    if (is.null(PDE_parameters$K))
+  
+  if(is.null(areal.data.avg))
+    stop("'areal.data.avg' required; is NULL.")
+  if(!is.logical(areal.data.avg))
+    stop("'areal.data.avg' is not logical")
+  
+  # PDE_parameters
+  if(!is.null(PDE_parameters)){
+    if(is.null(PDE_parameters$K))
       stop("'K' required in PDE_parameters;  is NULL.")
-    if (is.null(PDE_parameters$b))
+    if(is.null(PDE_parameters$b))
       stop("'b' required in PDE_parameters;  is NULL.")
-    if (is.null(PDE_parameters$c))
+    if(is.null(PDE_parameters$c))
       stop("'c' required in PDE_parameters;  is NULL.")
   }
-
-   #Check the locations in 'bary.locations' and 'locations' are the same
-  if(!is.null(bary.locations) & !is.null(locations))
-  {
-    flag=TRUE
-    for (i in 1:nrow(locations)) {
-      if (!(locations[i,1]==bary.locations$locations[i,1] & locations[i,2] == bary.locations$locations[i,2])) {
-        flag = FALSE
-        break
-      }
-    }
-
-    if (flag == FALSE) {
-      stop("Locations are not same as the one in barycenter information.")
-    }
-  }  # end of bary.locations
-
-  space_varying=FALSE
-
+  
+  space_varying = FALSE
+  
   if(!is.null(PDE_parameters$u)){
-
     space_varying=TRUE
-
     message("Smoothing: anysotropic and non-stationary case")
-
+    
     if(!is.function(PDE_parameters$K))
       stop("'K' in 'PDE_parameters' is not a function")
     if(!is.function(PDE_parameters$b))
@@ -92,60 +61,96 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, lam
       stop("'c' in 'PDE_parameters' is not a function")
     if(!is.function(PDE_parameters$u))
       stop("'u' in 'PDE_parameters' is not a function")
-
   }
   else if(!is.null(PDE_parameters)){
     message("Smoothing: anysotropic and stationary case")
   }
-
+  
   if(is.null(PDE_parameters))
     message("Smoothing: isotropic and stationary case")
-
-
-  if (GCVmethod != 1 && GCVmethod != 2)
-    stop("GCVmethod must be either Exact or Stochastic")
-
-  if( !is.numeric(nrealizations) || nrealizations < 1)
-    stop("nrealizations must be a positive integer")
-
-    # check GCV.inflation.factor
-  if (is.null(GCV.inflation.factor)){ 
-    stop("'GCV.inflation.factor' required;  is NULL.")
-  }else if( !is.numeric(GCV.inflation.factor) || GCV.inflation.factor < 0){
-      stop("'GCV.inflation.factor' must be a real positive")
+  
+  # Boundary Conditions [BC]
+  if(!is.null(BC)){
+    if (is.null(BC$BC_indices))
+      stop("'BC_indices' required in BC;  is NULL.")
+    if (is.null(BC$BC_values))
+      stop("'BC_indices' required in BC;  is NULL.")
   }
+  
+  # Check the locations in 'bary.locations' and 'locations' are the same
+  if(!is.null(bary.locations) & !is.null(locations)){
+    flag = TRUE
+    for(i in 1:nrow(locations)){
+      if(!(locations[i,1] == bary.locations$locations[i,1] & locations[i,2] == bary.locations$locations[i,2])){
+        flag = FALSE
+        break
+      }
+    }
+    if(flag == FALSE){
+      stop("Locations are not same as the one in barycenter information.")
+    }
+  } # end of bary.locations
+  
+  # Optimization
+  # --> General consistency rules
+  if(optimization != 'batch' & DOF_evaluation == 'non_required')
+    stop("An optimized method needs to evaluate DOF, please specify a 'DOF_evaluation' method among 'stochastic' and 'exact'")
+  if(optimization != 'batch' & loss_function == 'unused')
+    stop("An optimized method needs a loss function to perform the evaluation, please select 'loss_function' as 'GCV'")
+  if(optimization == 'newton' & DOF_evaluation == 'stochastic')
+    stop("Newton method can only be applied in a 'DOF_evaluation' = 'exact' context")
+  
+  # --> Lambda related
+  if(optimization == 'batch' & is.null(lambda))
+    stop("'lambda' required for 'optimization' = 'batch'; now is NULL.")
+  if(optimization != 'batch' & !is.null(lambda) & length(lambda) > 1)
+    warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
 
-  if (is.null(areal.data.avg))
-    stop("'areal.data.avg' required;  is NULL.")
-  if(!is.logical(areal.data.avg))
-    stop("'areal.data.avg' is not logical")
+  # --> Stochastic related data
+  if(!is.numeric(nrealizations) || nrealizations < 1)
+    stop("'nrealizations' must be a positive integer")
+  if(!is.numeric(seed) || seed < 0)
+    stop("'seed' must be a non-negative integer")
+  if((nrealizations != 100 || seed != 0) & DOF_evaluation != 'sochastic')
+    warning("'nrealzations' and 'seed' are used just with 'DOF_evaluation' = 'stochastic'")
+  
+  # --> GCV.inflation.factor related
+  if(is.null(GCV.inflation.factor)){ 
+    stop("'GCV.inflation.factor' required;  is NULL.")
+  }else if(!is.numeric(GCV.inflation.factor) || GCV.inflation.factor < 0){
+    stop("'GCV.inflation.factor' must be a non-negative real")
+  }
+  if(!is.null(GCV.inflation.factor) & GCV.inflation.factor != 1 & loss_function != 'GCV')
+    warning("'GCV' not selected as 'loss function', 'GCV.inflation.factor' unused")
+  
+  # --> DOF_matrix related
+  if(!is.null(DOF_matrix)){
+    if(optimization != 'batch')
+      stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
+    if(DOF_evaluation != 'not_required')
+      stop("'DOF_matrix' is passed to the function, 'DOF_evaluation' should be 'not_required'")
+    if(loss_function != 'GCV')
+      warning("'GCV' is not the 'loss_function'. DOF_matrix is passed but GCV is not computed")
+  }
+  if(is.null(DOF_matrix) & DOF_evaluation == 'not_required' & loss_function == 'GCV')
+    stop("Either 'DOF_matrix' different from NULL or 'DOF_evaluation' different from 'not_required', otherwise 'loss_function' = 'GCV' can't be computed")
+  
 
-
-
-  ans=space_varying
-
-  # # print the type of the search algorithm
-  # if(!is.null(locations))
-  # {
-  #   if (search == 1) { #use Naive search
-  #     print('This is Naive Search')
-  #   } else if (search == 2)  { #use Tree search (default)
-  #     print('This is Tree Search')
-  #   }
-  # }
-
-  ans
+  # Return information
+  return(space_varying)
 }
 
-checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, incidence_matrix = NULL, BC = NULL, GCV = FALSE, DOF=FALSE, DOF_matrix=NULL, space_varying=FALSE, PDE_parameters = NULL, ndim, mydim)
+checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, incidence_matrix = NULL, BC = NULL, space_varying = FALSE, ndim, mydim, lambda = NULL, DOF_matrix = NULL)
 {
   #################### Parameter Check #########################
+  # Observations
   if(ncol(observations) != 1)
     stop("'observations' must be a column vector")
   if(nrow(observations) < 1)
     stop("'observations' must contain at least one element")
-  if(is.null(locations))
-  {
+  
+  # Locations
+  if(is.null(locations)){
     if(class(FEMbasis$mesh) == "mesh.2D"){
       if(nrow(observations) > nrow(FEMbasis$mesh$nodes))
         stop("Size of 'observations' is larger then the size of 'nodes' in the mesh")
@@ -154,8 +159,8 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
         stop("Size of 'observations' is larger then the size of 'nodes' in the mesh")
     }
   }
-  if(!is.null(locations))
-  {
+  
+  if(!is.null(locations)){
     if(ncol(locations) != ndim)
       stop("'locations' must be a ndim-columns matrix;")
     if(nrow(locations) != nrow(observations))
@@ -163,18 +168,15 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
      if(dim(locations)[1]==dim(FEMbasis$mesh$nodes)[1] & dim(locations)[2]==dim(FEMbasis$mesh$nodes)[2] & !(sum(abs(locations[,1]))==sum(abs(FEMbasis$mesh$nodes[,1])) & sum(abs(locations[,2]))==sum(abs(FEMbasis$mesh$nodes[,2]))) )
       warning("The locations matrix has the same dimensions as the mesh nodes. If the locations you are using are the mesh nodes, set locations=NULL instead")
   }
-  if(ncol(lambda) != 1)
-    stop("'lambda' must be a column vector")
-  if(nrow(lambda) < 1)
-    stop("'lambda' must contain at least one element")
-  if(!is.null(covariates))
-  {
+    
+  #Covariates
+  if(!is.null(covariates)){
     if(nrow(covariates) != nrow(observations))
       stop("'covariates' and 'observations' have incompatible size;")
   }
-
-  if (!is.null(incidence_matrix))
-  {
+  
+  # Incidence matrix
+  if (!is.null(incidence_matrix)){
     if (nrow(incidence_matrix) != nrow(observations))
       stop("'incidence_matrix' and 'observations' have incompatible size;")
     if (class(FEMbasis$mesh) == 'mesh.2D' && ncol(incidence_matrix) != nrow(FEMbasis$mesh$triangles))
@@ -184,9 +186,9 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
     else if (class(FEMbasis$mesh) == 'mesh.3D' && ncol(incidence_matrix) != FEMbasis$mesh$ntetrahedrons)
       stop("'incidence_matrix' must be a ntetrahedrons-columns matrix;")
   }
-
-  if(!is.null(BC))
-  {
+  
+  # BC
+  if(!is.null(BC)){
     if(ncol(BC$BC_indices) != 1)
       stop("'BC_indices' must be a column vector")
     if(ncol(BC$BC_values) != 1)
@@ -201,9 +203,9 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
         stop("At least one index in 'BC_indices' larger then the number of 'nodes' in the mesh;")
     }
   }
-
-  if(!is.null(PDE_parameters) & space_varying==FALSE)
-  {
+  
+  # PDE_parameters
+  if(!is.null(PDE_parameters) & space_varying==FALSE){
     if(!all.equal(dim(PDE_parameters$K), c(2,2)))
       stop("'K' in 'PDE_parameters must be a 2x2 matrix")
     if(!all.equal(dim(PDE_parameters$b), c(2,1)))
@@ -212,8 +214,7 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
       stop("'c' in 'PDE_parameters must be a double")
   }
 
-  if(!is.null(PDE_parameters) & space_varying==TRUE)
-  {
+  if(!is.null(PDE_parameters) & space_varying==TRUE){
 
     n_test_points = min(nrow(FEMbasis$mesh$nodes), 5)
     test_points = FEMbasis$mesh$nodes[1:n_test_points, ]
@@ -242,16 +243,17 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
       stop("Test on function 'u' in 'PDE_parameters' not passed; output is not numeric")
     if(length(try_u_func) != n_test_points)
       stop("Test on function 'u' in 'PDE_parameters' not passed; wrong size of the output")
-  }
-
-  if(!is.null(DOF_matrix))
-  {
-    if(GCV==FALSE)
-      warning("GCV=FALSE. DOF_matrix is passed but GCV is not computed")
-    if(ncol(DOF_matrix)!=1)
+  }  
+  
+  # Optimization
+  if(!is.null(lambda) & ncol(lambda) != 1)
+    stop("'lambda' must be a column vector")
+  if(!is.null(lambda) & nrow(lambda) < 1)
+    stop("'lambda' must contain at least one element")
+  if(!is.null(DOF_matrix)){
+    if(ncol(DOF_matrix) != 1)
       stop("'DOF_matrix' must be a column vector")
-    if(nrow(DOF_matrix)!=length(lambda))
+    if(is.null(lambda) || nrow(DOF_matrix) != length(lambda))
       stop("The number of rows of DOF_matrix is different from the number of lambda")
   }
-
 }

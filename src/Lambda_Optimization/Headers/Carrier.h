@@ -1,5 +1,5 @@
-#ifndef __CARRIER_HPP__
-#define __CARRIER_HPP__
+#ifndef __CARRIER_H__
+#define __CARRIER_H__
 
 // HEADERS
 #include <memory>

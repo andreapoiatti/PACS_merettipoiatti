@@ -5,9 +5,10 @@
 #include "../../Regression/GAM_Headers/FPIRLS.h"
 #include "../../Regression/GAM_Headers/FPIRLSfactory.h"
 #include "../../Mesh/Headers/Mesh.h"
+#include "../../Lambda_Optimization/Headers/Optimization_Data.h"
 
 template<typename InputHandler,typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
-SEXP GAM_skeleton(InputHandler &GAMData, SEXP Rmesh, SEXP Rmu0, std::string family, SEXP RscaleParam)
+SEXP GAM_skeleton(InputHandler & GAMData, OptimizationData & optimizationData, SEXP Rmesh, SEXP Rmu0, std::string family, SEXP RscaleParam)
 {
   MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
 
@@ -23,7 +24,7 @@ SEXP GAM_skeleton(InputHandler &GAMData, SEXP Rmesh, SEXP Rmu0, std::string fami
  	// read scale param
 	Real scale_parameter = REAL(RscaleParam)[0];
 	// Factory:
-	std::unique_ptr<FPIRLS<InputHandler, Integrator, ORDER, mydim, ndim>> fpirls = FPIRLSfactory<InputHandler, Integrator, ORDER, mydim, ndim>::createFPIRLSsolver(family, mesh, GAMData, mu0, scale_parameter);
+	std::unique_ptr<FPIRLS<InputHandler, Integrator, ORDER, mydim, ndim>> fpirls = FPIRLSfactory<InputHandler, Integrator, ORDER, mydim, ndim>::createFPIRLSsolver(family, mesh, GAMData, optimizationData, mu0, scale_parameter);
 
 
   	fpirls->apply();
@@ -36,7 +37,7 @@ SEXP GAM_skeleton(InputHandler &GAMData, SEXP Rmesh, SEXP Rmu0, std::string fami
   	const std::vector<Real> variance_est = fpirls->getVarianceEst();
   	const std::vector<Real>& GCV = fpirls->getGCV();
 
-  	const UInt bestLambda = fpirls->getBestLambdaS();
+  	const UInt bestLambda = optimizationData.get_best_lambda_S();
 
   	MatrixXv beta;
   	if(GAMData.getCovariates()->rows()==0)

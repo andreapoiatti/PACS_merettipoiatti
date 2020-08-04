@@ -649,7 +649,7 @@ R_tricoefCal = function(mesh)
 smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda, covariates=covariates,BC=BC,GCV=GCV,GCVmethod = 'Exact')
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 
@@ -688,7 +688,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,GCV=GCV,GCVmethod = 'Exact')
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 
@@ -735,7 +735,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 smooth.FEM.PDE.sv.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,lambda=lambda,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,GCV=GCV,GCVmethod = 'Exact')
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 

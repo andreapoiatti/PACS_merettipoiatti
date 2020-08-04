@@ -1,4 +1,8 @@
-CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, observations, FEMbasis, time_mesh, lambdaS, lambdaT, covariates = NULL, incidence_matrix = NULL, ndim, mydim, BC = NULL, FLAG_MASS, FLAG_PARABOLIC, IC, GCV,GCVMETHOD = 2, nrealizations = 100, DOF=TRUE, DOF_matrix=NULL, search, GCV.inflation.factor = 1, areal.data.avg = TRUE)
+CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
+                                     covariates = NULL, ndim, mydim, BC = NULL, 
+                                     incidence_matrix = NULL, areal.data.avg = TRUE,
+                                     FLAG_MASS, FLAG_PARABOLIC, IC,
+                                     search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
 {
 
   # C++ function for volumetric works with vectors not with matrices
@@ -37,20 +41,30 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
 
   if(is.null(BC$BC_indices))
   {
-    BC$BC_indices<-vector(length=0)
-    }else
-    {
-      BC$BC_indices<-as.vector(BC$BC_indices)-1
+   BC$BC_indices<-vector(length=0)
+  }else
+  {
+    BC$BC_indices<-as.vector(BC$BC_indices)-1
+  }
 
-    }
-
-    if(is.null(BC$BC_values))
-    {
-      BC$BC_values<-vector(length=0)
-      }else
-      {
-        BC$BC_values<-as.vector(BC$BC_values)
-      }
+  if(is.null(BC$BC_values))
+  {
+    BC$BC_values<-vector(length=0)
+  }else
+  {
+    BC$BC_values<-as.vector(BC$BC_values)
+  }
+  
+  if(is.null(lambdaS))
+  {
+    lambdaS<-vector(length=0)
+  }
+  
+  if(is.null(lambdaT))
+  {
+    lambdaT<-vector(length=0)
+  }
+  
 
   ## Set propr type for correct C++ reading
   locations <- as.matrix(locations)
@@ -68,35 +82,31 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
   storage.mode(FEMbasis$mesh$tetrahedrons) <- "integer"
   covariates <- as.matrix(covariates)
   storage.mode(covariates) <- "double"
-  incidence_matrix <- as.matrix(incidence_matrix)
-  storage.mode(incidence_matrix) <- "integer"
-  storage.mode(lambdaS) <- "double"
-  storage.mode(lambdaT) <- "double"
-  IC <- as.matrix(IC)
-  storage.mode(IC) <- "double"
   storage.mode(ndim) <- "integer"
   storage.mode(mydim) <- "integer"
   storage.mode(BC$BC_indices) <- "integer"
-  storage.mode(BC$BC_values)  <- "double"
-  GCV <- as.integer(GCV)
-  storage.mode(GCV) <-"integer"
-  DOF <- as.integer(DOF)
-  storage.mode(DOF) <- "integer"
-
-  FLAG_MASS <- as.integer(FLAG_MASS)
-  storage.mode(FLAG_MASS) <-"integer"
-
-  FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
-  storage.mode(FLAG_PARABOLIC) <-"integer"
-
-  storage.mode(nrealizations) <- "integer"
-  storage.mode(GCVMETHOD) <- "integer"
-  storage.mode(search) <- "integer"
-
-  storage.mode(GCV.inflation.factor)  <- "double"
+  storage.mode(BC$BC_values) <-"double"
+  incidence_matrix <- as.matrix(incidence_matrix)
+  storage.mode(incidence_matrix) <- "integer"
   areal.data.avg <- as.integer(areal.data.avg)
   storage.mode(areal.data.avg) <-"integer"
-
+  FLAG_MASS <- as.integer(FLAG_MASS)
+  storage.mode(FLAG_MASS) <-"integer"
+  FLAG_PARABOLIC <- as.integer(FLAG_PARABOLIC)
+  storage.mode(FLAG_PARABOLIC) <-"integer"
+  IC <- as.matrix(IC)
+  storage.mode(IC) <- "double"
+  storage.mode(search) <- "integer"
+  storage.mode(optim) <- "integer"  
+  storage.mode(lambdaS) <- "double"  
+  storage.mode(lambdaT) <- "double"
+  DOF_matrix <- as.matrix(DOF_matrix)
+  storage.mode(DOF_matrix) <- "double"
+  storage.mode(nrealizations) <- "integer"
+  storage.mde(seed) <- "integer"
+  storage.mode(GCV.inflation.factor) <- "double"
+  
+  
   ## IC estimation for parabolic smoothing from the first column of observations
   ICsol=NA
   if(nrow(IC)==0 && FLAG_PARABOLIC)
@@ -118,9 +128,9 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
     storage.mode(lambdaSIC) <- "double"
     ## call the smoothing function with initial observations to estimates the IC
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-      FEMbasis$mesh, FEMbasis$order, mydim, ndim, lambdaSIC, covariatesIC,
-      incidence_matrix, BC$BC_indices, BC$BC_values,
-      T, as.integer(1), nrealizations, T, DOF_matrix, search, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
+     FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+     BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+     search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if((ICsol[[4]][1]+1)==1)
@@ -129,9 +139,9 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
       lambdaSIC <- as.matrix(lambdaSIC)
       storage.mode(lambdaSIC) <- "double"
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-        FEMbasis$mesh, FEMbasis$order, mydim, ndim, lambdaSIC, covariatesIC,
-        incidence_matrix, BC$BC_indices, BC$BC_values,
-        T, as.integer(1), nrealizations, T, DOF_matrix, search, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
+       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+       search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -142,9 +152,9 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
         lambdaSIC <- as.matrix(lambdaSIC)
         storage.mode(lambdaSIC) <- "double"
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
-          FEMbasis$mesh, FEMbasis$order, mydim, ndim, lambdaSIC, covariatesIC,
-          incidence_matrix, BC$BC_indices, BC$BC_values,
-          T, as.integer(1), nrealizations, T, DOF_matrix, search, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
+         FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
+         BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
+         search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
       }
     }
 
@@ -177,9 +187,9 @@ CPP_smooth.volume.FEM.time<-function(locations, bary.locations, time_locations, 
 
 
   ## Call C++ function
-  bigsol <- .Call("regression_Laplace_time", locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$mesh$order, mydim, ndim, lambdaS, lambdaT, covariates,
-    incidence_matrix, BC$BC_indices, BC$BC_values, FLAG_MASS, FLAG_PARABOLIC,
-    IC, GCV, GCVMETHOD, nrealizations, DOF, DOF_matrix, search, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
+  bigsol <- .Call("regression_Laplace_time", locations, locations, bary.locations, time_locations, observations, FEMbasis$mesh, time_mesh, FEMbasis$order,
+    mydim, ndim, covariates, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, FLAG_MASS, FLAG_PARABOLIC,
+    IC, search, optim, lambdaS, lambdaT, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
   return(c(bigsol,ICsol))
 }
