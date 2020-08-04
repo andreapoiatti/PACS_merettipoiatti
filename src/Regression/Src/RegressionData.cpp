@@ -107,6 +107,7 @@ RegressionData::RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Robser
 	setIncidenceMatrix(RincidenceMatrix);
 
 	order_ =  INTEGER(Rorder)[0];
+	search_ =  INTEGER(Rsearch)[0];
 
 	UInt length_indexes = Rf_length(RBCIndices);
 	bc_indices_.assign(INTEGER(RBCIndices), INTEGER(RBCIndices) +  length_indexes);
