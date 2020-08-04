@@ -134,13 +134,13 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Preliminary consistency of optimization parameters
   if(optimization == "batch")
   {
-    optm = 0  
+    optim = 0  
   }else if(optimization == "newton")
   {
-    optm = 1
+    optim = 1
   }else if(optimization == "newton_fd")
   {
-    optm = 2
+    optim = 2
   }else
   {
     stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
@@ -152,13 +152,13 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   
   if(DOF_evaluation == 'not_required')
   {
-    optm = c(optm,0)
+    optim = c(optim,0)
   }else if(DOF_evaluation == 'stochastic')
   {
-    optm = c(optm,1)
+    optim = c(optim,1)
   }else if(DOF_evaluation == 'exact')
   {
-    optm = c(optm,2)
+    optim = c(optim,2)
   }else
   {
     stop("'DOF_evaluation' must be 'not_required', 'stochastic' or 'exact'.")
@@ -166,10 +166,10 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   
   if(loss_function == 'unused')
   {
-    optm = c(optm,0)
+    optim = c(optim,0)
   }else if(loss_function == 'GCV')
   {
-    optm = c(optm,1)
+    optim = c(optim,1)
   }else
   {
     stop("'loss_function' has to be 'GCV'.")
