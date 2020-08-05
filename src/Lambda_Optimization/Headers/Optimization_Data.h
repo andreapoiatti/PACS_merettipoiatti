@@ -56,7 +56,7 @@ class  OptimizationData
 
                 // [[TODO ADD SEED TO THE CONSTRUCTORS]]
                 OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune);
-                OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune);
+                OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rflag_parabolic, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune);
 
                 // Setters
                 inline void set_criterion(const std::string && criterion_) {criterion = criterion_;}

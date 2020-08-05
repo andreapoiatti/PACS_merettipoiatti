@@ -83,10 +83,7 @@ class MixedFERegressionBase
 		bool isR1Computed  = false;
 
 		bool isSpaceVarying = false; //!< used to distinguish whether to use the forcing term u in apply() or not
-		bool isGAMData      =
-			std::is_same<InputHandler, GAMDataLaplace>::value ||
-			std::is_same<InputHandler, GAMDataEllipticSpaceVarying>::value ||
-			std::is_same<InputHandler, GAMDataElliptic>::value;
+		bool isGAMData;
 
 	        // -- SETTERS --
 		template<UInt ORDER, UInt mydim, UInt ndim>
@@ -142,11 +139,11 @@ class MixedFERegressionBase
 	public:
 		//!A Constructor.
 		MixedFERegressionBase( const InputHandler & regressionData, OptimizationData & optimizationData,  UInt nnodes_):
-			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){};
+			N_(nnodes_), M_(1), regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
 
 		MixedFERegressionBase(const std::vector<Real> & mesh_time, const InputHandler & regressionData, OptimizationData & optimizationData, UInt nnodes_, UInt spline_degree):
 			mesh_time_(mesh_time), N_(nnodes_), M_(regressionData.getFlagParabolic() ? mesh_time.size()-1 : mesh_time.size()+spline_degree-1),
-			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){};
+			regressionData_(regressionData), optimizationData_(optimizationData), _dof(optimizationData.get_DOF_matrix()){isGAMData = regressionData.getisGAM();};
 
 		//! A member function computing the dofs for external calls
 		//template<typename A>

@@ -55,7 +55,6 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
                 }
         }
 }
-
 void OptimizationData::fill_lambda(SEXP Rlambda, std::vector<Real> & vect, UInt & size)
 {
         size = Rf_length(Rlambda);
@@ -89,7 +88,7 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealization
         }
 }
 
-OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
+OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rflag_parabolic, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
 {
         builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
@@ -97,13 +96,15 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, 
         if(this->criterion == "batch")
         {
                 fill_lambda(Rlambda_S, this->lambda_S, this->size_S);
-                fill_lambda(Rlambda_T, this->lambda_T, this->size_T);
+                if(INTEGER(Rflag_parabolic)[0] == 0)
+                        fill_lambda(Rlambda_T, this->lambda_T, this->size_T);
                 set_lambdaS_backup();
         }
         else
         {
                 initialize_lambda(Rlambda_S, this->initial_lambda_S);
-                initialize_lambda(Rlambda_T, this->initial_lambda_T);
+                if(INTEGER(Rflag_parabolic)[0] == 0)
+                        initialize_lambda(Rlambda_T, this->initial_lambda_T);
         }
 }
 

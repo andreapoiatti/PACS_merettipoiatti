@@ -20,6 +20,7 @@ class  RegressionData
 		UInt 		   nRegions_; 			//!< For areal data.
 		bool 		   arealDataAvg_; 		//!< Is areal data averaged ?
 		VectorXr	   WeightsMatrix_; 		//!< Weighted regression.
+		bool               isGAM = false;
 
 	private:
 		std::vector<UInt> observations_indices_;
@@ -162,6 +163,7 @@ class  RegressionData
 		inline bool isSpaceTime(void) const {return flag_SpaceTime_;}
 		inline bool getFlagMass(void) const {return flag_mass_;}
 		inline bool getFlagParabolic(void) const {return flag_parabolic_;}
+		inline bool getisGAM(void) const {return isGAM;}
 
 		// Search
 		//! A method returning the input search

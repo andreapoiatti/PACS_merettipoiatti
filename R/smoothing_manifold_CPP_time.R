@@ -136,7 +136,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-      search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+      search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if((ICsol[[4]][1]+1)==1)
@@ -147,7 +147,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-         search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+         search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -160,7 +160,7 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
            FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
            BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-           search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+           search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
       }
     }
 

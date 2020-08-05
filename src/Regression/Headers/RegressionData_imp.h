@@ -9,7 +9,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(std::vector<Point> & loc
 	MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt max_num_iterations, Real threshold):
 	RegressionData(locations, observations, order, covariates, bc_indices, bc_values, incidenceMatrix, arealDataAvg, search),
 	max_num_iterations_(max_num_iterations), threshold_(threshold), initialObservations_(observations)
-{;}
+{this->isGAM = true;}
 
 // PDE
 template<typename RegressionHandler>
@@ -19,7 +19,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(std::vector<Point> & loc
 	UInt search, UInt max_num_iterations, Real threshold):
 	RegressionDataElliptic(locations, observations, order, K, beta, c, covariates, bc_indices, bc_values, incidenceMatrix, arealDataAvg, search),
 	max_num_iterations_(max_num_iterations), threshold_(threshold), initialObservations_(observations)
-{;}
+{this->isGAM = true;}
 
 // PDE SpaceVarying
 template<typename RegressionHandler>
@@ -31,7 +31,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(std::vector<Point> & loc
 	MatrixXi & incidenceMatrix, bool arealDataAvg, UInt search, UInt max_num_iterations, Real threshold):
 	RegressionDataEllipticSpaceVarying(locations, observations, order, K, beta, c, u, covariates, bc_indices, bc_values, incidenceMatrix, arealDataAvg, search),
 	max_num_iterations_(max_num_iterations), threshold_(threshold), initialObservations_(observations)
-{;}
+{this->isGAM = true;}
 
 // Laplace
 template<typename RegressionHandler>
@@ -43,6 +43,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
 	initialObservations_ = this->observations_;
+	this->isGAM = true;
 }
 
 // PDE
@@ -56,6 +57,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
 	initialObservations_ = this->observations_;
+	this->isGAM = true;
 }
 
 // PDE SpaceVarying
@@ -69,6 +71,7 @@ RegressionDataGAM<RegressionHandler>::RegressionDataGAM(SEXP Rlocations, SEXP Rb
 	max_num_iterations_ = INTEGER(Rmax_num_iteration)[0];
 	threshold_ =  REAL(Rthreshold)[0];
 	initialObservations_ = this->observations_;
+	this->isGAM = true;
 }
 
 #endif

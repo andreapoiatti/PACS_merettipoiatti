@@ -105,7 +105,6 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
 
-
   ## IC estimation for parabolic smoothing from the first column of observations
   ICsol = NA
   if(nrow(IC)==0 && FLAG_PARABOLIC)
@@ -136,10 +135,11 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
     lambdaSIC <- as.matrix(lambdaSIC)
     storage.mode(lambdaSIC) <- "double"
     ## call the smoothing function with initial observations to estimates the IC
+    
     ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-      c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+      as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if((ICsol[[4]][1]+1)==1)
@@ -150,7 +150,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
       ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-       c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+       as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -163,7 +163,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
         ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-         c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+         as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
       }
     }
 
@@ -333,7 +333,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
     storage.mode(lambdaSIC) <- "double"
     ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
       mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-      incidence_matrix, areal.data.avg, search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+      incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     if((ICsol[[4]][1]+1)==1)
     {
@@ -342,7 +342,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
       storage.mode(lambdaSIC) <- "double"
       ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
        mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-       incidence_matrix, areal.data.avg, search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+       incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -353,7 +353,7 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
         storage.mode(lambdaSIC) <- "double"
         ICsol <- .Call("regression_PDE", locations, bary.locations, observations[1:NobsIC], FEMbasis$mesh, FEMbasis$order,
          mydim, ndim, PDE_parameters$K, PDE_parameters$b, PDE_parameters$c, covariatesIC, BC$BC_indices, BC$BC_values,
-         incidence_matrix, areal.data.avg, search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+         incidence_matrix, areal.data.avg, search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
       }
     }
 
@@ -538,7 +538,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
     ICsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations[1:NobsIC],
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
       covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-      search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+      search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     if((ICsol[[4]][1]+1)==1)
     {
@@ -548,7 +548,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
       ICsol <- .Call("regression_PDE_space_varying", llocations, bary.locations, observations[1:NobsIC],
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
        covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-       search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+       search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -560,7 +560,7 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
         ICsol <- .Call("regression_PDE_space_varying", locations, bary.locations, observations[1:NobsIC],
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, PDE_param_eval$K, PDE_param_eval$b, PDE_param_eval$c, PDE_param_eval$u,
          covariatesIC, BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-         search, c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
+         search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, areal.data.avg, PACKAGE = "fdaPDE")
       }
     }
 

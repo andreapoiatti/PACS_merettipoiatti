@@ -96,7 +96,7 @@ extern "C"
                 //Set data
                 RegressionDataEllipticSpaceVarying regressionData(Rlocations, RbaryLocations, Rtime_locations, Robservations, Rorder, RK, Rbeta, Rc, Ru,
                          Rcovariates, RBCIndices, RBCValues, RincidenceMatrix, RarealDataAvg, Rflag_mass, Rflag_parabolic, Ric, Rsearch);
-                OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rnrealizations, Rseed, RDOF_matrix, Rtune);
+                OptimizationData optimizationData(Roptim, Rlambda_S, Rlambda_T, Rflag_parabolic, Rnrealizations, Rseed, RDOF_matrix, Rtune);
 
                 UInt mydim = INTEGER(Rmydim)[0];
                 UInt ndim = INTEGER(Rndim)[0];
