@@ -1012,8 +1012,10 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
                                 Real lambdaS;
 				if(!regressionData_.isSpaceTime() && !isGAMData) //at the moment only space is implemented
 					{
-						optimizationData_.set_current_lambdaS(lambdaS); //lo setterà il carrier tramite optdata
-						lambdaS=optimizationData_.get_current_lambdaS();
+						lambdaS = (optimizationData_.get_lambda_S())[s];
+						// TO DE ADDED AFTER CARRIER
+						//optimizationData_.set_current_lambdaS(lambdaS); //lo setterà il carrier tramite optdata
+						//lambdaS=optimizationData_.get_current_lambdaS();
 					}
 				else
 				 	lambdaS = (optimizationData_.get_lambda_S())[s];
