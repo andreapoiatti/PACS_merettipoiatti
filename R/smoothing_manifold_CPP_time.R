@@ -56,15 +56,20 @@ CPP_smooth.manifold.FEM.time<-function(locations, time_locations, observations, 
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-  
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
+  }else
+  {
+    lambdaS<-as.vector(lambdaS)
   }
   
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
+  }else
+  {
+    lambdaT<-as.vector(lambdaT)
   }
 
   ## Set propr type for correct C++ reading

@@ -45,6 +45,9 @@ CPP_smooth.FEM.basis<-function(locations, observations, FEMbasis, covariates = N
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
+  }else
+  {
+    lambda<-as.vector(lambda)
   }
 
   ## Set proper type for correct C++ reading
@@ -129,6 +132,9 @@ CPP_smooth.FEM.PDE.basis<-function(locations, observations, FEMbasis, covariates
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
+  }else
+  {
+    lambda<-as.vector(lambda)
   }
   
 
@@ -219,6 +225,9 @@ CPP_smooth.FEM.PDE.sv.basis<-function(locations, observations, FEMbasis, covaria
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
+  }else
+  {
+    lambda<-as.vector(lambda)
   }
 
   PDE_param_eval = NULL

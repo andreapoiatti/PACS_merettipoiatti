@@ -54,11 +54,17 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
+  }else
+  {
+    lambdaS<-as.vector(lambdaS)
   }
   
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
+  }else
+  {
+    lambdaT<-as.vector(lambdaT)
   }
 
   ## Set proper type for correct C++ reading
@@ -133,7 +139,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
     ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
       FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
       BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-      c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+      c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if((ICsol[[4]][1]+1)==1)
@@ -144,7 +150,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
       ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-       c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+       c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -157,7 +163,7 @@ CPP_smooth.FEM.time<-function(locations, time_locations, observations, FEMbasis,
         ICsol <- .Call("regression_Laplace", locationsIC, bary.locations, observationsIC,
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg, search,
-         c(1,1,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
+         c(1,2,1), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
       }
     }
 
@@ -253,11 +259,17 @@ CPP_smooth.FEM.PDE.time<-function(locations, time_locations, observations, FEMba
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
+  }else
+  {
+    lambdaS<-as.vector(lambdaS)
   }
   
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
+  }else
+  {
+    lambdaT<-as.vector(lambdaT)
   }
 
   ## Set proper type for correct C++ reading
@@ -439,9 +451,20 @@ CPP_smooth.FEM.PDE.sv.time<-function(locations, time_locations, observations, FE
     lambdaS<-vector(length=0)
   }
   
+  if(is.null(lambdaS))
+  {
+    lambdaS<-vector(length=0)
+  }else
+  {
+    lambdaS<-as.vector(lambdaS)
+  }
+  
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
+  }else
+  {
+    lambdaT<-as.vector(lambdaT)
   }
   
 

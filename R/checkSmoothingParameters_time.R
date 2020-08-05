@@ -127,36 +127,61 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
     stop("Newton method can only be applied in a 'DOF_evaluation' = 'exact' context")
   
   # --> Lambda related
-  if(optimization == 'batch' & (is.null(lambdaS) || is.null(lambdaT)))
-    stop("'lambda' required for 'optimization' = 'batch'; now is NULL.")
-  if(optimization != 'batch' & !(is.null(lambdaS) || is.null(lambdaT))& (length(lambdaS)>1 || length(lambdaT)>1))
-    warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
+  if(optimization == 'batch' & FLAG_PARABOLIC == FALSE & (is.null(lambdaS) || is.null(lambdaT)))
+    stop("Both not NULL 'lambdaS'  and 'lambdaT' required for 'optimization' = 'batch' in separable context.")
+  if(optimization == 'batch' & FLAG_PARABOLIC == TRUE & is.null(lambdaS))
+    stop("Not NULL 'lambdaS' required for 'optimization' = 'batch' in parabolic context.")
+  if(FLAG_PARABOLIC == 'TRUE' & !is.null(lambdaT))
+    warning("'lambdaT' discarded in parabolic context")
+  if(optimization != 'batch' & !is.null(lambdaS))
+  {
+    if(length(lambdaS)>1) 
+      warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
+  }  
+  if(optimization != 'batch' & !is.null(lambdaT))
+  {
+    if(length(lambdaT)>1) 
+      warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
+  }
+  
   
   # --> Stochastic related data
-  if(!is.numeric(nrealizations) || nrealizations < 1)
+  if(!is.numeric(nrealizations))
     stop("'nrealizations' must be a positive integer")
-  if(!is.numeric(seed) || seed < 0)
+  else if(nrealizations < 1)
+    stop("'nrealizations' must be a positive integer")
+  
+  if(!is.numeric(seed))
     stop("'seed' must be a non-negative integer")
+  else if(seed < 0)
+    stop("'seed' must be a non-negative integer")
+  
   if((nrealizations != 100 || seed != 0) & DOF_evaluation != 'sochastic')
     warning("'nrealzations' and 'seed' are used just with 'DOF_evaluation' = 'stochastic'")
   
   # --> GCV.inflation.factor related
-  if(is.null(GCV.inflation.factor)){ 
+  if(is.null(GCV.inflation.factor))
+  { 
     stop("'GCV.inflation.factor' required;  is NULL.")
-  }else if(!is.numeric(GCV.inflation.factor) || GCV.inflation.factor < 0){
+  } else if(!is.numeric(GCV.inflation.factor))
+  {
+    stop("'GCV.inflation.factor' must be a non-negative real")
+  } else if(GCV.inflation.factor < 0)
+  {
     stop("'GCV.inflation.factor' must be a non-negative real")
   }
-  if(!is.null(GCV.inflation.factor) & GCV.inflation.factor != 1 & loss_function != 'GCV')
+  if(GCV.inflation.factor != 1 & loss_function != 'GCV')
     warning("'GCV' not selected as 'loss function', 'GCV.inflation.factor' unused")
   
   # --> DOF_matrix related
-  if(!is.null(DOF_matrix)){
+  if(!is.null(DOF_matrix))
+  {
     if(optimization != 'batch')
       stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
     if(DOF_evaluation != 'not_required')
       stop("'DOF_matrix' is passed to the function, 'DOF_evaluation' should be 'not_required'")
     if(loss_function != 'GCV')
-      warning("'GCV' is not the 'loss_function'. DOF_matrix is passed but GCV is not computed")
+      stop("'GCV' is not the 'loss_function'. DOF_matrix is passed but GCV is not computed")
   }
   if(is.null(DOF_matrix) & DOF_evaluation == 'not_required' & loss_function == 'GCV')
     stop("Either 'DOF_matrix' different from NULL or 'DOF_evaluation' different from 'not_required', otherwise 'loss_function' = 'GCV' can't be computed")
@@ -358,23 +383,38 @@ checkSmoothingParametersSize_time<-function(locations = NULL, time_locations = N
   }
 
   # Optimization
-  if(ncol(lambdaS) != 1)
-    stop("'lambdaS' must be a column vector")
-  if(nrow(lambdaS) < 1)
-    stop("'lambdaS' must contain at least one element")
+  if(!is.null(lambdaS))
+  {
+    if(ncol(lambdaS)!=1)
+        stop("'lambdaS' must be a column vector")
+    if(nrow(lambdaS)<1)
+        stop("'lambdaS' must contain at least one element")
+  }
   
-  if(ncol(lambdaT) != 1)
-    stop("'lambdaT' must be a column vector")
-  if(nrow(lambdaT) < 1)
-    stop("'lambdaT' must contain at least one element")
+  if(!is.null(lambdaT))
+  {
+    if(ncol(lambdaT)!=1)
+      stop("'lambdaT' must be a column vector")
+    if(nrow(lambdaT)<1)
+      stop("'lambdaT' must contain at least one element")
+  }
   
   if(!is.null(DOF_matrix))
   {
-    if(GCV==FALSE)
-      warning("GCV=FALSE. DOF_matrix is passed but GCV is not computed")
-    if(nrow(DOF_matrix)!=length(lambdaS))
+    if(is.null(lambdaS))
+    {
       stop("The number of rows of DOF_matrix is different from the number of lambdaS")
-    if(ncol(DOF_matrix)!=length(lambdaT))
+    } else if(nrow(DOF_matrix)!=length(lambdaS))
+    {
+        stop("The number of rows of DOF_matrix is different from the number of lambdaS")
+    }
+    
+    if(is.null(lambdaT))
+    {
       stop("The number of columns of DOF_matrix is different from the number of lambdaT")
+    } else if(ncol(DOF_matrix)!=length(lambdaT))
+    {
+        stop("The number of columns of DOF_matrix is different from the number of lambdaT")
+    }
   }
 }

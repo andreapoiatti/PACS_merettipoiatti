@@ -103,28 +103,43 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   # --> Lambda related
   if(optimization == 'batch' & is.null(lambda))
     stop("'lambda' required for 'optimization' = 'batch'; now is NULL.")
-  if(optimization != 'batch' & !is.null(lambda) & length(lambda) > 1)
-    warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
+  if(optimization != 'batch' & !is.null(lambda))
+  {
+    if(length(lambda) > 1)
+      warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
+  }
 
   # --> Stochastic related data
-  if(!is.numeric(nrealizations) || nrealizations < 1)
+  if(!is.numeric(nrealizations))
     stop("'nrealizations' must be a positive integer")
-  if(!is.numeric(seed) || seed < 0)
+  else if(nrealizations < 1)
+    stop("'nrealizations' must be a positive integer")
+  
+  if(!is.numeric(seed))
     stop("'seed' must be a non-negative integer")
+  else if(seed < 0)
+    stop("'seed' must be a non-negative integer")
+  
   if((nrealizations != 100 || seed != 0) & DOF_evaluation != 'sochastic')
     warning("'nrealzations' and 'seed' are used just with 'DOF_evaluation' = 'stochastic'")
   
   # --> GCV.inflation.factor related
-  if(is.null(GCV.inflation.factor)){ 
+  if(is.null(GCV.inflation.factor))
+  { 
     stop("'GCV.inflation.factor' required;  is NULL.")
-  }else if(!is.numeric(GCV.inflation.factor) || GCV.inflation.factor < 0){
+  } else if(!is.numeric(GCV.inflation.factor))
+  {
+    stop("'GCV.inflation.factor' must be a non-negative real")
+  } else if(GCV.inflation.factor < 0)
+  {
     stop("'GCV.inflation.factor' must be a non-negative real")
   }
-  if(!is.null(GCV.inflation.factor) & GCV.inflation.factor != 1 & loss_function != 'GCV')
+  if(GCV.inflation.factor != 1 & loss_function != 'GCV')
     warning("'GCV' not selected as 'loss function', 'GCV.inflation.factor' unused")
   
   # --> DOF_matrix related
-  if(!is.null(DOF_matrix)){
+  if(!is.null(DOF_matrix))
+  {
     if(optimization != 'batch')
       stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
     if(DOF_evaluation != 'not_required')
@@ -246,14 +261,26 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
   }  
   
   # Optimization
-  if(!is.null(lambda) & ncol(lambda) != 1)
-    stop("'lambda' must be a column vector")
-  if(!is.null(lambda) & nrow(lambda) < 1)
-    stop("'lambda' must contain at least one element")
-  if(!is.null(DOF_matrix)){
+  if(!is.null(lambda))
+  {
+    if(ncol(lambda)!=1)
+      stop("'lambda' must be a column vector")
+    if(nrow(lambda)<1)
+      stop("'lambda' must contain at least one element")
+  }
+  if(!is.null(DOF_matrix))
+  {    
     if(ncol(DOF_matrix) != 1)
+    {
       stop("'DOF_matrix' must be a column vector")
-    if(is.null(lambda) || nrow(DOF_matrix) != length(lambda))
+    }
+    
+    if(is.null(lambda))
+    {
       stop("The number of rows of DOF_matrix is different from the number of lambda")
+    } else if(nrow(DOF_matrix)!=length(lambda))
+    {
+      stop("The number of rows of DOF_matrix is different from the number of lambda")
+    }
   }
 }

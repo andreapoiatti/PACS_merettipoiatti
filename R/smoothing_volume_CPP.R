@@ -50,6 +50,9 @@ CPP_smooth.volume.FEM.basis<-function(locations, observations, FEMbasis, covaria
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
+  }else
+  {
+    lambda<-as.vector(lambda)
   }
 
   ## Set propr type for correct C++ reading

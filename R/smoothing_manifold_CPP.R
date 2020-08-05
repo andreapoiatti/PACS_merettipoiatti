@@ -47,11 +47,14 @@ CPP_smooth.manifold.FEM.basis<-function(locations, observations, FEMbasis, covar
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
+  
   if(is.null(lambda))
   {
     lambda<-vector(length=0)
+  }else
+  {
+    lambda<-as.vector(lambda)
   }
-  
 
   ## Set propr type for correct C++ reading
   locations <- as.matrix(locations)
