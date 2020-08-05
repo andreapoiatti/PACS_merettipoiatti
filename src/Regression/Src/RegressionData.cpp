@@ -102,9 +102,9 @@ RegressionData::RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Robser
 
 	setLocations(Rlocations);
 	setBaryLocations(RbaryLocations);
+	setIncidenceMatrix(RincidenceMatrix);
 	setObservations(Robservations);
 	setCovariates(Rcovariates);
-	setIncidenceMatrix(RincidenceMatrix);
 
 	order_ =  INTEGER(Rorder)[0];
 	search_ =  INTEGER(Rsearch)[0];
@@ -124,9 +124,9 @@ RegressionData::RegressionData(SEXP Rlocations, SEXP RbaryLocations, SEXP Rtime_
 	setLocations(Rlocations);
 	setTimeLocations(Rtime_locations);
 	setBaryLocations(RbaryLocations);
+	setIncidenceMatrix(RincidenceMatrix);
 	setObservationsTime(Robservations);
 	setCovariates(Rcovariates);
-	setIncidenceMatrix(RincidenceMatrix);
 
 	order_ =  INTEGER(Rorder)[0];
 	search_ =  INTEGER(Rsearch)[0];
