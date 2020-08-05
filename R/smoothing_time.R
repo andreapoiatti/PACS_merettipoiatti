@@ -226,6 +226,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                   incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
                   FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
                   search = search, bary.locations = bary.locations,
+                  optimization = optimization, DOF_evaluation = DOF_evaluation, loss_function = loss_function, 
                   lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
 
   # If I have PDE non-sv case I need (constant) matrices as parameters

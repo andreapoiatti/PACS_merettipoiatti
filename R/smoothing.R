@@ -609,7 +609,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   # Prepare return list
   reslist = NULL
 
-  if(GCV == TRUE)
+  if(DOF_evaluation!='not_required')
   {
   	if(bestlambda == 1 || bestlambda == length(lambda))
   		warning("Your optimal 'GCV' is on the border of lambda sequence")
