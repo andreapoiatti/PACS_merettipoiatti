@@ -1,4 +1,4 @@
-checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, observations, FEMbasis, time_mesh = NULL, covariates = NULL, PDE_parameters=NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL, search, bary.locations = NULL, loptimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
+checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, observations, FEMbasis, time_mesh = NULL, covariates = NULL, PDE_parameters=NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL, search, bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
 {
   #################### Parameter Check #########################
   
@@ -129,7 +129,7 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   # --> Lambda related
   if(optimization == 'batch' & (is.null(lambdaS) || is.null(lambdaT)))
     stop("'lambda' required for 'optimization' = 'batch'; now is NULL.")
-  if(optimization != 'batch' & !(is.null(lambdaS) || is.null(lambdaT))& (length(lambdaS)>1 || length(lambaT)>1))
+  if(optimization != 'batch' & !(is.null(lambdaS) || is.null(lambdaT))& (length(lambdaS)>1 || length(lambdaT)>1))
     warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
   
   # --> Stochastic related data
