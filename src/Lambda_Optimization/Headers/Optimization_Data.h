@@ -24,7 +24,7 @@ class  OptimizationData
                 // For batch fixed method
                 UInt best_lambda_S = 0;	        //!< Stores the index of the best lambdaS according to method
                 UInt best_lambda_T = 0;	        //!< Stores the index of the best lambdaT according to method
-                Real best_value    = 10e20;	//!< Stores the value of the best loss function
+                Real best_value    = std::numeric_limits<Real>::max();	//!< Stores the value of the best loss function
 
                 // For optimized methods
                 Real initial_lambda_S = 0.0;
