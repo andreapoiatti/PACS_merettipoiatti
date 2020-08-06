@@ -163,8 +163,8 @@ class MixedFERegressionBase
 		//! A inline member that returns a VectorXr, returns the whole solution_.
 		inline MatrixXv const & getSolution(void) const {return _solution;}
 		//! A function returning the computed dofs of the model
-		inline MatrixXr const & getDOF(void) const { if (optimizationData.get_DOF_matrix().rows()!=0 && optimizationData.get_DOF_matrix().cols()!=0)
-                                                             	return  optimizationData.get_DOF_matrix();
+		inline MatrixXr const & getDOF(void) const { if (optimizationData_.get_DOF_matrix().rows()!=0 && optimizationData_.get_DOF_matrix().cols()!=0)
+                                                             	return  optimizationData_.get_DOF_matrix();
 							     else return this->_dof;}
 		//! A method returning the computed GCV of the model
 		inline MatrixXr const & getGCV(void) const {return _GCV;}
