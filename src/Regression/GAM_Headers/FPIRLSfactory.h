@@ -22,7 +22,7 @@ class FPIRLSfactory
 {
 	public:
 	//! A method that takes as parameter a string and builds a pointer to the right object for the data distribution
-	static std::unique_ptr<FPIRLS<InputHandler, Integrator, ORDER,  mydim,  ndim>> createFPIRLSsolver(const std::string &family, const MeshHandler<ORDER,mydim,ndim>& mesh, InputHandler& inputData, OptimizationData optimizationData, VectorXr& mu0, Real scale_parameter)
+	static std::unique_ptr<FPIRLS<InputHandler, Integrator, ORDER,  mydim,  ndim>> createFPIRLSsolver(const std::string &family, const MeshHandler<ORDER,mydim,ndim> & mesh, InputHandler & inputData, OptimizationData & optimizationData, VectorXr& mu0, Real scale_parameter)
 	{
 		//initial checks: m0 must be initialized correctly for the different distributions
 

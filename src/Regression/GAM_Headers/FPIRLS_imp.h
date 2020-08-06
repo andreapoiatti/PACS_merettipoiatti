@@ -9,7 +9,7 @@
 // Constructor
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::FPIRLS_Base(const MeshHandler<ORDER,mydim,ndim> & mesh, InputHandler & inputData, OptimizationData & optimizationData,  VectorXr mu0, bool scale_parameter_flag, Real scale_param):
-  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData_, optimizationData_, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
+  mesh_(mesh), inputData_(inputData), optimizationData_(optimizationData), regression_(inputData, optimizationData, mesh.num_nodes()), scale_parameter_flag_(scale_parameter_flag), _scale_param(scale_param)
 {
   //initialization of mu, current_J_values and past_J_values.
   for(UInt j=0; j<optimizationData_.get_size_S() ; j++){
