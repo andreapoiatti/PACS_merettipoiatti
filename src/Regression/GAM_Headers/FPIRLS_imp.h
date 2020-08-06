@@ -247,31 +247,30 @@ std::array<Real,2> FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::comp
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt & lambda_index){
 
-  //GCV COMPUTATION
-  if (optimizationData_.get_DOF_evaluation() != "not_required")
-  { // is DOF_matrix to be computed?
-    regression_.computeDegreesOfFreedom(0, 0, optimizationData_.get_lambda_S()[lambda_index], 0);
-  }
-  _dof(lambda_index,0) = optimizationData_.get_DOF_matrix()(0,0);
+        if (optimizationData_.get_DOF_evaluation() != "not_required")
+        { // is DOF_matrix to be computed?
+        regression_.computeDegreesOfFreedom(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
+        }
+        _dof(lambda_index,0) = regression_.getDOF()(0,0);
 
-  const VectorXr * y = inputData_.getInitialObservations();
-  Real GCV_value = 0;
+        const VectorXr * y = inputData_.getInitialObservations();
+        Real GCV_value = 0;
 
-  for(UInt j=0; j < y->size();j++)
-    GCV_value += dev_function(mu_[lambda_index][j], (*y)[j]); //norm computation
+        for(UInt j=0; j < y->size();j++)
+        GCV_value += dev_function(mu_[lambda_index][j], (*y)[j]); //norm computation
 
-  GCV_value *= y->size();
+        GCV_value *= y->size();
 
-  GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0))*(y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0));
+        GCV_value /= (y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0))*(y->size()-optimizationData_.get_tuning()*_dof(lambda_index,0));
 
-  _GCV[lambda_index] = GCV_value;
+        _GCV[lambda_index] = GCV_value;
 
-  //best lambda
-  if(GCV_value < optimizationData_.get_best_value())
-  {
-    optimizationData_.set_best_lambda_S(lambda_index);
-    optimizationData_.set_best_value(GCV_value);
-  }
+        //best lambda
+        if(GCV_value < optimizationData_.get_best_value())
+        {
+        optimizationData_.set_best_lambda_S(lambda_index);
+        optimizationData_.set_best_value(GCV_value);
+        }
 
 }
 
