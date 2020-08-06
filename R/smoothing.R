@@ -65,11 +65,11 @@
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
 #' @param family This parameter specify the distibution within exponential family used for GLM model.
 #' The following distribution are implemented: "binomial", "exponential", "gamma", "poisson", "gaussian", "invgaussian".
-#' The default link function for binomial is \code{logit} if you want either \code{probit} or \code{clogloc} set \code{family = "probit"}, \code{family = "cloglog"}.      
+#' The default link function for binomial is \code{logit} if you want either \code{probit} or \code{clogloc} set \code{family = "probit"}, \code{family = "cloglog"}.
 #' @param mu0 This parameter is a vector that set the starting point for FPIRLS algorithm. It represent an initial guess of the location parameter.
 #' Default is set to observation for non binary distribution while equal to \code{0.5(observations + 0.5)} for binary data.
 #' @param scale.param Dispersion parameter of the chosen distribution. This is only required for "gamma", "gaussian", "invgaussian".
-#' User may specify the parameter as a positive real number. If the parameter is not supplied, it is estimated from data according to Wilhelm Sangalli 2016. 
+#' User may specify the parameter as a positive real number. If the parameter is not supplied, it is estimated from data according to Wilhelm Sangalli 2016.
 #' @param threshold.FPIRLS This parameter is used for arresting algorithm iterations. Algorithm stops when two successive iterations lead to improvement in penalized log-likelihood smaller than threshold.FPIRLS.
 #' Default value \code{threshold.FPIRLS = 0.0002020}.
 #' @param max.steps.FPIRLS This parameter is used to limit the maximum number of iteration.
@@ -102,7 +102,7 @@
 #'                   covariates = NULL, PDE_parameters=NULL, incidence_matrix = NULL,
 #'                   BC = NULL, GCV = FALSE, GCVmethod = "Stochastic", nrealizations = 100,
 #'                   DOF_matrix=NULL, search = "tree", bary.locations = NULL,
-#'                   family="gaussian", mu0 = NULL, scale.param=NULL, threshold.FPIRLS=0.0002020, 
+#'                   family="gaussian", mu0 = NULL, scale.param=NULL, threshold.FPIRLS=0.0002020,
 #'                   max.steps.FPIRLS=15, GCV.inflation.factor=1, areal.data.avg = TRUE)
 #' @export
 
@@ -112,7 +112,7 @@
 #' Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75(4), 681-703.}
 #'    \item{Azzimonti, L., Sangalli, L. M., Secchi, P., Domanin, M., Nobile, F. (2015). Blood flow velocity field estimation
 #' via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
-#'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization. 
+#'    \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
 #'  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
 #' }
 #' @examples
@@ -123,7 +123,7 @@
 #' boundary_nodes = horseshoe2D$boundary_nodes
 #' boundary_segments = horseshoe2D$boundary_segments
 #' locations = horseshoe2D$locations
-#' 
+#'
 #' mesh = create.mesh.2D(nodes = rbind(boundary_nodes, locations), segments = boundary_segments)
 #' FEMbasis = create.FEM.basis(mesh)
 #' lambda = 10^-1
@@ -137,7 +137,7 @@
 #' covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #'
-#' solution = smooth.FEM(observations = data, covariates = covariate, 
+#' solution = smooth.FEM(observations = data, covariates = covariate,
 #'                       FEMbasis = FEMbasis, lambda = lambda)
 #' # beta estimate:
 #' solution$beta
@@ -161,7 +161,7 @@
 #' boundary_segments = quasicircle2D$boundary_segments
 #' locations = quasicircle2D$locations
 #' data = quasicircle2D$data
-#' 
+#'
 #' mesh = create.mesh.2D(nodes = rbind(boundary_nodes, locations), segments = boundary_segments)
 #' FEMbasis = create.FEM.basis(mesh)
 #' lambda = 10^-2
@@ -302,13 +302,13 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop('unknown mesh class.')
   }
-  
+
   ##################### Checking parameters, sizes and conversion ################################
-  
+
   # Preliminary consistency of optimization parameters
   if(optimization == "batch")
   {
-    optim = 0  
+    optim = 0
   }else if(optimization == "newton")
   {
     optim = 1
@@ -319,7 +319,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
   }
-  
+
   if(DOF_evaluation == 'not_required')
   {
     optim = c(optim,0)
@@ -333,7 +333,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'DOF_evaluation' must be 'not_required', 'stochastic' or 'exact'.")
   }
-    
+
   if(loss_function == 'unused')
   {
     optim = c(optim,0)
@@ -347,7 +347,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
   if(any(lambda<=0))
   	stop("'lambda' can not be less than or equal to 0")
-  
+
   # Search algorithm
   if(search=="naive")
   {
@@ -359,7 +359,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'search' must be either 'tree' or 'naive'.")
   }
-  
+
   # If locations is null but bary.locations is not null, use the locations in bary.locations
   if(is.null(locations) & !is.null(bary.locations))
   {
@@ -402,7 +402,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
 
   checkSmoothingParametersSize(locations = locations, observations = observations, FEMbasis = FEMbasis,
-    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix, 
+    covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix,
     BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
     lambda = lambda, DOF_matrix = DOF_matrix)
 
@@ -432,7 +432,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   if(sum(family==family_admit)==0){
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
-  
+
   # OPTIMIZATION NOT IMPLEMENTED FOR GAM
   if(family != 'gaussian'& optimization != 'batch')
     stop("'optimization' = 'batch' is the only method implemented for GAM problems")
@@ -480,7 +480,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       print('C++ Code Execution')
       # if(!is.null(locations))
       #   stop("The option locations!=NULL for manifold domains is currently not implemented")
-      bigsol = CPP_smooth.manifold.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+      bigsol = CPP_smooth.manifold.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        search = search, bary.locations = bary.locations,
@@ -490,7 +490,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     {
       bigsol = NULL
       print('C++ Code Execution')
-      bigsol = CPP_smooth.volume.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis, 
+      bigsol = CPP_smooth.volume.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
@@ -498,7 +498,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       numnodes = FEMbasis$mesh$nnodes
     }
   }else
-  { 
+  {
     #----------------------------------------------------#
     ############# GAMs: FPIRLS algorithm #################
     #----------------------------------------------------#
@@ -522,12 +522,12 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         bigsol = CPP_smooth.GAM.FEM.PDE.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
           covariates = covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
           incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-          FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,  
+          FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
           search = search, bary.locations = bary.locations,
           optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
         numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
-    { 
+    {
       bigsol = NULL
       print('C++ Code Execution')
       bigsol = CPP_smooth.GAM.FEM.PDE.sv.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
@@ -539,20 +539,20 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
     {
-      bigsol = NULL  
+      bigsol = NULL
       print('C++ Code Execution')
       if(!is.null(locations))
         stop("The option locations!=NULL for manifold domains is currently not implemented")
       bigsol = CPP_smooth.manifold.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
-        FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS, 
+        FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
         search = search, bary.locations = bary.locations,
         optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
       numnodes = FEMbasis$mesh$nnodes
     }else if(class(FEMbasis$mesh) == 'mesh.3D')
     {
-      bigsol = NULL  
+      bigsol = NULL
       print('C++ Code Execution')
       bigsol = CPP_smooth.volume.GAM.FEM.basis(locations = locations, observations = observations, FEMbasis = FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
@@ -582,7 +582,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    # Save information of Tree Mesh
     tree_mesh = list(
     treelev = bigsol[[6]][1],
-    header_orig= bigsol[[7]], 
+    header_orig= bigsol[[7]],
     header_scale = bigsol[[8]],
     node_id = bigsol[[9]][,1],
     node_left_child = bigsol[[9]][,2],
@@ -594,11 +594,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   if (is.null(FEMbasis$mesh$treelev)) { #if doesn't exist the tree information
     FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
   } #if already exist the tree information, don't append
-  class(FEMbasis$mesh) = mesh.class  
+  class(FEMbasis$mesh) = mesh.class
 
   # Save information of Barycenter
   if (is.null(bary.locations)) {
-      bary.locations = list(locations=locations, element_ids = bigsol[[11]], barycenters = bigsol[[12]])    
+      bary.locations = list(locations=locations, element_ids = bigsol[[11]], barycenters = bigsol[[12]])
   }
   class(bary.locations) = "bary.locations"
 
@@ -609,7 +609,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   # Prepare return list
   reslist = NULL
 
-  if(DOF_evaluation!='not_required')
+  if(DOF_evaluation!='not_required' || (DOF_evaluation=='not_required' && !is.null(DOF_matrix)))
   {
   	if(bestlambda == 1 || bestlambda == length(lambda))
   		warning("Your optimal 'GCV' is on the border of lambda sequence")
@@ -621,10 +621,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
 
   # GAM outputs
- if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1 ){  
+ if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1 ){
     fn.eval = bigsol[[13]]
-    J_minima = bigsol[[14]]   
-    variance.est=bigsol[[15]] 
+    J_minima = bigsol[[14]]
+    variance.est=bigsol[[15]]
     if( variance.est[1]<0 ) variance.est = NULL
     reslist=c(reslist, list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est) )
 }

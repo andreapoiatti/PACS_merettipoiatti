@@ -17,7 +17,7 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
         UInt DOF_evaluation = INTEGER(Roptim)[1];
         if(DOF_evaluation == 0)
         {
-                this->set_DOF_evaluation("not_requied");
+                this->set_DOF_evaluation("not_required");
         }
         else if(DOF_evaluation == 1)
         {
@@ -54,6 +54,7 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
                         DOF_matrix(i,j) = REAL(RDOF_matrix)[i+ n_*j];
                 }
         }
+
 }
 void OptimizationData::fill_lambda(SEXP Rlambda, std::vector<Real> & vect, UInt & size)
 {

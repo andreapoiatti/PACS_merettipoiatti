@@ -70,14 +70,17 @@ library(fdaPDE)
     
     response <- rgamma(nnodes, shape=mu/scale.param, scale=scale.param)
   
-  
+  #to give the dofs for  lambda= c(10^-4,10^-3)
+  dofs=  matrix(c(19.10020, 13.97923), nrow = 2)
+    
+    
   GCVFLAG=T
   GCVMETHODFLAG='Exact'
-  lambda= 10^-4
+  lambda= c(10^-4,10^-3)
   
   #mu_guessed <- rep(1,nnodes) + response
   
-  
+    
   output_CPP <- smooth.FEM(observations = as.numeric(response), FEMbasis =FEMbasis, covariates = desmat,
-                                    lambda = lambda, max.steps=10, family="gamma", mu0=NULL, scale.param=scale.param)
+                                    lambda = lambda, max.steps=10, family="gamma", mu0=NULL, scale.param=scale.param,  DOF_matrix = dofs, loss_function = "GCV")
   

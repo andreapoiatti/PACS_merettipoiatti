@@ -96,7 +96,7 @@ class  OptimizationData
                 inline UInt get_nrealizations(void) const {return nrealizations;}
                 inline Real get_last_lS_used(void) const {return last_lS_used;}
                 inline Real get_last_lT_used(void) const {return last_lT_used;}
-                inline MatrixXr get_DOF_matrix(void) const {return DOF_matrix;}
+                inline MatrixXr const & get_DOF_matrix(void) const {return DOF_matrix;}
                 inline Real get_tuning(void) const {return tuning;}
                 inline Real get_current_lambdaS(void) const {return current_lambdaS;}
                 inline const std::vector<Real> * get_LambdaS_vector() const {return &lambdaS_backup;}

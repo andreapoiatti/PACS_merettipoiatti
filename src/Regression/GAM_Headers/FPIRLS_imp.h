@@ -247,11 +247,12 @@ std::array<Real,2> FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::comp
 template <typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 void FPIRLS_Base<InputHandler,Integrator,ORDER, mydim, ndim>::compute_GCV(UInt & lambda_index){
 
-        if (optimizationData_.get_DOF_evaluation() != "not_required")
+        if (optimizationData_.get_DOF_evaluation() != "not_required") //in this case surely we have already the dofs
         { // is DOF_matrix to be computed?
         regression_.computeDegreesOfFreedom(0, 0, (*optimizationData_.get_LambdaS_vector())[lambda_index], 0);
-        }
         _dof(lambda_index,0) = regression_.getDOF()(0,0);
+        }
+        else _dof(lambda_index,0) = regression_.getDOF()(lambda_index,0);
 
         const VectorXr * y = inputData_.getInitialObservations();
         Real GCV_value = 0;
