@@ -987,112 +987,117 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 template<typename InputHandler>
 MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 {
-	if (isGAMData||regressionData_.isSpaceTime()||optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
+	UInt nnodes = N_*M_; // Define nuber of nodes
+	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
+
+	UInt sizeLambdaS = optimizationData_.get_size_S();
+	UInt sizeLambdaT = optimizationData_.get_size_T();
+
+	this->_solution.resize(sizeLambdaS,sizeLambdaT);
+	this->_dof.resize(sizeLambdaS,sizeLambdaT);
+	this->_GCV.resize(sizeLambdaS,sizeLambdaT);
+	if(regressionData_.getCovariates()->rows() != 0)
 	{
-		UInt nnodes = N_*M_; // Define nuber of nodes
-		const VectorXr * obsp = regressionData_.getObservations(); // Get observations
+		this->_beta.resize(sizeLambdaS,sizeLambdaT);
+	}
 
-		UInt sizeLambdaS = optimizationData_.get_size_S();
-		UInt sizeLambdaT = optimizationData_.get_size_T();
+	VectorXr rhs = _rightHandSide; // Save rhs for modification
 
-		this->_solution.resize(sizeLambdaS,sizeLambdaT);
-		this->_dof.resize(sizeLambdaS,sizeLambdaT);
-		this->_GCV.resize(sizeLambdaS,sizeLambdaT);
-		if(regressionData_.getCovariates()->rows() != 0)
+	for(UInt s=0; s<sizeLambdaS; ++s)
+	{
+		for(UInt t=0; t<sizeLambdaT; ++t)
 		{
-			this->_beta.resize(sizeLambdaS,sizeLambdaT);
-		}
+                        Real lambdaS;
+			if(!regressionData_.isSpaceTime() && !isGAMData) //at the moment only space is implemented
+				{
+					lambdaS = optimizationData_.get_current_lambdaS();
+				}
+			else
+			 	lambdaS = (optimizationData_.get_lambda_S())[s];
 
-		VectorXr rhs = _rightHandSide; // Save rhs for modification
+			Real lambdaT = (optimizationData_.get_lambda_T())[t];
+			_rightHandSide = rhs;
 
-		for(UInt s=0; s<sizeLambdaS; ++s)
-		{
-			for(UInt t=0; t<sizeLambdaT; ++t)
+			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used()
 			{
-                                Real lambdaS;
-				if(!regressionData_.isSpaceTime() && !isGAMData) //at the moment only space is implemented
-					{
-						lambdaS = (optimizationData_.get_lambda_S())[s];
-						// TO DE ADDED AFTER CARRIER
-						//optimizationData_.set_current_lambdaS(lambdaS); //lo setterà il carrier tramite optdata
-						//lambdaS=optimizationData_.get_current_lambdaS();
-					}
-				else
-				 	lambdaS = (optimizationData_.get_lambda_S())[s];
-
-				Real lambdaT = (optimizationData_.get_lambda_T())[t];
-				_rightHandSide = rhs;
-
-				if (!regressionData_.isSpaceTime())
-					{
-						buildSystemMatrix(lambdaS);
-					}
-                                	else
-					{
-						buildSystemMatrix(lambdaS, lambdaT);
-					}
-
-				// Right-hand side correction for space varying PDEs
-				if(this->isSpaceVarying)
+				if(!regressionData_.isSpaceTime())
 				{
-				    _rightHandSide.bottomRows(nnodes)= (-lambdaS)*rhs_ft_correction_;
+					buildSystemMatrix(lambdaS);
 				}
-
-				// Right-hand side correction for initial condition in parabolic case
-				if(regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
+                        	else
 				{
-					for(UInt i=0; i<regressionData_.getInitialValues()->rows(); i++)
-					{
-						_rightHandSide(nnodes+i) -= lambdaS*rhs_ic_correction_(i);
-					}
-				}
-
-				// Applying boundary conditions if necessary
-				if(regressionData_.getDirichletIndices()->size() != 0)  // if areal data NO BOUNDARY CONDITIONS
-					addDirichletBC();
-
-
-				//f Factorization of the system for woodbury decomposition
-				system_factorize();
-
-				// system solution
-				_solution(s,t) = this->template system_solve(this->_rightHandSide);
-
-
-				if(optimizationData_.get_loss_function()=="GCV"&&(isGAMData||regressionData_.isSpaceTime()))
-				{
-					if (optimizationData_.get_DOF_evaluation()!="not_required")
-						computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
-					computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
-				}
-				else
-				{
-					_dof(s,t) = -1;
-					_GCV(s,t) = -1;
-				}
-
-				// covariates computation
-				if(regressionData_.getCovariates()->rows()!=0&&(isGAMData||regressionData_.isSpaceTime()))
-				{
-					MatrixXr W(*(this->regressionData_.getCovariates()));
-					VectorXr P(*(this->regressionData_.getWeightsMatrix()));
-					VectorXr beta_rhs;
-					if( P.size() != 0)
-					{
-						beta_rhs = W.transpose()*P.asDiagonal()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
-					}
-					else
-					{
-						beta_rhs = W.transpose()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
-					}
-					_beta(s,t) = WTW_.solve(beta_rhs);
+					buildSystemMatrix(lambdaS, lambdaT);
 				}
 			}
+
+			// Right-hand side correction for space varying PDEs
+			if(this->isSpaceVarying)
+			{
+			    _rightHandSide.bottomRows(nnodes)= (-lambdaS)*rhs_ft_correction_;
+			}
+
+			// Right-hand side correction for initial condition in parabolic case
+			if(regressionData_.isSpaceTime() && regressionData_.getFlagParabolic())
+			{
+				for(UInt i=0; i<regressionData_.getInitialValues()->rows(); i++)
+				{
+					_rightHandSide(nnodes+i) -= lambdaS*rhs_ic_correction_(i);
+				}
+			}
+
+			// Applying boundary conditions if necessary
+			if(regressionData_.getDirichletIndices()->size() != 0)  // if areal data NO BOUNDARY CONDITIONS
+				addDirichletBC();
+
+
+			//f Factorization of the system for woodbury decomposition
+			if(isGAMData || regressionData_.isSpaceTime() || optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used()
+			{
+				system_factorize();
+			}
+
+			// system solution
+			_solution(s,t) = this->template system_solve(this->_rightHandSide);
+
+
+			if(optimizationData_.get_loss_function()=="GCV" && (isGAMData||regressionData_.isSpaceTime()))
+			{
+				if (optimizationData_.get_DOF_evaluation()!="not_required")
+				{
+					computeDegreesOfFreedom(s,t,lambdaS,lambdaT);
+				}
+				computeGeneralizedCrossValidation(s,t,lambdaS,lambdaT);
+			}
+			else
+			{
+				_dof(s,t) = -1;
+				_GCV(s,t) = -1;
+			}
+
+			// covariates computation
+			if(regressionData_.getCovariates()->rows()!=0 && (isGAMData||regressionData_.isSpaceTime()))
+			{
+				MatrixXr W(*(this->regressionData_.getCovariates()));
+				VectorXr P(*(this->regressionData_.getWeightsMatrix()));
+				VectorXr beta_rhs;
+				if( P.size() != 0)
+				{
+					beta_rhs = W.transpose()*P.asDiagonal()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
+				}
+				else
+				{
+					beta_rhs = W.transpose()*(*obsp - psi_*_solution(s,t).topRows(psi_.cols()));
+				}
+				_beta(s,t) = WTW_.solve(beta_rhs);
+			}
 		}
-		if(!(isGAMData||regressionData_.isSpaceTime())&&optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
-			optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
-		_rightHandSide = rhs; // Return rhs to original status for next apply call
 	}
+	if(!(isGAMData||regressionData_.isSpaceTime()) && optimizationData_.get_current_lambdaS()!=optimizationData_.get_last_lS_used())
+	{
+		optimizationData_.set_last_lS_used(optimizationData_.get_current_lambdaS());
+	}
+	_rightHandSide = rhs; // Return rhs to original status for next apply call
+
 	//std::cout<<_solution(0,0).size()<<std::endl; per il caso GCV semplice la solution è il valore in posizione 0,0
 	return this->_solution;
 }

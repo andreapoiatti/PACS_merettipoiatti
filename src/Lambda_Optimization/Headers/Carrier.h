@@ -196,18 +196,22 @@ class Carrier: public Extensions...
                  \param lambda the optimization parameter with which to build the system matrix
                  \return the solution of the system
                 */
-                inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda){
-                        this->model->set_lambda(lambda); // set the lambda value
-                        return this->model->apply_to_b(b);} //specific for spatial case
+                inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda)
+                {
+                        this->opt_data_->set_current_lambdaS(lambda); // set the lambda value
+                        return this->model->apply_to_b(b);
+                } //specific for spatial case
 
                 //! Method to the system given a lambda [rith hand sde is the usual of the problem]
                 /*!
                  \param lambda the optimization parameter with which to build the system matrix
                  \return the solution of the system
                 */
-                inline MatrixXr apply(Real lambda) {
+                inline MatrixXr apply(Real lambda)
+                {
                         this->model->set_lambda(lambda); // set the lambda value
-                        return (this->model->apply())(0,0);}
+                        return (this->model->apply())(0,0);
+                }
 };
 //----------------------------------------------------------------------------//
 

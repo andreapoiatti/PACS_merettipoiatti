@@ -27,14 +27,14 @@ class  OptimizationData
                 Real best_value    = std::numeric_limits<Real>::max();	//!< Stores the value of the best loss function
 
                 // For optimized methods
-                Real initial_lambda_S = 0.0;
-                Real initial_lambda_T = 0.0;
+                Real initial_lambda_S = 0.;
+                Real initial_lambda_T = 0.;
                 UInt seed             = 0;
                 UInt nrealizations    = 0;      //!< The number of random points used in the stochastic computation of the dofs
 
                 // To keep track of optimization
-                Real last_lS_used;
-                Real last_lT_used;
+                Real last_lS_used = std::numeric_limits<Real>::infinity();
+                Real last_lT_used = std::numeric_limits<Real>::infinity();
 
                 // If already present
                 MatrixXr DOF_matrix;
@@ -43,7 +43,7 @@ class  OptimizationData
                 Real tuning = 1.;
 
                 // For GAM
-                Real current_lambdaS;
+                Real current_lambdaS = -1.;
                 std::vector<Real> lambdaS_backup;
 
 
