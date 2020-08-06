@@ -34,6 +34,7 @@
 typedef double Real;
 typedef int UInt;
 
+
 typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> MatrixXr;
 typedef Eigen::Matrix<UInt,Eigen::Dynamic,Eigen::Dynamic> MatrixXi;
 typedef Eigen::Matrix<Real,Eigen::Dynamic,1> VectorXr;
@@ -42,5 +43,17 @@ typedef Eigen::Matrix<VectorXr,Eigen::Dynamic,Eigen::Dynamic> MatrixXv;
 typedef Eigen::SparseMatrix<Real> SpMat;
 typedef Eigen::SparseVector<Real> SpVec;
 typedef Eigen::Triplet<Real> coeff;
+
+template <bool ... b>
+struct multi_bool_type
+{};
+
+typedef multi_bool_type<true> t_type;
+typedef multi_bool_type<false> f_type;
+typedef multi_bool_type<true, true> tt_type;
+typedef multi_bool_type<false, true> ft_type;
+typedef multi_bool_type<true, false> tf_type;
+typedef multi_bool_type<false, false> ff_type;
+
 
 #endif /* FDAPDE_H_ */

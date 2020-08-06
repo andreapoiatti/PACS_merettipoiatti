@@ -975,7 +975,7 @@ MatrixXr MixedFERegressionBase<InputHandler>::apply_to_b(const MatrixXr & b)
 			this->addDirichletBC_matrix();
 		}
 
-                this->systemFactorize();
+                this->system_factorize();
         }
 
 	optimizationData_.set_last_lS_used(lambda_);

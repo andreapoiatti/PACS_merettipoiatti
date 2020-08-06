@@ -192,6 +192,7 @@ class MixedFERegressionBase
 		inline const VectorXr *	getu_(void) const {return &this->rhs_ft_correction_;}
 		//! A method returning the number of nodes of the mesh
 		inline UInt getnnodes_(void) const {return this->N_;}
+		inline bool isSV(void) const {return this->isSpaceVarying;}
 
 		// -- APPLY --
 		//! The function solving the system, used by the children classes. Saves the result in _solution

@@ -565,6 +565,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
 
   # ---------- Solution -----------
+  if(family != 'gaussian')
+  {
   f = bigsol[[1]][1:numnodes,]
   g = bigsol[[1]][(numnodes+1):(2*numnodes),]
 
@@ -630,4 +632,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 }
 
   return(reslist)
+  }
+  else
+  {
+    return(bigsol)
+  }
 }

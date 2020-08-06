@@ -4,10 +4,10 @@
 // HEADERS
 #include <memory>
 #include <type_traits>
-#include "fdaPDE.h"
-#include "mixedFERegression.h"
-#include "optimizationData.h"
-#include "regressionData.h"
+#include "../../FdaPDE.h"
+#include "../../Regression/Headers/MixedFERegression.h"
+#include "Optimization_Data.h"
+#include "../../Regression/Headers/RegressionData.h"
 
 // Declaration of classes that will be used as Extensions for Carrier
 class Areal;
@@ -31,7 +31,7 @@ class Carrier: public Extensions...
 {
         private:
                 // --- DATA ---
-                const OptimizationData * opt_data;            //!< Pointer to the optimization data needed for the method
+                OptimizationData * opt_data;            //!< Pointer to the optimization data needed for the method
                 MixedFERegressionBase<InputHandler> * model;  //!< Pointer to the model data [not const, since it must modify members with the apply]
 
                 // Booleans for particular computations
@@ -98,7 +98,7 @@ class Carrier: public Extensions...
                  \param bc_values_ pointer to the values of boundary conditions
                  \param bc_indicesp_ pointer tp the indices of the boundary conditions
                 */
-                inline void set_all(MixedFERegressionBase<InputHandler> * model_, const OptimizationData * opt_data_,
+                inline void set_all(MixedFERegressionBase<InputHandler> * model_, OptimizationData * opt_data_,
                         bool locations_are_nodes_, bool has_covariates_, UInt n_obs_, UInt n_nodes_, const std::vector<UInt> * obs_indicesp_,
                         const VectorXr * zp_, const MatrixXr * Wp_, const MatrixXr * Hp_, const MatrixXr * Qp_,
                         const SpMat * DMatp_, const SpMat * R1p_, const SpMat * R0p_, const SpMat * psip_, const SpMat * psi_tp_,
@@ -145,7 +145,7 @@ class Carrier: public Extensions...
                 }
 
                 // GETTERS
-                inline const OptimizationData * get_opt_data(void) const {return this->opt_data;}               //!< Getter of opt_data
+                inline OptimizationData * get_opt_data(void) {return this->opt_data;}               //!< Getter of opt_data
                 inline bool loc_are_nodes(void) const {return this->locations_are_nodes;}                       //!< Getter of locations_are_nodes
                 inline bool has_W(void) const {return this->has_covariates;}                                    //!< Getter of has_covariates
                 inline bool is_areal(void) const {return this->areal_data;}                                     //!< Getter of areal_data
@@ -169,7 +169,7 @@ class Carrier: public Extensions...
 
                 // SETTERS
                 inline void set_model(MixedFERegressionBase<InputHandler> * md) {this->model=md;};                                      //!< Setter of model
-                inline void set_opt_data(const OptimizationData * opt_data_) {this->opt_data = opt_data_;}                              //!< Setter of opt_data
+                inline void set_opt_data(OptimizationData * opt_data_) {this->opt_data = opt_data_;}                              //!< Setter of opt_data
                 inline void set_loc_are_nodes(const bool locations_are_nodes_) {this->locations_are_nodes = locations_are_nodes_;}      //!< Setter of locations_are_nodes
                 inline void set_has_W(const bool has_covariates_) {this->has_covariates = has_covariates_;}                             //!< Setter of has_covariates
                 inline void set_n_obs(const UInt n_obs_) {this->n_obs = n_obs_;}                                                        //!< Setter of n_obs
@@ -198,7 +198,7 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda)
                 {
-                        this->opt_data_->set_current_lambdaS(lambda); // set the lambda value
+                        this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         return this->model->apply_to_b(b);
                 } //specific for spatial case
 
@@ -209,7 +209,7 @@ class Carrier: public Extensions...
                 */
                 inline MatrixXr apply(Real lambda)
                 {
-                        this->model->set_lambda(lambda); // set the lambda value
+                        this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         return (this->model->apply())(0,0);
                 }
 };
@@ -274,7 +274,7 @@ class CarrierBuilder
 {
         private:
                 template<typename... Extensions>
-                static void set_plain_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static void set_plain_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
                         car.set_all(&mc, &optimizationData, data.isLocationsByNodes(), bool(data.getCovariates()->rows()>0 && data.getCovariates()->cols()>0),
                                 data.getNumberofObservations(), mc.getnnodes_(), data.getObservationsIndices(),
@@ -283,19 +283,19 @@ class CarrierBuilder
                 }
 
                 template<typename... Extensions>
-                static void set_areal_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static void set_areal_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
                         car.set_all_areal(data.getNumberOfRegions(), mc.getA_());
                 }
 
                 template<typename... Extensions>
-                static void set_forced_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static void set_forced_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
                         car.set_all_forced(mc.getu_());
                 }
 
         public:
-                static Carrier<DataHandler> build_plain_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static Carrier<DataHandler> build_plain_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {       //da modificare, non serve copiarli due volte!
                         Carrier<DataHandler> car;
                         set_plain_data(car, data, mc, optimizationData);
@@ -303,7 +303,7 @@ class CarrierBuilder
                         return car;
                 }
 
-                static Carrier<DataHandler, Areal> build_areal_carrier(const DataHandler & data,  MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static Carrier<DataHandler, Areal> build_areal_carrier(const DataHandler & data,  MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Areal> car;
                         set_plain_data(car, data, mc, optimizationData);
@@ -312,7 +312,7 @@ class CarrierBuilder
                         return car;
                 }
 
-                static Carrier<DataHandler, Forced> build_forced_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static Carrier<DataHandler, Forced> build_forced_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Forced> car;
                         set_plain_data(car, data, mc, optimizationData);
@@ -321,7 +321,7 @@ class CarrierBuilder
                         return car;
                 }
 
-                static Carrier<DataHandler, Forced, Areal> build_forced_areal_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, const OptimizationData & optimizationData)
+                static Carrier<DataHandler, Forced, Areal> build_forced_areal_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Forced, Areal> car;
                         set_plain_data(car, data, mc, optimizationData);
