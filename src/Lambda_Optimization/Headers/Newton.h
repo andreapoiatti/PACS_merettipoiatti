@@ -9,8 +9,6 @@
 #include "../../FE_Assemblers_Solvers/Headers/Solver.h"
 #include "Function_Variadic.h"
 
-
-
 //! Checker, contains data regarding the last process, used in optimizaion processes
 class Checker
 {
@@ -35,14 +33,12 @@ class Checker
                 }
 };
 
-
 //! Father class to apply generic optimization methods
 /*!
  * \tparam       Tuple          image type of the gradient of the function
  * \tparam       Hessian        image type of the Hessian of the function: if the dimension of the image is >1 (and domain >1), problems to store the hessian, it's a tensor
  * \tparam       Extensions    input class if the computations need members already stored in a class
  */
-
 template <typename Tuple, typename Hessian, typename... Extensions>
 class Opt_methods
 {
@@ -56,8 +52,6 @@ class Opt_methods
                 virtual std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch) = 0; //!< Function to apply the optimization method and obtain as a result the couple (optimal lambda, optimal value of the function)
 };
 
-
-
 // Classes
 template <typename Tuple>
 struct Auxiliary
@@ -65,9 +59,7 @@ struct Auxiliary
         //NOT yet implemented
 };
 
-
 //!< Auxiliary class to perform elementary mathematical operations and checks: specialization for 1 dimensional case
-
 template<>
 struct Auxiliary<Real>
 {
@@ -112,140 +104,105 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
  template <typename Tuple, typename Hessian, typename ...Extensions>
  class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>
  {
-
          public:
                  Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //!Constructor
                  /*! F cannot be const, it must be modified*/
- /*Real bisection(const Real &aa,const  Real &bb, const UInt& max_it, const Real &eval_a_, const Real &eval_b_)
- {    Real a=aa, b=bb;
-      Real eval_a=eval_a_;
-     if( eval_a*eval_b_>= 0)
-     {
-         Rprintf("\n Incorrect a and b\n");
-         return 1;
-     }
-
-
-     Real c=a;
-     UInt n_it=0;
-     Real eval_c;
-
-     while (n_it<max_it) //tell about interval is sufficently small
-     {
-         c = std::sqrt(a*b);
-
-         eval_c=this->F.evaluate_second_derivative(c);
-         if ( eval_c== 0.0){
-
-             break;
-         }
-         else if (eval_c*eval_a < 0){
-
-                 b=c;
-         }
-         else{
-
-                 a=c;
-                 eval_a=eval_c;
-         }
-         n_it++;
-
-     }
-   return c;
-}*/
-
 
                  std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch) override //!< Apply Newton's method
                  {
-                         // Initialize the algorithm
-                         Tuple x_old;
-                         Tuple x      = x0;
-                         UInt  n_iter = 0;
-                         Real  error  = std::numeric_limits<Real>::infinity();
+                        // Initialize the algorithm
+                        Tuple x_old;
+                        Tuple x      = x0;
+                        UInt  n_iter = 0;
+                        Real  error  = std::numeric_limits<Real>::infinity();
 
-                                Rprintf("\n Starting Initializing lambda phase\n"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
+                        Rprintf("\n Starting Initializing lambda phase\n"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
 
-                                Real valmin, valcur, lambda_min;
-                                UInt Nm=6;
-        			std::vector<Real> vals={5.000000e-05, 1.442700e-03, 4.162766e-02, 1.201124e+00, 3.465724e+01, 1.000000e+03};
-        			valcur=this->F.evaluate_f(vals[0]);
-        			lambda_min=5e-5;
-        			valmin=valcur;
+                        Real valmin, valcur, lambda_min;
+                        UInt Nm = 6;
+                        std::vector<Real> vals={5.000000e-05, 1.442700e-03, 4.162766e-02, 1.201124e+00, 3.465724e+01, 1.000000e+03};
+                        valcur = this->F.evaluate_f(vals[0]);
+                        lambda_min = 5e-5;
+                        valmin = valcur;
 
-                                for (UInt i=1;i<Nm;i++)
-                                        {  valcur=this->F.evaluate_f(vals[i]);
-                                                if (valcur<valmin)
-                                                {valmin=valcur;
-                                                lambda_min=vals[i];}
-                                        }
+                        for(UInt i=1; i<Nm; i++)
+                        {
+                                valcur = this->F.evaluate_f(vals[i]);
+                                if(valcur<valmin)
+                                {
+                                        valmin = valcur;
+                                        lambda_min = vals[i];
+                                }
+                        }
 
-        			if (x>lambda_min/10)
-                                        x=lambda_min/10;
+                        if(x>lambda_min/10)
+                        {
+                                x = lambda_min/10;
+                        }
 
-                         Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
+                        Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
 
-                         //only the first time applied here
-                         Real   fx  = this->F.evaluate_f(x);
-                         Tuple   fpx = this->F.evaluate_first_derivative (x);
-                         Hessian fsx = this->F.evaluate_second_derivative(x);
+                        //only the first time applied here
+                        Real    fx  = this->F.evaluate_f(x);
+                        Tuple   fpx = this->F.evaluate_first_derivative (x);
+                        Hessian fsx = this->F.evaluate_second_derivative(x);
 
-                         while (n_iter < max_iter)
-                         {
-                                 //Debugging purpose f(x)
+                        while(n_iter < max_iter)
+                        {
+                                //Debugging purpose f(x)
 
-                                 if (Auxiliary<Tuple>::isNull(fsx))
-                                 {
-                                         // Debug message
-                                         // std::cout << "Division by zero" << std::endl;
-                                         return {x, n_iter};
-                                 }
+                                if(Auxiliary<Tuple>::isNull(fsx))
+                                {
+                                        // Debug message
+                                        // std::cout << "Division by zero" << std::endl;
+                                        return {x, n_iter};
+                                }
 
-                                 ++n_iter;
+                                ++n_iter;
 
-                                 Rprintf("\nStep number %d  of EXACT-NEWTON\n", n_iter);
-                                 x_old = x;
-                                 Auxiliary<Tuple>::divide(fsx, fpx, x);
-                                 x = x_old - x;
-                                 //if (x<1e-8) x=(1./(2*n_iter))*flesso/50;
-                                 if (x<1e-8) x=(1./(2*n_iter))*lambda_min/10;
-                                 //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
-                                 fx = this->F.evaluate_f(x);
-                                 fpx = this->F.evaluate_first_derivative (x);
+                                Rprintf("\nStep number %d  of EXACT-NEWTON\n", n_iter);
+                                x_old = x;
+                                Auxiliary<Tuple>::divide(fsx, fpx, x);
+                                x = x_old - x;
+                                //if (x<1e-8) x=(1./(2*n_iter))*flesso/50;
+                                if (x<1e-8)
+                                {
+                                        x = (1./(2*n_iter))*lambda_min/10;
+                                }
 
-                                 fsx = this->F.evaluate_second_derivative(x);
+                                //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
+                                fx  = this->F.evaluate_f(x);
+                                fpx = this->F.evaluate_first_derivative (x);
+                                fsx = this->F.evaluate_second_derivative(x);
 
-                                 error = Auxiliary<Tuple>::residual(fpx);
-                                 Rprintf("Residual: %f\n", error);
-                                 if (error < tolerance)
-                                 {        /* fpx=this->F.evaluate_f(x-0.5);
-                                         fsx=this->F.evaluate_f(x+0.5);
-                                         if (std::abs(fpx-fsx)/fsx<=0.01)
-                                            Rprintf("GCV has a non standard shape");*/
-                                         ch.set_tolerance();
-                                         fx = this->F.evaluate_f(x);
-                                         return {x, n_iter};
-                                 }
-                         }
-                          fx = this->F.evaluate_f(x);
-                         ch.set_max_iter();
-                         return {x, n_iter};
-                 }
- };
+                                error = Auxiliary<Tuple>::residual(fpx);
+                                Rprintf("Residual: %f\n", error);
 
+                                if(error<tolerance)
+                                {
+                                        /* fpx=this->F.evaluate_f(x-0.5);
+                                        fsx=this->F.evaluate_f(x+0.5);
+                                        if (std::abs(fpx-fsx)/fsx<=0.01)
+                                                Rprintf("GCV has a non standard shape");*/
 
+                                        ch.set_tolerance();
+                                        fx = this->F.evaluate_f(x);
+                                        return {x, n_iter};
+                                }
+                        }
 
+                        fx = this->F.evaluate_f(x);
+                        ch.set_max_iter();
+                        return {x, n_iter};
+                }
+};
 
 
 template <typename Tuple, typename Hessian, typename ...Extensions>
 class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
 {
-//NOT yet implemented
+        //NOT yet implemented
 };
-
-
-
-
-
 
 //! Class to apply Newton method exploting finite differences to compute derivatives, inheriting from Opt_methods
 /*!
@@ -256,123 +213,43 @@ class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
 template <typename ...Extensions>
 class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Extensions...>
 {
-
         public:
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {}; //! Constructor
                 // NB F cannot be const
 
-                //Useless up to now
-                /*Real bisection(const Real &aa,const  Real &bb, const UInt& max_it, const Real &eval_a_, const Real &eval_b_, const Real& h)
-		{    Real a=aa, b=bb;
-     		     Real eval_a=eval_a_;
-    		if( eval_a*eval_b_>= 0)
-                    {
-                        Rprintf("\n Incorrect a and b\n");
-                        return 1;
-                    }
-
-
-                    Real c=a;
-                    UInt n_it=0;
-                    Real eval_c;
-
-                    while (n_it<max_it) //tell about interval is sufficently small
-                    {
-                        c = std::sqrt(a*b);
-
-                        eval_c=this->second_derivative(c,h);
-                        if ( eval_c== 0.0){
-
-                            break;
-                        }
-                        else if (eval_c*eval_a < 0){
-
-                                b=c;
-                        }
-                        else{
-
-                                a=c;
-
-               		        eval_a=eval_c;
-                        }
-                        n_it++;
-
-                    }
-                  return c;
-                }
-
-
-                Real second_derivative(const Real& x, const Real& h)
-               {
-                       Rprintf("Forward: \n");
-                       Real fxph = this->F.evaluate_f(x+h);
-                       Rprintf("Backward: \n");
-                       Real fxmh = this->F.evaluate_f(x-h);
-                       Rprintf("Center: \n");
-                       Real fx  = this->F.evaluate_f(x);
-                       return (fxph+fxmh-(2*fx))/(h*h);
-
-                 }
-*/
                 std::pair<Real, UInt> compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch) override
                 {
                         // Initialize the algorithm
                         Real x_old;
                         Real x      = x0;
-                        UInt  n_iter = 0;
-                        Real  error  = std::numeric_limits<Real>::infinity();
-		       // Real a=1e-7;
-			//Real b=0.5;
+                        UInt n_iter = 0;
+                        Real error  = std::numeric_limits<Real>::infinity();
+			Real h      = 4e-6;
 
-
-			Real h = 4e-6;
-
-
-			/*
-			Real eval_a=this->second_derivative(a,h); //useful to save one evaluation in the bisection method if the extrema are already correct
-			Real eval_b=this->second_derivative(b,h);
-                        while (eval_a<-0.0001)
-                                  {a*=10;
-				   eval_a=this->second_derivative(a,h);
-                                   }
-			while (eval_b>0.0001)
-                                  {b*=10;
-				   eval_b=this->second_derivative(b,h);}
-
-                        Rprintf("\n Starting interval for preprocessing: [%f;%f]\n", a,b);
-
-                        Real flesso=bisection(a,b,4, eval_a, eval_b,h);
- 			Rprintf("\nFlesso at %f\n", flesso);
-
-                      if (x>flesso/25 || x<a )
-                              {x=flesso/50;
-                                if (x<4e-6)
-                                    x=5e-6;
-				Rprintf("\nInitial value inserted is out of range, using default value lambda=%f\n",x);
-				}
-
-*/
                         Rprintf("\n Starting Initializing lambda phase"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
 
                         Real valmin, valcur, lambda_min;
-                        UInt Nm=6;
-			std::vector<Real> vals={5.000000e-05, 1.442700e-03, 4.162766e-02, 1.201124e+00, 3.465724e+01, 1.000000e+03};
+                        UInt Nm = 6;
+			std::vector<Real> vals = {5.000000e-05, 1.442700e-03, 4.162766e-02, 1.201124e+00, 3.465724e+01, 1.000000e+03};
 			valcur=this->F.evaluate_f(vals[0]);
-			lambda_min=5e-5;
-			valmin=valcur;
+			lambda_min = 5e-5;
+			valmin = valcur;
 
-                        for (UInt i=1;i<Nm;i++)
-                                {  valcur=this->F.evaluate_f(vals[i]);
-                                        if (valcur<valmin)
-                                        {valmin=valcur;
-                                        lambda_min=vals[i];}
+                        for(UInt i=1; i<Nm; i++)
+                        {
+                                valcur = this->F.evaluate_f(vals[i]);
+                                if(valcur<valmin)
+                                {
+                                        valmin = valcur;
+                                        lambda_min = vals[i];
                                 }
+                        }
 
 			if (x>lambda_min/10)
-                                x=lambda_min/10;
+                        {
+                                x = lambda_min/10;
+                        }
 			Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
-
-
 
                         //only the first time applied here
                         Rprintf("Forward: \n");
@@ -388,11 +265,9 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                         Real fsx = (fxph+fxmh-(2*fx))/(h*h);
                         Rprintf("fs(x): %f\n", fsx);
 
-                        while (n_iter < max_iter)
+                        while(n_iter < max_iter)
                         {
                                 //Debugging purpose f(x)
-
-
                                 if (Auxiliary<Real>::isNull(fsx))
                                 {
                                         // Debug message
@@ -443,7 +318,5 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                         return {x, n_iter};
                 }
 };
-
-
 
 #endif

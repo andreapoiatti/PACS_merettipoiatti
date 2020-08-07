@@ -7,21 +7,8 @@
 #include "Carrier.h"
 #include "../../FE_Assemblers_Solvers/Headers/Solver.h"
 #include "../../Global_Utilities/Headers/Solver_Definitions.h"
+#include "Solution_Builders.h"
 
-//Output struct to be used to return values in R
-struct output_Data
-{
-        std::string     content{"Empty"};          //!< Suggests what the output is containing and how it should be used
-        VectorXr        z_hat;                     //!< Model predicted values in the locations
-        Real            SS_res = 0.0;              //!< Model predicted sum of squares of the residuals
-        Real            rmse = 0.0;                //!< Model root mean squared error
-        Real            sigma_hat_sq = 0.0;        //!< Model estimated variance of errors
-        Real            dof = 0.0;                 //!< tr(S) + q, degrees of freedom of the model
-        Real            dor = 0.0;                 //!< s - dof, degrees of freedom of the residuals
-        Real            lambda_sol = 0.0;          //!<Lambda obratained in the solution
-        UInt            n_it = 0;                  //!< Number of iterations for the method
-        Real            time_partial = 0;          //!<Time, from beginning to end of the optimization method
-};
 
 template<typename InputCarrier, typename Enable = void>
 struct AuxiliaryData
