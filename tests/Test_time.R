@@ -15,11 +15,12 @@ space_time_locations = cbind(rep(time_locations,each=nrow(mesh$nodes)),
 FEMbasis = create.FEM.basis(mesh)
 lambdaS = c(10^-1)
 lambdaT = c(10^-1)
-data = fs.test(space_time_locations[,2], 
+set.seed(1234)
+data = fs.test(space_time_locations[,2],
                space_time_locations[,3])*cos(pi*space_time_locations[,1]) +
   rnorm(nrow(space_time_locations), sd = 0.5)
 data = matrix(data, nrow = nrow(mesh$nodes), ncol = length(time_locations), byrow = TRUE)
 
 solution = smooth.FEM.time(observations = data, time_locations = time_locations,
-                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, GCV=TRUE, FLAG_PARABOLIC = FALSE, GCVmethod = "Exact") 
+                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, GCV=TRUE, FLAG_PARABOLIC = FALSE, GCVmethod = "Exact")
 plot(solution$fit.FEM)

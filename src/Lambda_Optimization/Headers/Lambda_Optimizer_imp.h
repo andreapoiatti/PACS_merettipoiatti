@@ -19,19 +19,22 @@
  \return full output_Data struct
 */
 template<typename InputCarrier>
-const output_Data & GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal_pair, const timespec & time_count)
+output_Data  GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal_pair, const timespec & time_count, const std::vector<Real> & GCV_v, const std::vector<Real> & lambda_v, int termination_)
 {
         this->output.content            = "full_optimization";
         this->output.lambda_sol         = optimal_pair.first;
         this->output.n_it               = optimal_pair.second;
         this->output.z_hat              = this->z_hat;
-        this->output.SS_res             = this->SS_res;
         this->output.rmse               = this->rmse;
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
-        this->output.dof                = this->dof;
-        this->output.dor                = this->dor;
+        (this->output.dof).push_back(this->dof);
         this->output.time_partial       = time_count.tv_sec + 1e-9*time_count.tv_nsec;
-
+        this->output.GCV_evals          = GCV_v;
+        this->output.GCV_opt            = GCV_v[GCV_v.size()-1];
+        this->output.lambda_vec         = lambda_v;
+        this->output.lambda_pos         = GCV_v.size();
+        this->output.termination        = termination_;
+        this->output.betas              = this->the_carrier.get_model()->getBeta();
         return this->output;
 }
 
@@ -40,15 +43,13 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt>
  \return output_Data struct containing predictions and dof
 */
 template<typename InputCarrier>
-const output_Data & GCV_Family<InputCarrier, 1>::get_output_partial(void)
+output_Data GCV_Family<InputCarrier, 1>::get_output_partial(void)
 {
-        this->output.content            = "full_dof";
+        this->output.content            = "full_dof_batch";
         this->output.z_hat              = this->z_hat;
-        this->output.SS_res             = this->SS_res;
         this->output.rmse               = this->rmse;
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
-        this->output.dof                = this->dof;
-        this->output.dor                = this->dor;
+        (this->output.dof).push_back(this->dof);
 
         return this->output;
 }
@@ -68,7 +69,6 @@ const output_Data & GCV_Family<InputCarrier, 1>::get_output_prediction(const Vec
 
         this->output.content            = "prediction";
         this->output.z_hat              = this->z_hat;
-        this->output.SS_res             = this->SS_res;
         this->output.rmse               = this->rmse;
 
         return this->output;

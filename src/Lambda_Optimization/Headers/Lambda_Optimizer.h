@@ -148,8 +148,8 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
         virtual Real compute_f( Real lambda) = 0;       //!< Main function, represents the gcv computation
 
                 // OUTPUT MANAGERS
-                const output_Data & get_output(std::pair<Real, UInt> optimal_pair, const timespec & time_count);
-                const output_Data & get_output_partial(void);
+                output_Data  get_output(std::pair<Real, UInt> optimal_pair, const timespec & time_count, const std::vector<Real> & GCV_v, const std::vector<Real> & lambda_v, int termination_);
+                output_Data get_output_partial(void);
                 const output_Data & get_output_prediction(const VectorXr & f_hat);
 };
 

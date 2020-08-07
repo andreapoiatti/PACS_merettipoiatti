@@ -75,28 +75,29 @@ template <typename Tuple, typename Hessian, typename ...Extensions>
 class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
 {
         protected:
-                output_Data_opt output;
+                output_Data output; //! Local copy of output data
 
                 void compute_specific_parameters(void) override //!< Computes specific parameters needed for GCV
                 {
                          Rprintf("Specific parameters for GCV computed\n");
 
-                         this->output.z_hat_opt        = this->F.get_output_partial().z_hat;
-                         this->output.SS_res_opt       = this->F.get_output_partial().SS_res;
-                         this->output.sigma_hat_sq_opt = this->F.get_output_partial().sigma_hat_sq;
+                         this->output= this->F.get_output_partial();
+
                  }
 
         public:
                 Eval_GCV(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
                         Vec_evaluation<Tuple, Hessian, Extensions...>(F_,lambda_vec_) {}; //! Constructor
 
-                const output_Data_opt & Get_optimization_vectorial(void) //! Output constructor
+                 output_Data  Get_optimization_vectorial(void) //! Output constructor
                 {
                         std::pair<std::vector<Real>, UInt> p = this->compute_vector();
                         this->output.GCV_evals  = p.first;
-                        this->output.lambda_opt = this->lambda_vec.at(p.second);
+                        this->output.lambda_sol = this->lambda_vec.at(p.second); //Safer use of at instead of []
+                        this->output.lambda_pos = 1+p.second; //in R numbering
+                        this->output.lambda_vec = this->lambda_vec;
                         this->output.GCV_opt    = p.first.at(p.second);
-
+                        
                         return this->output;
                 }
 };

@@ -165,7 +165,7 @@ class Carrier: public Extensions...
                 inline const VectorXr * get_rhsp(void) const {return this->rhsp;}                               //!< Getter of rhsp
                 inline const std::vector<Real> * get_bc_valuesp(void) const {return this->bc_valuesp;}          //!< Getter of bc_valuesp
                 inline const std::vector<UInt> * get_bc_indicesp(void) const {return this->bc_indicesp;}        //!< Getter of bc_indicesp
-
+                inline const MixedFERegressionBase<InputHandler> * get_model(void) const {return this->model;}
 
                 // SETTERS
                 inline void set_model(MixedFERegressionBase<InputHandler> * md) {this->model=md;};                                      //!< Setter of model

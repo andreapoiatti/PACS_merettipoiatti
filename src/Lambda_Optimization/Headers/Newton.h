@@ -22,14 +22,15 @@ class Checker
                 inline void set_max_iter(void)  {reached_max_iter  = true;} //!< Sets max number of iterations
                 inline void set_tolerance(void) {reached_tolerance = true;} //!< Sets the tolerance for the optimization method
 
-                inline UInt which(void) const   //!<Returns the reason of conclusion of the iterative method
+                inline int which(void) const   //!<Returns the reason of conclusion of the iterative method
                 {
                         if (reached_tolerance == true)
                                 return 1;
                         else if (reached_max_iter ==  true)
+
                                 return 2;
                         else
-                                return -1;
+                                return -1; //error status
                 }
 };
 
@@ -49,7 +50,7 @@ class Opt_methods
                 Opt_methods(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_): F(F_) {}
         public:
                 Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F; /*! needed to be public, to be able to access to other methods of the class F from outside */
-                virtual std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch) = 0; //!< Function to apply the optimization method and obtain as a result the couple (optimal lambda, optimal value of the function)
+                virtual std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) = 0; //!< Function to apply the optimization method and obtain as a result the couple (optimal lambda, optimal value of the function)
 };
 
 // Classes
@@ -108,7 +109,7 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                  Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //!Constructor
                  /*! F cannot be const, it must be modified*/
 
-                 std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch) override //!< Apply Newton's method
+                 std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override //!< Apply Newton's method
                  {
                         // Initialize the algorithm
                         Tuple x_old;
@@ -135,9 +136,9 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                                 }
                         }
 
-                        if(x>lambda_min/10)
+                        if(x>lambda_min/4||x<=0)
                         {
-                                x = lambda_min/10;
+                                x = lambda_min/4;
                         }
 
                         Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
@@ -150,6 +151,8 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                         while(n_iter < max_iter)
                         {
                                 //Debugging purpose f(x)
+                                GCV_v.push_back(fx);
+                                lambda_v.push_back(x);
 
                                 if(Auxiliary<Tuple>::isNull(fsx))
                                 {
@@ -217,7 +220,7 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {}; //! Constructor
                 // NB F cannot be const
 
-                std::pair<Real, UInt> compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch) override
+                std::pair<Real, UInt> compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override
                 {
                         // Initialize the algorithm
                         Real x_old;
@@ -245,9 +248,9 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                                 }
                         }
 
-			if (x>lambda_min/10)
+			if (x>lambda_min/4|| x<=0)
                         {
-                                x = lambda_min/10;
+                                x = lambda_min/4;
                         }
 			Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
 
@@ -267,6 +270,9 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
 
                         while(n_iter < max_iter)
                         {
+                                GCV_v.push_back(fx);
+                                lambda_v.push_back(x);
+
                                 //Debugging purpose f(x)
                                 if (Auxiliary<Real>::isNull(fsx))
                                 {

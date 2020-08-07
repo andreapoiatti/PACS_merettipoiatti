@@ -1075,7 +1075,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			}
 
 			// covariates computation
-			if(regressionData_.getCovariates()->rows()!=0 && (isGAMData||regressionData_.isSpaceTime()))
+			if(regressionData_.getCovariates()->rows()!=0)
 			{
 				MatrixXr W(*(this->regressionData_.getCovariates()));
 				VectorXr P(*(this->regressionData_.getWeightsMatrix()));
