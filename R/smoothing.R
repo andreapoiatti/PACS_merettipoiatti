@@ -567,21 +567,23 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   # ---------- Solution -----------
   if(family != 'gaussian')
   {
-  f = bigsol[[1]][1:numnodes,]
-  g = bigsol[[1]][(numnodes+1):(2*numnodes),]
-
-  dof = bigsol[[2]]
-  GCV_ = bigsol[[3]]
-  bestlambda = bigsol[[4]]+1
-
-  if(!is.null(covariates)){
-    beta = matrix(data=bigsol[[5]],nrow=ncol(covariates),ncol=length(lambda))
-	}
-  else{
-    beta = NULL
-}
-
-   # Save information of Tree Mesh
+    f = bigsol[[1]][1:numnodes,]
+    g = bigsol[[1]][(numnodes+1):(2*numnodes),]
+  
+    dof = bigsol[[2]]
+    GCV_ = bigsol[[3]]
+    bestlambda = bigsol[[4]]+1
+  
+    if(!is.null(covariates))
+    {
+      beta = matrix(data=bigsol[[5]],nrow=ncol(covariates),ncol=length(lambda))
+  	}
+    else
+    {
+      beta = NULL
+    }
+  
+    # Save information of Tree Mesh
     tree_mesh = list(
     treelev = bigsol[[6]][1],
     header_orig= bigsol[[7]],
@@ -590,51 +592,120 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     node_left_child = bigsol[[9]][,2],
     node_right_child = bigsol[[9]][,3],
     node_box= bigsol[[10]])
-
-  # Reconstruct FEMbasis with tree mesh
-  mesh.class= class(FEMbasis$mesh)
-  if (is.null(FEMbasis$mesh$treelev)) { #if doesn't exist the tree information
-    FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
-  } #if already exist the tree information, don't append
-  class(FEMbasis$mesh) = mesh.class
-
-  # Save information of Barycenter
-  if (is.null(bary.locations)) {
-      bary.locations = list(locations=locations, element_ids = bigsol[[11]], barycenters = bigsol[[12]])
-  }
-  class(bary.locations) = "bary.locations"
-
-  # Make Functional objects object
-  fit.FEM  = FEM(f, FEMbasis)
-  PDEmisfit.FEM = FEM(g, FEMbasis)
-
-  # Prepare return list
-  reslist = NULL
-
-  if(DOF_evaluation!='not_required' || (DOF_evaluation=='not_required' && !is.null(DOF_matrix)))
-  {
-  	if(bestlambda == 1 || bestlambda == length(lambda))
-  		warning("Your optimal 'GCV' is on the border of lambda sequence")
-    stderr=sqrt(GCV_*(length(observations)-dof)/length(observations))
-    reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM,
-            beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, bary.locations = bary.locations)
-  }else{
-    reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, beta = beta, bary.locations = bary.locations)
-  }
-
-  # GAM outputs
- if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1 ){
-    fn.eval = bigsol[[13]]
-    J_minima = bigsol[[14]]
-    variance.est=bigsol[[15]]
-    if( variance.est[1]<0 ) variance.est = NULL
-    reslist=c(reslist, list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est) )
-}
-
-  return(reslist)
+  
+    # Reconstruct FEMbasis with tree mesh
+    mesh.class= class(FEMbasis$mesh)
+    if (is.null(FEMbasis$mesh$treelev)) { #if doesn't exist the tree information
+      FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
+    } #if already exist the tree information, don't append
+    class(FEMbasis$mesh) = mesh.class
+  
+    # Save information of Barycenter
+    if (is.null(bary.locations)) {
+        bary.locations = list(locations=locations, element_ids = bigsol[[11]], barycenters = bigsol[[12]])
+    }
+    class(bary.locations) = "bary.locations"
+  
+    # Make Functional objects object
+    fit.FEM  = FEM(f, FEMbasis)
+    PDEmisfit.FEM = FEM(g, FEMbasis)
+  
+    # Prepare return list
+    reslist = NULL
+  
+    if(DOF_evaluation!='not_required' || (DOF_evaluation=='not_required' && !is.null(DOF_matrix)))
+    {
+    	if(bestlambda == 1 || bestlambda == length(lambda))
+    		warning("Your optimal 'GCV' is on the border of lambda sequence")
+      stderr=sqrt(GCV_*(length(observations)-dof)/length(observations))
+      reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM,
+              beta = beta, edf = dof, GCV = GCV_, stderr=stderr, bestlambda = bestlambda, bary.locations = bary.locations)
+    }
+    else
+    {
+      reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, beta = beta, bary.locations = bary.locations)
+    }
+  
+    # GAM outputs
+    if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1)
+    {
+      fn.eval = bigsol[[13]]
+      J_minima = bigsol[[14]]
+      variance.est=bigsol[[15]]
+      if( variance.est[1]<0 ) variance.est = NULL
+      reslist = c(reslist, list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est))
+    }
+  
+    return(reslist)
   }
   else
   {
-    return(bigsol)
+    solution = list(
+      f = as.matrix(bigsol[[1]][1:numnodes]),
+      g = as.matrix(bigsol[[1]][(numnodes+1):(2*numnodes)]),
+      z_hat = bigsol[[2]],
+      rmse = bigsol[[3]],
+      estimated_sd = bigsol[[4]]
+    )
+    
+    optimization = list(
+      lambda_solution = bigsol[[5]],
+      lambda_position = bigsol[[6]],
+      GCV = bigsol[[7]],
+      optimization_details = list(
+          iterations = bigsol[[8]],
+          termination = bigsol[[9]],
+        optimization_type = bigsol[[10]]),
+      dof = bigsol[[11]],
+      lambda_vector = bigsol[[12]],
+      GCV_vector = bigsol[[13]]
+    )
+    
+    time = bigsol[[14]]
+    
+    
+    if(!is.null(covariates))
+    {
+      beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
+    }
+    else
+    {
+      beta = NULL
+    }
+    
+    solution = c(solution, beta)
+    
+    # Save information of Tree Mesh
+    tree_mesh = list(
+      treelev = bigsol[[16]][1],
+      header_orig= bigsol[[17]],
+      header_scale = bigsol[[18]],
+      node_id = bigsol[[19]][,1],
+      node_left_child = bigsol[[19]][,2],
+      node_right_child = bigsol[[19]][,3],
+      node_box= bigsol[[20]])
+    
+    #Reconstruct FEMbasis with tree mesh
+    mesh.class= class(FEMbasis$mesh)
+    if (is.null(FEMbasis$mesh$treelev)) 
+    { #if doesn't exist the tree information
+      FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
+    } #if already exist the tree information, don't append
+    class(FEMbasis$mesh) = mesh.class
+    
+    # Save information of Barycenter
+    if (is.null(bary.locations)) 
+    {
+      bary.locations = list(locations=locations, element_ids = bigsol[[21]], barycenters = bigsol[[22]])
+    }
+    class(bary.locations) = "bary.locations"
+    
+    # Make Functional objects object
+    fit.FEM  = FEM(solution$f, FEMbasis)
+    PDEmisfit.FEM = FEM(solution$g, FEMbasis)
+    
+    reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
+                optimization  = optimization, time = time, bary.locations = bary.locations)
+    return(reslist)
   }
 }
