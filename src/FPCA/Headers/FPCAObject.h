@@ -11,7 +11,8 @@
  * iteration during the SF-PCA algorithm.
 */
 
-class  FPCAObject{
+class  FPCAObject
+{
 	private:
 
 

@@ -12,8 +12,9 @@ SEXP FPCA_skeleton(FPCAData &fPCAData, SEXP Rmesh, std::string validation)
 
 	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
 
-	std::unique_ptr<MixedFEFPCABase<Integrator, ORDER, mydim, ndim>> fpca = MixedFEFPCAfactory<Integrator, ORDER, mydim, ndim>::createFPCAsolver(validation, mesh, fPCAData);
+	std::unique_ptr<MixedFEFPCABase> fpca = MixedFEFPCAfactory::createFPCAsolver(validation, fPCAData);
 
+	fpca->template SetAndFixParameters<Integrator,ORDER,mydim,ndim>(mesh);
 	fpca->apply();
 
 	const std::vector<VectorXr>& loadings = fpca->getLoadingsMat();
