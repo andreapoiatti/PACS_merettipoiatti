@@ -136,9 +136,9 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                                 }
                         }
 
-                        if(x>lambda_min/4||x<=0)
+                        if(x>lambda_min/2||x<=0)
                         {
-                                x = lambda_min/4;
+                                x = lambda_min/2;
                         }
 
                         Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
@@ -170,13 +170,13 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                                 //if (x<1e-8) x=(1./(2*n_iter))*flesso/50;
                                 if (x<1e-8)
                                 {
-                                        x = (1./(2*n_iter))*lambda_min/10;
+                                        x = (1./(2*n_iter))*lambda_min/2;
                                 }
 
                                 //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
-                                fx  = this->F.evaluate_f(x);
+
                                 fpx = this->F.evaluate_first_derivative (x);
-                                fsx = this->F.evaluate_second_derivative(x);
+
 
                                 error = Auxiliary<Tuple>::residual(fpx);
                                 Rprintf("Residual: %f\n", error);
@@ -192,6 +192,8 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
                                         fx = this->F.evaluate_f(x);
                                         return {x, n_iter};
                                 }
+                                fx  = this->F.evaluate_f(x);
+                                fsx = this->F.evaluate_second_derivative(x);
                         }
 
                         fx = this->F.evaluate_f(x);
@@ -248,9 +250,9 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                                 }
                         }
 
-			if (x>lambda_min/4|| x<=0)
+			if (x>lambda_min/2|| x<=0)
                         {
-                                x = lambda_min/4;
+                                x = lambda_min/2;
                         }
 			Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
 
@@ -288,7 +290,7 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                                 Auxiliary<Real>::divide(fsx, fpx, x);
                                 x = x_old - x;
 
-                                if (x<1e-7) {x=(1./(2*n_iter))*lambda_min/10;
+                                if (x<1e-7) {x=(1./(2*n_iter))*lambda_min/2;
 
            			if (x<4e-6)
                                         x=5e-6;}
@@ -297,14 +299,10 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                                 fxph = this->F.evaluate_f(x+h);
                                 Rprintf("Backward: \n");
                                 fxmh = this->F.evaluate_f(x-h);
-                                Rprintf("Center: \n");
-                                fx  = this->F.evaluate_f(x);
+
 
                                 fpx = (fxph-fxmh)/(2*h);
-                                Rprintf("fp(x): %f\n", fpx);
 
-                                fsx = (fxph+fxmh-(2*fx))/(h*h);
-                                Rprintf("fs(x): %f\n", fsx);
 
                                 error = Auxiliary<Real>::residual(fpx);
                                 Rprintf("residual: %f\n", error);
@@ -318,6 +316,13 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
                                         return {x, n_iter};
 
                                 }
+                                Rprintf("Center: \n");
+                                fx  = this->F.evaluate_f(x);
+
+                                fsx = (fxph+fxmh-(2*fx))/(h*h);
+
+                                Rprintf("fp(x): %f\n", fpx);
+                                Rprintf("fs(x): %f\n", fsx);
                         }
                         fx  = this->F.evaluate_f(x);
                         ch.set_max_iter();
