@@ -640,10 +640,20 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
   else
   {
+    if(!is.null(covariates))
+    {
+      beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
+    }
+    else
+    {
+      beta = NULL
+    }
+    
     solution = list(
-      f = as.matrix(bigsol[[1]][1:numnodes]),
-      g = as.matrix(bigsol[[1]][(numnodes+1):(2*numnodes)]),
+      f = bigsol[[1]][1:numnodes,],
+      g = bigsol[[1]][(numnodes+1):(2*numnodes),],
       z_hat = bigsol[[2]],
+      beta = beta,
       rmse = bigsol[[3]],
       estimated_sd = bigsol[[4]]
     )
@@ -662,18 +672,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     )
     
     time = bigsol[[14]]
-    
-    
-    if(!is.null(covariates))
-    {
-      beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
-    }
-    else
-    {
-      beta = NULL
-    }
-    
-    solution = c(solution, beta)
     
     # Save information of Tree Mesh
     tree_mesh = list(

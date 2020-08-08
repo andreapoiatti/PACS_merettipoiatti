@@ -24,8 +24,8 @@ output_Data  GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optima
         this->output.content            = "full_optimization";
         this->output.lambda_sol         = optimal_pair.first;
         this->output.n_it               = optimal_pair.second;
-        this->output.z_hat              = this->z_hat;
-        this->output.rmse               = this->rmse;
+        this->output.z_hat              = MatrixXr(this->z_hat);
+        (this->output.rmse).push_back(this->rmse);
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
         (this->output.dof).push_back(this->dof);
         this->output.time_partial       = time_count.tv_sec + 1e-9*time_count.tv_nsec;
@@ -46,8 +46,8 @@ template<typename InputCarrier>
 output_Data GCV_Family<InputCarrier, 1>::get_output_partial(void)
 {
         this->output.content            = "full_dof_batch";
-        this->output.z_hat              = this->z_hat;
-        this->output.rmse               = this->rmse;
+        this->output.z_hat              = MatrixXr(this->z_hat);
+        (this->output.rmse).push_back(this->rmse);
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
         (this->output.dof).push_back(this->dof);
 
@@ -60,18 +60,19 @@ output_Data GCV_Family<InputCarrier, 1>::get_output_partial(void)
  \return output_Data struct containing predictions
 */
 template<typename InputCarrier>
-const output_Data & GCV_Family<InputCarrier, 1>::get_output_prediction(const VectorXr & f_hat)
+void GCV_Family<InputCarrier, 1>::combine_output_prediction(const VectorXr & f_hat, output_Data & outp, UInt cols)
 {
         this->compute_z_hat_from_f_hat(f_hat);
         this->compute_eps_hat();
         this->compute_SS_res();
         this->compute_rmse();
 
-        this->output.content            = "prediction";
-        this->output.z_hat              = this->z_hat;
-        this->output.rmse               = this->rmse;
+        if(outp.content != "prediction")
+                outp.content = "prediction";
 
-        return this->output;
+        outp.z_hat.col(cols) = this->z_hat;
+
+        outp.rmse.push_back(this->rmse);
 }
 
 // -- Setters --

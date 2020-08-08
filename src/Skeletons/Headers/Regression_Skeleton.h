@@ -13,9 +13,9 @@
 #include "../../Lambda_Optimization/Headers/Solution_Builders.h"
 
 template<typename CarrierType>
-std::pair<VectorXr, output_Data> optimizer_method_selection(CarrierType & carrier);
+std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
 template<typename EvaluationType, typename CarrierType>
-std::pair<VectorXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
+std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier);
 
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, SEXP Rmesh)
@@ -25,7 +25,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 
 	regression.template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh);
 
-        std::pair<VectorXr, output_Data> solution_bricks;
+        std::pair<MatrixXr, output_Data> solution_bricks;
 	//Build the carrier
 	if(regression.isSV())
 	{
@@ -66,7 +66,7 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 }
 
 template<typename CarrierType>
-std::pair<VectorXr, output_Data> optimizer_method_selection(CarrierType & carrier)
+std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier)
 {
 	// Build the optimizer				[[ TO DO factory]]
 	const OptimizationData * optr = carrier.get_opt_data();
@@ -88,12 +88,49 @@ std::pair<VectorXr, output_Data> optimizer_method_selection(CarrierType & carrie
 	}
 	else if(optr->get_loss_function() == "unused" && optr->get_DOF_evaluation() == "not_required")
 	{
-		//ADD
+		Rprintf("Pure evaluation\n");
+		auto model  = carrier.get_model();
+		GCV_Exact<CarrierType, 1> optim(carrier);
+
+		timer Time_partial;
+		Time_partial.start();
+		Rprintf("WARNING: start taking time\n");
+
+		// Get the solution
+		output_Data output;
+		output.z_hat.resize(carrier.get_psip()->rows(),carrier.get_opt_data()->get_size_S());
+		output.lambda_vec = carrier.get_opt_data()->get_lambda_S();
+		MatrixXr solution;
+
+		for(UInt j=0; j<carrier.get_opt_data()->get_size_S(); j++)
+		{
+			if(j==0)
+			{
+				MatrixXr sol = carrier.apply(carrier.get_opt_data()->get_lambda_S()[j]);
+				solution.resize(sol.rows(),carrier.get_opt_data()->get_size_S());
+				solution.col(j) = sol;
+			}
+			else
+			{
+				solution.col(j) = carrier.apply(carrier.get_opt_data()->get_lambda_S()[j]);
+			}
+			optim.combine_output_prediction(solution.topRows(solution.rows()/2).col(j),output,j);
+		}
+
+		Rprintf("WARNING: partial time after the optimization method\n");
+		timespec T = Time_partial.stop();
+
+		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
+
+                //postponed after apply in order to have betas computed
+                output.betas = carrier.get_model()->getBeta();
+
+                return {solution, output};
 	}
 }
 
 template<typename EvaluationType, typename CarrierType>
-std::pair<VectorXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
+std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 {
 	// Build wraper and newton method
 	Function_Wrapper<Real, Real, Real, Real, EvaluationType> Fun(optim);
@@ -114,14 +151,12 @@ std::pair<VectorXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 		timespec T = Time_partial.stop();
 
 		// Get the solution
-		VectorXr solution = carrier.apply(output.lambda_sol);
+		MatrixXr solution = carrier.apply(output.lambda_sol);
 
-		output.time_partial=T.tv_sec + 1e-9*T.tv_nsec;
+		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
 
                 //postponed after apply in order to have betas computed
-                output.betas=carrier.get_model()->getBeta();
-
-                //std::cout<<"sol"<<solution<<std::endl;
+                output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
 		//Solution_Builders::GCV_batch_sol(solution, output_vec);
@@ -152,7 +187,7 @@ std::pair<VectorXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 
 		// Get the solution
 		//to compute f and g hat
-		VectorXr solution = carrier.apply(lambda_couple.first);
+		MatrixXr solution = carrier.apply(lambda_couple.first);
 
                  //postponed after apply in order to have betas computed
 		//now the last values in GCV_exact are the correct ones, related to the last iteration

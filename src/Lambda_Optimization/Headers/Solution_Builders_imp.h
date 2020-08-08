@@ -2,7 +2,7 @@
 #define __SOLUTION_BUILDERS_IMP_H__
 
 template<typename InputHandler, UInt ORDER, UInt mydim, UInt ndim>
-SEXP Solution_Builders::build_solution_plain_regression(const VectorXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData )
+SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solution, const output_Data & output, const MeshHandler<ORDER, mydim, ndim> & mesh , const InputHandler & regressionData )
 {
         MatrixXv beta;
         if(regressionData.getCovariates()->rows()==0)
@@ -17,11 +17,11 @@ SEXP Solution_Builders::build_solution_plain_regression(const VectorXr & solutio
         }
 
         UInt code_string;
-        if(output.content=="full_optimization")
+        if(output.content == "full_optimization")
         {
                 code_string = 0;
         }
-        else if(output.content=="full_dof_batch")
+        else if(output.content == "full_dof_batch")
         {
                 code_string = 1;
         }
@@ -37,25 +37,30 @@ SEXP Solution_Builders::build_solution_plain_regression(const VectorXr & solutio
         SEXP result = NILSXP;
         result = PROTECT(Rf_allocVector(VECSXP, 22));
 
-        SET_VECTOR_ELT(result, 0, Rf_allocVector(REALSXP, solution.size()));
+        SET_VECTOR_ELT(result, 0, Rf_allocMatrix(REALSXP, solution.rows(), solution.cols()));
         Real *rans = REAL(VECTOR_ELT(result, 0));
-        for(UInt j = 0; j < solution.size(); j++)  //[TO DO ] //sono le f_hat e g_hat, si potrebbe rimuovere, cambiando la chiamata da R in  smooth.FEM.basis
-        {
-               rans[j] = solution[j];
-        }
+	for(UInt j = 0; j < solution.cols(); j++)
+	{
+		for(UInt i = 0; i < solution.rows(); i++)
+			rans[i + solution.rows()*j] = solution(i,j);
+	}
 
-        UInt size_z=output.z_hat.size();
-        SET_VECTOR_ELT(result, 1, Rf_allocVector(REALSXP, size_z));
+
+        SET_VECTOR_ELT(result, 1, Rf_allocMatrix(REALSXP, output.z_hat.rows(), output.z_hat.cols()));
         rans = REAL(VECTOR_ELT(result, 1));
-        for(UInt j = 0; j < size_z; j++)
+        for(UInt j = 0; j < output.z_hat.cols(); j++)
         {
-               rans[j] = output.z_hat[j];
+                for(UInt i = 0; i < output.z_hat.rows(); i++)
+                        rans[i + output.z_hat.rows()*j] = output.z_hat(i,j);
         }
 
-        //Rprintf("Hey doc,  %f %f %f\n", output.z_hat[0], output.z_hat[1], output.z_hat[3]);
-        SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, 1));
+        UInt size_rmse = output.rmse.size();
+        SET_VECTOR_ELT(result, 2, Rf_allocVector(REALSXP, size_rmse));
         rans = REAL(VECTOR_ELT(result, 2));
-        rans[0] = output.rmse;
+        for(UInt j = 0; j < size_rmse; j++)
+        {
+               rans[j] = output.rmse[j];
+        }
 
         SET_VECTOR_ELT(result, 3, Rf_allocVector(REALSXP, 1));
         rans= REAL(VECTOR_ELT(result, 3));
