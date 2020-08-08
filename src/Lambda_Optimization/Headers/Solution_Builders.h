@@ -16,7 +16,7 @@ struct output_Data
         MatrixXr                z_hat;                     //!< Model predicted values in the locations
         std::vector<Real>       rmse;                      //!< Model root mean squared error
         Real                    sigma_hat_sq    = -1.0;    //!< Model estimated variance of errors
-        std::vector<Real>       dof             = {-1.0};  //!< tr(S) + q, degrees of freedom of the model
+        std::vector<Real>       dof             = {};  //!< tr(S) + q, degrees of freedom of the model
         Real                    lambda_sol      = 0.0;     //!< Lambda obratained in the solution
         UInt                    lambda_pos      = 0;       //!< Position of optimal lambda, only for batch evaluation, in R numebring starting from 1 (0 means no batch used)
         UInt                    n_it            = 0;       //!< Number of iterations for the method

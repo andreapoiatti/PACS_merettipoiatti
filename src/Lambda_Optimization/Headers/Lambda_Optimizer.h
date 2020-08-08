@@ -109,6 +109,7 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 // Degrees of freedom
                 Real            dof = 0.0;              //!< tr(S) + q, degrees of freedom of the model
                 Real            dor = 0.0;              //!< s - dof, degrees of freedom of the residuals
+                UInt            use_index = -1;
 
                 // SETTERS of the putput data
         virtual void compute_z_hat(Real lambda) = 0;    //!< Utility to compute the size of predicted value in the locations
@@ -139,6 +140,9 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                         }
 
         public:
+                // UTILITY FOR DOF MATRIX
+        inline  void set_index(UInt index){this->use_index = index;}
+
                 // PUBLIC UPDATERS
         virtual void update_parameters(Real lambda) = 0; //!< Utility to update all the prameters of the model
 
@@ -302,7 +306,11 @@ class GCV_Stochastic<InputCarrier, 1>: public GCV_Family<InputCarrier, 1>
                 GCV_Stochastic<InputCarrier, 1>(InputCarrier & the_carrier_):
                         GCV_Family<InputCarrier, 1>(the_carrier_)
                         {
-                                this->set_US_(); // this matrix is unchanged during the whole procedure, thus it's set once and for all
+                                MatrixXr m = this->the_carrier.get_opt_data()->get_DOF_matrix();
+                                if(m.cols()==0 || m.rows()==0)
+                                {
+                                        this->set_US_(); // this matrix is unchanged during the whole procedure, thus it's set once and for all
+                                }
                         }
 
                 // PUBLIC UPDATERS

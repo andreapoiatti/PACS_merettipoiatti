@@ -615,53 +615,63 @@ void GCV_Stochastic<InputCarrier, 1>::set_US_(void)
 template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
 {
-        /* Debugging purpose timer [part I]
-         timer Time_partial;
-         Time_partial.start();
-         Rprintf("WARNING: start taking time update_dof\n");
-        */
-
-	UInt nnodes = this->the_carrier.get_n_nodes();
-        UInt nr     = this->the_carrier.get_opt_data()->get_nrealizations();
-
-        if(this->us == false) // check is US matrix has been defined
+        MatrixXr m = this->the_carrier.get_opt_data()->get_DOF_matrix();
+        if(m.cols()!=1 || m.rows()<=this->use_index)
         {
-                this->set_US_();
+                /* Debugging purpose timer [part I]
+                 timer Time_partial;
+                 Time_partial.start();
+                 Rprintf("WARNING: start taking time update_dof\n");
+                */
+
+        	UInt nnodes = this->the_carrier.get_n_nodes();
+                UInt nr     = this->the_carrier.get_opt_data()->get_nrealizations();
+
+                if(this->us == false) // check is US matrix has been defined
+                {
+                        this->set_US_();
+                }
+
+        	// Define the first right hand side : | I  0 |^T * psi^T * Q * u
+        	MatrixXr b = MatrixXr::Zero(2*nnodes, this->US_.cols());
+                UInt ret = AuxiliaryOptimizer::universal_b_setter(b, this->the_carrier, this->US_, nnodes);
+
+        	// Solve the system
+            	MatrixXr x = this->the_carrier.apply_to_b(b, lambda);
+
+        	MatrixXr USTpsi = this->US_.transpose()*(*this->the_carrier.get_psip());
+        	VectorXr edf_vect(nr);
+        	Real q = 0;
+
+        	// Degrees of freedom = q + E[ u^T * psi * | I  0 |* x ]
+        	if (this->the_carrier.has_W())
+                {
+        		q = this->the_carrier.get_Wp()->cols();
+        	}
+
+        	// For any realization we calculate the degrees of freedom
+        	for (UInt i = 0; i < nr; ++i)
+                {
+        		edf_vect(i) = USTpsi.row(i).dot(x.col(i).head(nnodes)) + q;
+        	}
+
+        	// Estimates: sample mean, sample variance
+        	this->dof = edf_vect.sum()/nr;
+
+                // Deugging purpose print
+                // Rprintf("DOF:%f\n", this->dof);
+
+                /* Debugging purpose timer [part II]
+                 Rprintf("WARNING: time after the update_dof method\n");
+                 timespec T = Time_partial.stop();
+                */
         }
-
-	// Define the first right hand side : | I  0 |^T * psi^T * Q * u
-	MatrixXr b = MatrixXr::Zero(2*nnodes, this->US_.cols());
-        UInt ret = AuxiliaryOptimizer::universal_b_setter(b, this->the_carrier, this->US_, nnodes);
-
-	// Solve the system
-    	MatrixXr x = this->the_carrier.apply_to_b(b, lambda);
-
-	MatrixXr USTpsi = this->US_.transpose()*(*this->the_carrier.get_psip());
-	VectorXr edf_vect(nr);
-	Real q = 0;
-
-	// Degrees of freedom = q + E[ u^T * psi * | I  0 |* x ]
-	if (this->the_carrier.has_W())
+        else
         {
-		q = this->the_carrier.get_Wp()->cols();
-	}
-
-	// For any realization we calculate the degrees of freedom
-	for (UInt i = 0; i < nr; ++i)
-        {
-		edf_vect(i) = USTpsi.row(i).dot(x.col(i).head(nnodes)) + q;
-	}
-
-	// Estimates: sample mean, sample variance
-	this->dof = edf_vect.sum()/nr;
-
-        // Deugging purpose print
-        // Rprintf("DOF:%f\n", this->dof);
-
-        /* Debugging purpose timer [part II]
-         Rprintf("WARNING: time after the update_dof method\n");
-         timespec T = Time_partial.stop();
-        */
+                Rprintf("No DOF computation required\n");
+                this->dof = m(this->use_index,0);
+                std::cout<< this->dof << std::endl;
+        }
 }
 
 //! Utility to compute the degrees of freedom of the residuals

@@ -41,6 +41,7 @@ class Vec_evaluation
 
                         for (UInt i=0; i<dim; i++)
                         {
+                                this->F.set_index(i);
                                 evaluations[i] = this->F.evaluate_f(this->lambda_vec[i]); //only scalar functions;
                                 if (i==0)
                                 {
@@ -97,7 +98,7 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
                         this->output.lambda_pos = 1+p.second; //in R numbering
                         this->output.lambda_vec = this->lambda_vec;
                         this->output.GCV_opt    = p.first.at(p.second);
-                        
+
                         return this->output;
                 }
 };

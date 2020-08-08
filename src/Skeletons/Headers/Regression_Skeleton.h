@@ -76,15 +76,11 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 		GCV_Exact<CarrierType, 1> optim(carrier);
 		return optimizer_strategy_selection<GCV_Exact<CarrierType, 1>, CarrierType>(optim, carrier);
 	}
-	else if(optr->get_loss_function() == "GCV" && optr->get_DOF_evaluation() == "stochastic")
+	else if(optr->get_loss_function() == "GCV" && (optr->get_DOF_evaluation() == "stochastic" || optr->get_DOF_evaluation() == "not_required"))
 	{
 		Rprintf("GCV stochastic\n");
 		GCV_Stochastic<CarrierType, 1> optim(carrier);
 		return optimizer_strategy_selection<GCV_Stochastic<CarrierType, 1>, CarrierType>(optim, carrier);
-	}
-	else if(optr->get_loss_function() == "GCV" && optr->get_DOF_evaluation() == "not_required")
-	{
-		//ADD
 	}
 	else if(optr->get_loss_function() == "unused" && optr->get_DOF_evaluation() == "not_required")
 	{
@@ -161,7 +157,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
                 return {solution, output};
 		//Solution_Builders::GCV_batch_sol(solution, output_vec);
 	}
-	else
+	else // 'not_required' optimization can't enter here!! [checked in R code]
 	{
 		std::unique_ptr<Opt_methods<Real,Real,EvaluationType>> optim_p =
 			Opt_method_factory<FunWr, Real, Real, EvaluationType>::create_Opt_method(optr->get_criterion(), Fun);
