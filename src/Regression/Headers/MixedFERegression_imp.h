@@ -683,7 +683,7 @@ void MixedFERegressionBase<InputHandler>::computeGeneralizedCrossValidation(UInt
 			n-=observations_na->size();
 		}
 //! GCV computation
-	_GCV(output_indexS,output_indexT) = (n / ((n - optimizationData_.get_tuning()*_dof(output_indexS, output_indexT)) * (n - optimizationData_.get_tuning()*_dof(output_indexS, output_indexT)))) * (*z-dataHat).dot(*z-dataHat);
+	_GCV(output_indexS,output_indexT) = (n / ((n - optimizationData_.get_tuning()*((this->getDOF())(output_indexS, output_indexT))) * (n - optimizationData_.get_tuning()*((this->getDOF())(output_indexS, output_indexT))))) * (*z-dataHat).dot(*z-dataHat);
 	if (_GCV(output_indexS,output_indexT) < optimizationData_.get_best_value())
 	{
 		optimizationData_.set_best_lambda_S(output_indexS);
@@ -1060,7 +1060,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 			_solution(s,t) = this->template system_solve(this->_rightHandSide);
 
 
-			if(optimizationData_.get_loss_function()=="GCV" && (isGAMData||regressionData_.isSpaceTime()))
+			if(optimizationData_.get_loss_function()=="GCV" && (!isGAMData&&regressionData_.isSpaceTime()))
 			{
 				if (optimizationData_.get_DOF_evaluation()!="not_required")
 				{

@@ -21,6 +21,8 @@ data = fs.test(space_time_locations[,2],
   rnorm(nrow(space_time_locations), sd = 0.5)
 data = matrix(data, nrow = nrow(mesh$nodes), ncol = length(time_locations), byrow = TRUE)
 
+dofs=  matrix(c(48.36436), nrow = 1)
+
 solution = smooth.FEM.time(observations = data, time_locations = time_locations,
-                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, GCV=TRUE, FLAG_PARABOLIC = FALSE, GCVmethod = "Exact")
+                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, FLAG_PARABOLIC = FALSE, optimization = "batch", loss_function = "GCV", DOF_evaluation = "exact")
 plot(solution$fit.FEM)
