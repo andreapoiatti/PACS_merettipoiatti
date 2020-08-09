@@ -55,6 +55,12 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
                 }
         }
 
+        if(n_==0 || p_==0)
+        {
+                n_ = 0;
+                p_ = 0;
+        }
+        DOF_matrix.resize(n_,p_);
 }
 void OptimizationData::fill_lambda(SEXP Rlambda, std::vector<Real> & vect, UInt & size)
 {

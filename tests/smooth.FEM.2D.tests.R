@@ -22,49 +22,51 @@ locations = expand.grid(x,y)
 mesh = create.mesh.2D(locations)
 plot(mesh)
 
-nnodes=dim(mesh$nodes)[1]
+nnodes = dim(mesh$nodes)[1]
 
-FEMbasis=create.FEM.basis(mesh)
+FEMbasis = create.FEM.basis(mesh)
 
 # Test function
-f = function(x, y, z = 1){
+f = function(x, y, z = 1)
+{
   coe = function(x,y) 1/2*sin(5*pi*x)*exp(-x^2)+1
   sin(2*pi*(coe(y,1)*x*cos(z-2)-y*sin(z-2)))*cos(2*pi*(coe(y,1)*x*cos(z-2+pi/2)+coe(x,1)*y*sin((z-2)*pi/2)))
 }
 
 # Exact solution (pointwise at nodes)
-sol_exact=f(mesh$nodes[,1], mesh$nodes[,2])
+sol_exact = f(mesh$nodes[,1], mesh$nodes[,2])
 image(FEM(sol_exact, FEMbasis))
 
 # Add error to simulate data
 set.seed(7893475)
-ran=range(sol_exact)
+ran = range(sol_exact)
 data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 
 # Set smoothing parameter
-lambda= 10^seq(-6,-3,by=0.25)
+lambda = 10^seq(-6,-3,by=0.25)
 
-#### Test 1.1: Without GCV
-GCVFLAG=FALSE
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG)
+#### Test 1.1: Batch Without GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
 image(output_CPP$fit.FEM)
 
-#### Test 1.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+#### Test 1.2: Batch With exact GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
 
-#### Test 1.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+#### Test 1.3: Batch stochastic GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$optimization$GCV_vector)],FEMbasis))
 
+### Test 1.4: Newton exact GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+
+### Test 1.5: Newton_fd exact GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+
+### Test 1.6: Newton_fd stochastic GCV
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
 
 #### Test 2: c-shaped domain ####
 #            locations != nodes
@@ -77,37 +79,38 @@ graphics.off()
 
 data(horseshoe2D)
 
-mesh=create.mesh.2D(nodes=horseshoe2D$boundary_nodes, 
-                    segments = horseshoe2D$boundary_segments)
-locations=refine.mesh.2D(mesh, maximum_area = 0.05)$nodes
-mesh=refine.mesh.2D(mesh, maximum_area = 0.025, minimum_angle = 30)
+mesh = create.mesh.2D(nodes=horseshoe2D$boundary_nodes, segments = horseshoe2D$boundary_segments)
+locations = refine.mesh.2D(mesh, maximum_area = 0.05)$nodes
+mesh = refine.mesh.2D(mesh, maximum_area = 0.025, minimum_angle = 30)
 plot(mesh, pch = ".")
 points(locations, pch = 16, col = "red")
 
-FEMbasis=create.FEM.basis(mesh)
+FEMbasis = create.FEM.basis(mesh)
 
 ndata = nrow(locations)
 
 # Create covariates
 set.seed(509875)
-cov1=rnorm(ndata, mean = 1, sd = 2)
-cov2=sin(locations[,1])
+cov1 = rnorm(ndata, mean = 1, sd = 2)
+cov2 = sin(locations[,1])
 
 # Exact solution (pointwise at nodes)
 DatiEsatti=fs.test(locations[,1], locations[,2]) + 2*cov1 - cov2
 
-for(ind in 1:100){
-  points(locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),1],locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),2],
+for(ind in 1:100)
+{
+  points(locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),1],
+         locations[which(round((DatiEsatti-min(DatiEsatti))/(max(DatiEsatti)-min(DatiEsatti))*100)==ind),2],
          col=heat.colors(100)[ind], pch=16)
 }
 
 # Add error to simulate data
 set.seed(543663)
-ran=range(DatiEsatti)
+ran = range(DatiEsatti)
 data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1]))
 
 # Set smoothing parameter
-lambda= 10^seq(-3,3,by=0.25)
+lambda = 10^seq(-3,3,by=0.25)
 
 #### Test 2.1: Without GCV
 GCVFLAG=FALSE
