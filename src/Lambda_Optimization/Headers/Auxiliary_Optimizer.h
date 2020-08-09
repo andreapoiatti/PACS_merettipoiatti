@@ -2,6 +2,7 @@
 #define __AUXILIARY_OPTIMIZER_H__
 
 #include <functional>
+#include<algorithm>
 #include <string>
 #include "../../FdaPDE.h"
 #include "Carrier.h"
@@ -82,10 +83,10 @@ struct AuxiliaryOptimizer
 
         static void set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp);
         static void set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
-        static void set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s);
-        static void set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s);
-        static void set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp);
-        static void set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp);
+        static void set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s, const std::vector<UInt> * bc_indicesp);
+        static void set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s, const std::vector<UInt> * bc_indicesp);
+        static void set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const std::vector<UInt> * bc_indicesp);
+        static void set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp, const std::vector<UInt> * bc_indicesp);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
@@ -232,11 +233,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         if (carrier.has_W())
                         {
                                 const MatrixXr * Qp = carrier.get_Qp();
-                                AuxiliaryOptimizer::set_T_ln_W_ptw(T, kp, Qp, s);
+                                AuxiliaryOptimizer::set_T_ln_W_ptw(T, kp, Qp, s, carrier.get_bc_indicesp());
                         }
                         else
                         {
-                                AuxiliaryOptimizer::set_T_ln_nW_ptw(T, kp, s);
+                                AuxiliaryOptimizer::set_T_ln_nW_ptw(T, kp, s,  carrier.get_bc_indicesp());
                         }
 
                 }
@@ -248,11 +249,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
                         if (carrier.has_W())
                         {
                                 const MatrixXr * Qp = carrier.get_Qp();
-                                AuxiliaryOptimizer::set_T_lnn_W_ptw(T, psip, psi_tp, Qp);
+                                AuxiliaryOptimizer::set_T_lnn_W_ptw(T, psip, psi_tp, Qp, carrier.get_bc_indicesp());
                         }
                         else
                         {
-                                AuxiliaryOptimizer::set_T_lnn_nW_ptw(T, psip, psi_tp);
+                                AuxiliaryOptimizer::set_T_lnn_nW_ptw(T, psip, psi_tp, carrier.get_bc_indicesp());
                         }
                 }
 
