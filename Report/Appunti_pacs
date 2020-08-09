@@ -138,3 +138,11 @@ NB SISTEMARE: far capire che nei cpp quelli che vengono da fdaPDE.cpp sono CORE,
 
 Mettere che si è modificato caso di dof matrix se fornita dall'esterno
 
+
+NB caso newton esatto da bloccare se si usano le BC (non implementato)
+
+?? CHiedere caso areale come è implementato per le BC...va fatto???
+
+
+
+
