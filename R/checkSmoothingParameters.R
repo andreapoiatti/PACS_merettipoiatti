@@ -75,10 +75,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
       stop("'BC_indices' required in BC;  is NULL.")
     if (is.null(BC$BC_values))
       stop("'BC_indices' required in BC;  is NULL.")
-  }
-  else
-  {
-    if(DOF_evaluation = 'exact')
+    if(DOF_evaluation == 'exact')
     {
       DOF_evaluation = 'stochastic'
       warning("'exact' 'DOF_evaluation' can't be performed with non-NULL boundary conditions, using 'stochastic' evaluation")

@@ -139,7 +139,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
      search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
-    if((ICsol[[4]][1]+1)==1)
+    if(ICsol[[6]]==1)
     {
       lambdaSIC <- 10^seq(-9,-7,0.1)
       lambdaSIC <- as.matrix(lambdaSIC)
@@ -152,7 +152,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
     else
     {
       ## shifting the lambdas interval if the best lambda is the higher one and retry smoothing
-      if((ICsol[[4]][1]+1)==length(lambdaSIC))
+      if(ICsol[[6]]==length(lambdaSIC))
       {
         lambdaSIC <- 10^seq(3,5,0.1)
         lambdaSIC <- as.matrix(lambdaSIC)
@@ -166,18 +166,18 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
 
     if(nrow(covariates)!=0)
     {
-      betaIC = ICsol[[5]]
-      IC = ICsol[[1]][1:FEMbasis$mesh$nnodes,ICsol[[4]][1]+1] ## best IC estimation
+      betaIC = ICsol[[15]]
+      IC = ICsol[[1]][1:FEMbasis$mesh$nnodes,] ## best IC estimation
       covariates=covariates[(NobsIC+1):nrow(covariates),]
       covariates <- as.matrix(covariates)
     }
     else
     {
-      IC = ICsol[[1]][1:FEMbasis$mesh$nnodes,ICsol[[4]][1]+1] ## best IC estimation
+      IC = ICsol[[1]][1:FEMbasis$mesh$nnodes,] ## best IC estimation
       betaIC = NULL
     }
     ## return a FEM object containing IC estimates with best lambda and best lambda index
-    ICsol = list(IC.FEM=FEM(ICsol[[1]][1:FEMbasis$mesh$nnodes,],FEMbasis),bestlambdaindex=ICsol[[4]][1]+1,bestlambda=lambdaSIC[ICsol[[4]][1]+1],beta=betaIC)
+    ICsol = list(IC.FEM=FEM(ICsol[[1]][1:FEMbasis$mesh$nnodes,],FEMbasis),bestlambdaindex=ICsol[[6]],bestlambda=ICsol[[5]],beta=betaIC)
     time_locations=time_locations[2:nrow(time_locations)]
     observations = observations[(NobsIC+1):length(observations)]
   }
