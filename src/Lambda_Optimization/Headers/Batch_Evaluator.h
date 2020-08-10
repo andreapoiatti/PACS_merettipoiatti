@@ -43,14 +43,11 @@ class Vec_evaluation
                         {
                                 this->F.set_index(i);
                                 evaluations[i] = this->F.evaluate_f(this->lambda_vec[i]); //only scalar functions;
-                                if (i==0)
-                                {
-                                        this->compute_specific_parameters(); //for the first evaluation it is needed to be computed
-                                }
+
+                                this->compute_specific_parameters();
                                 if (evaluations[i]<evaluations[index_min])
                                 {
                                         index_min=i;
-                                        this->compute_specific_parameters();
                                 }
                         }
 
