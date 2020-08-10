@@ -90,7 +90,7 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
                 Eval_GCV(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
                         Vec_evaluation<Tuple, Hessian, Extensions...>(F_,lambda_vec_) {}; //! Constructor
 
-                 output_Data  Get_optimization_vectorial(void) //! Output constructor
+                output_Data  Get_optimization_vectorial(void) //! Output constructor
                 {
                         std::pair<std::vector<Real>, UInt> p = this->compute_vector();
                         this->output.GCV_evals  = p.first;

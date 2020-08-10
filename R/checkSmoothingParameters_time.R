@@ -87,7 +87,16 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
       stop("'BC_indices' required in BC;  is NULL.")
     if (is.null(BC$BC_values))
       stop("'BC_indices' required in BC;  is NULL.")
+  }  
+  else
+  {
+    if(DOF_evaluation = 'exact')
+    {
+      DOF_evaluation = 'stochastic'
+      warning("'exact' 'DOF_evaluation' can't be performed with non-NULL boundary conditions, using 'stochastic' evaluation")
+    }
   }
+  
   
   # Parabolic
   if (is.null(FLAG_MASS))

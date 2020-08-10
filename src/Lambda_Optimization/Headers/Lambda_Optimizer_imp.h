@@ -19,7 +19,7 @@
  \return full output_Data struct
 */
 template<typename InputCarrier>
-output_Data  GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal_pair, const timespec & time_count, const std::vector<Real> & GCV_v, const std::vector<Real> & lambda_v, int termination_)
+output_Data GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal_pair, const timespec & time_count, const std::vector<Real> & GCV_v, const std::vector<Real> & lambda_v, int termination_)
 {
         this->output.content            = "full_optimization";
         this->output.lambda_sol         = optimal_pair.first;
