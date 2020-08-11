@@ -80,7 +80,7 @@ class Carrier: public Extensions...
                 /*!
                  \param model_ pointer of the miexd object from which the carrier is derived, used for apply(s) purpose
                  \param opt_data_ stores the data related to the optimization procedure to be followed
-                 \parm locations_are_nodes_ boolean to check if locations are nodes [for simplified computations]
+                 \param locations_are_nodes_ boolean to check if locations are nodes [for simplified computations]
                  \param has_covariates_ boolean to check if the problem has regressors [for simplified computations]
                  \param n_obs_ number of locations and hence of observations
                  \param n_noes_number of nodes of the mesh
