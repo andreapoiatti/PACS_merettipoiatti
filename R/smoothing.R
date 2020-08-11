@@ -642,7 +642,14 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     if(!is.null(covariates))
     {
-      beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
+      if(optimization = 'batch' & DOF_evaluation = 'not_required' & loss_function = 'unused')
+      {
+        beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
+      }
+      else
+      {
+        beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=1)
+      }
     }
     else
     {
