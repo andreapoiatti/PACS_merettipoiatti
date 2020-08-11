@@ -28,7 +28,8 @@ class Vec_evaluation
                 /*!
                 Function to compute particular parameters related to the mimizing solution. It does nothing if not implemented. It is not pure virtual in order to be general and leave the possibility of instantiating the object without impementing that function
                 */
-                virtual void compute_specific_parameters(void) {}; //!<Computes particular parameters related to the mimizing solution. It does nothing if not implemented
+                virtual void compute_specific_parameters(void) {}; //!<Computes particular parameters related to the mimizing solution, for all the values evaluated. It does nothing if not implemented
+                virtual void compute_specific_parameters_best(void) {}; //!<Computes particular parameters related to the mimizing solution, only for minimizing solutions. It does nothing if not implemented
 
         public:
                 Function_Wrapper<Tuple, Tuple, Tuple, Hessian, Extensions...> & F; //!< F needed to be public, to be able to access to other methods of the class F from outside*/
@@ -45,8 +46,12 @@ class Vec_evaluation
                                 evaluations[i] = this->F.evaluate_f(this->lambda_vec[i]); //only scalar functions;
 
                                 this->compute_specific_parameters();
+                                if (i==0)
+                                     this->compute_specific_parameters_best();
+
                                 if (evaluations[i]<evaluations[index_min])
                                 {
+                                        this->compute_specific_parameters_best();
                                         index_min=i;
                                 }
                         }
@@ -73,14 +78,17 @@ template <typename Tuple, typename Hessian, typename ...Extensions>
 class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
 {
         protected:
-                output_Data output; //! Local copy of output data
 
-                void compute_specific_parameters(void) override //!< Computes specific parameters needed for GCV
+                void compute_specific_parameters(void) override
+                {
+                 this->F.set_output_partial();
+                }
+
+                void compute_specific_parameters_best(void) override //!< Computes specific parameters needed for GCV
                 {
                          Rprintf("Specific parameters for GCV computed\n");
 
-                         this->output= this->F.get_output_partial();
-
+                        this->F.set_output_partial_best();
                  }
 
         public:
@@ -90,13 +98,14 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
                 output_Data  Get_optimization_vectorial(void) //! Output constructor
                 {
                         std::pair<std::vector<Real>, UInt> p = this->compute_vector();
-                        this->output.GCV_evals  = p.first;
-                        this->output.lambda_sol = this->lambda_vec.at(p.second); //Safer use of at instead of []
-                        this->output.lambda_pos = 1+p.second; //in R numbering
-                        this->output.lambda_vec = this->lambda_vec;
-                        this->output.GCV_opt    = p.first.at(p.second);
+                        output_Data output=this->F.get_output_full();
+                        output.GCV_evals  = p.first;
+                        output.lambda_sol = this->lambda_vec.at(p.second); //Safer use of at instead of []
+                        output.lambda_pos = 1+p.second; //in R numbering
+                        output.lambda_vec = this->lambda_vec;
+                        output.GCV_opt    = p.first.at(p.second);
 
-                        return this->output;
+                        return output;
                 }
 };
 

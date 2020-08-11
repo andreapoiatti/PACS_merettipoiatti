@@ -144,5 +144,9 @@ NB caso newton esatto da bloccare se si usano le BC (non implementato)
 ?? CHiedere caso areale come è implementato per le BC...va fatto???
 
 
+NB CASO stocastico?? le bc vanno esse nella GCV????
+
+NB per installazione windows, fare installare prima Rtools. Non presente in R 4.0
+
 
 

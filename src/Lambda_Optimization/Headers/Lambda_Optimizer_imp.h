@@ -40,18 +40,34 @@ output_Data GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal
 
 //! Full output for dof computation
 /*! Set and return all output data, dof included.
+
+*/
+template<typename InputCarrier>
+void GCV_Family<InputCarrier, 1>::set_output_partial(void)
+{
+        (this->output.rmse).push_back(this->rmse);
+        (this->output.dof).push_back(this->dof);
+
+}
+
+template<typename InputCarrier>
+output_Data GCV_Family<InputCarrier, 1>::get_output_full(void)
+{
+        return this->output;
+}
+
+
+//! Full output for dof computation
+/*! Set and return all output data, dof included.
  \return output_Data struct containing predictions and dof
 */
 template<typename InputCarrier>
-output_Data GCV_Family<InputCarrier, 1>::get_output_partial(void)
+void GCV_Family<InputCarrier, 1>::set_output_partial_best(void)
 {
         this->output.content            = "full_dof_batch";
         this->output.z_hat              = MatrixXr(this->z_hat);
-        (this->output.rmse).push_back(this->rmse);
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
-        (this->output.dof).push_back(this->dof);
 
-        return this->output;
 }
 
 //! Partial output, for prediction evaluation without dof
@@ -59,6 +75,8 @@ output_Data GCV_Family<InputCarrier, 1>::get_output_partial(void)
  \param f_hat the system soultion from which to evaluate the predictions
  \return output_Data struct containing predictions
 */
+
+
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::combine_output_prediction(const VectorXr & f_hat, output_Data & outp, UInt cols)
 {
