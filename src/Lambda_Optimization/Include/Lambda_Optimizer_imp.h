@@ -388,8 +388,18 @@ void GCV_Exact<InputCarrier, 1>::LeftMultiplybyPsiAndTrace(Real & trace, MatrixX
 template<typename InputCarrier>
 void GCV_Exact<InputCarrier, 1>::compute_z_hat(Real lambda)
 {
-        UInt ret = AuxiliaryOptimizer::universal_z_hat_setter<InputCarrier>(this->z_hat, this->the_carrier, this->S_, this->adt, lambda);
+        UInt ret;
+        if (this->the_carrier.get_bc_indicesp()->size()==0)
+                ret = AuxiliaryOptimizer::universal_z_hat_setter<InputCarrier>(this->z_hat, this->the_carrier, this->S_, this->adt, lambda);
+        else {
 
+                const UInt nnodes    = this->the_carrier.get_n_nodes();
+                const VectorXr f_hat = VectorXr(this->the_carrier.apply(lambda)).head(nnodes);
+
+                // Compute the predicted values in the locations from the f_hat
+                this->compute_z_hat_from_f_hat(f_hat);
+
+               }
         // Debugging purpose print
         /* Rprintf("z_hat \n");
            for(UInt i = 0; i < this->s-1; i++)

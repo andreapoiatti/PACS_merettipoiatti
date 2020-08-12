@@ -16,43 +16,132 @@
 // non-null components on its diagonal and subsequently summing
 // them direcly to the second block.
 
-void AuxiliaryOptimizer::set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp)
+void AuxiliaryOptimizer::set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp,const std::vector<UInt> *bc_idxp)
 {
+        MatrixXr aux=(*psi_tp)*(*Ap).asDiagonal()*(*psip);
+        UInt nbc_indices = bc_idxp->size();
+        if (nbc_indices!=0)
+        {
+                std::cout<<"sono dentro"<<std::endl;
+                Real pen=10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        aux(id,id)=pen;
+                }
+
+        }
         // Avoid using Q
-        T += ((*psi_tp)*(*Ap).asDiagonal()*(*psip));
+        T += aux;
 }
 
-void AuxiliaryOptimizer::set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp, const std::vector<UInt> *bc_idxp)
 {
+
+        MatrixXr aux=(*psi_tp)*(*Ap).asDiagonal()*(*Qp)*(*psip);
+        UInt nbc_indices = bc_idxp->size();
+        if (nbc_indices!=0)
+        {
+                std::cout<<"sono dentro"<<std::endl;
+                Real pen=10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        std::cout<<id<<std::endl;
+                        aux(id,id)=pen;
+                }
+
+        }
         // Full model, no simplification allowed
-        T += ((*psi_tp)*(*Ap).asDiagonal()*(*Qp)*(*psip));
+        T += aux;
 }
 
-void AuxiliaryOptimizer::set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s)
+void AuxiliaryOptimizer::set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s, const std::vector<UInt> *bc_idxp)
 {
         // T = Psi^t*Psi == Indicator(k[i],k[i])
         for (UInt i = 0; i < s ; i++)
                 T.coeffRef((*kp)[i], (*kp)[i]) += 1;
+                UInt nbc_indices = bc_idxp->size();
+        if (nbc_indices!=0)
+        {
+                Real pen=10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+
+                        UInt id = (*bc_idxp)[i];
+                        if ( std::find(kp->cbegin(), kp->cend(), id) != kp->cend() )
+                                T(id,id)=T(id,id)+pen-1;
+                        else   T(id,id)+=pen;
+                }
+
+
+        }
+
+
+
 }
 
-void AuxiliaryOptimizer::set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s)
+void AuxiliaryOptimizer::set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s, const std::vector<UInt> *bc_idxp)
 {
         // T = Psi^t*Q*Psi == q_ij*Indicator(k[i],k[j])
         for (UInt i = 0; i < s ; i++)
                 for (int j = 0; j < s; j++)
                         T.coeffRef((*kp)[i], (*kp)[j]) += (*Qp).coeff(i, j);
+
+                        UInt nbc_indices = bc_idxp->size();
+                if (nbc_indices!=0)
+                {
+                        Real pen=10e20;
+                        for(UInt i=0; i<nbc_indices; i++)
+                        {
+
+                                UInt id = (*bc_idxp)[i];
+                                if ( std::find(kp->cbegin(), kp->cend(), id) != kp->cend() )
+                                        T(id,id)=T(id,id)+pen-(*Qp).coeff(id, id);
+                                else   T(id,id)+=pen;
+                        }
+
+
+                }
+
 }
 
-void AuxiliaryOptimizer::set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp)
+void AuxiliaryOptimizer::set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const std::vector<UInt> *bc_idxp)
 {
+
+
+        MatrixXr aux=(*psi_tp)*(*psip);
+        UInt nbc_indices = bc_idxp->size();
+        if (nbc_indices!=0)
+        {
+                Real pen=10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        aux(id,id)=pen;
+                }
+
+        }
         // Avoid using Q
-        T += ((*psi_tp)*(*psip));
+        T += aux;
 }
 
-void AuxiliaryOptimizer::set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp)
+void AuxiliaryOptimizer::set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp, const std::vector<UInt> *bc_idxp)
 {
+        MatrixXr aux=(*psi_tp)*(*Qp)*(*psip);
+        UInt nbc_indices = bc_idxp->size();
+        if (nbc_indices!=0)
+        {
+                Real pen=10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        aux(id,id)=pen;
+                }
+
+        }
         // Full model, no simplification allowed
-        T += ((*psi_tp)*(*Qp)*(*psip));
+        T += aux;
 }
 
 // THEORETICAL REMARK:
