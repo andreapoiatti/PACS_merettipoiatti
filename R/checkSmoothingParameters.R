@@ -1,5 +1,5 @@
 checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
-{stop_criterion_tol = 0.05
+{
   #################### Full Consistency Parameter Check #########################
   
   # Mesh type and methods
@@ -75,10 +75,10 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
       stop("'BC_indices' required in BC;  is NULL.")
     if (is.null(BC$BC_values))
       stop("'BC_indices' required in BC;  is NULL.")
-    if(DOF_evaluation == 'exact')
+    if(optimization == 'newton')
     {
-      DOF_evaluation = 'stochastic'
-      warning("'exact' 'DOF_evaluation' can't be performed with non-NULL boundary conditions, using 'stochastic' evaluation")
+      optimization = 'newton_fd'
+      warning("'newton' 'optimization' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
     }
   }
   
