@@ -198,7 +198,7 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   else if(stop_criterion_tol>=1 || stop_criterion_tol<=0)
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
   
-  if(optimization!='batch' & stop_criterion_tol!=0.05)
+  if(optimization=='batch' & stop_criterion_tol!=0.05)
     warning("'stop_criterion_tol' is not used in batch evaluation")
 
   return(space_varying)
