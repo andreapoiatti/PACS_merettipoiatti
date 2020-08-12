@@ -22,7 +22,6 @@ void AuxiliaryOptimizer::set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpM
         UInt nbc_indices = bc_idxp->size();
         if (nbc_indices!=0)
         {
-                std::cout<<"sono dentro"<<std::endl;
                 Real pen=10e20;
                 for(UInt i=0; i<nbc_indices; i++)
                 {
@@ -42,12 +41,10 @@ void AuxiliaryOptimizer::set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMa
         UInt nbc_indices = bc_idxp->size();
         if (nbc_indices!=0)
         {
-                std::cout<<"sono dentro"<<std::endl;
                 Real pen=10e20;
                 for(UInt i=0; i<nbc_indices; i++)
                 {
                         UInt id = (*bc_idxp)[i];
-                        std::cout<<id<<std::endl;
                         aux(id,id)=pen;
                 }
 
