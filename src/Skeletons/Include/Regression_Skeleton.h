@@ -176,7 +176,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 		Time_partial.start();
 		Rprintf("WARNING: start taking time\n");
 
-		std::pair<Real, UInt> lambda_couple = optim_p->compute(lambda, 5e-2, 40, ch, GCV_v_, lambda_v_); //era 1e-5
+		std::pair<Real, UInt> lambda_couple = optim_p->compute(lambda, optr->get_stopping_criterion_tol(), 40, ch, GCV_v_, lambda_v_);
 
 		Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();

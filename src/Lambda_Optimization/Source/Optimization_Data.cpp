@@ -7,18 +7,21 @@
  \param Rseed seed to be stored for reproducibility of stochastic gcv computation
  \param RDOF_MATRIX matrix of dof possibly passed by the user
  \param Rtune tuning parameter for gcv, used in GAM methods
+ \param Rstc stopping criterion for optimized methods
 */
-void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
+void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
 {
         // op
         UInt criterion = INTEGER(Roptim)[0]; // Decipher the Roptim sequence of numbers, first criterion
         if(criterion == 2)
         {
                 this->set_criterion("newton_fd");
+                this->set_stopping_criterion_tol(REAL(Rsct)[0]);
         }
         else if(criterion == 1)
         {
                 this->set_criterion("newton");
+                this->set_stopping_criterion_tol(REAL(Rsct)[0]);
         }
         else if(criterion == 0)
                 this->set_criterion("batch");
@@ -108,10 +111,11 @@ void OptimizationData::initialize_lambda(SEXP Rlambda, Real & init)
  \param Rseed seed to be stored for reproducibility of stochastic gcv computation
  \param RDOF_MATRIX matrix of dof possibly passed by the user
  \param Rtune tuning parameter for gcv, used in GAM methods
+ \param Rstc stopping criterion for optimized methods
 */
-OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
+OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
 {
-        builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune); // build common terms
+        builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct); // build common terms
 
         // Lambda
         if(this->criterion == "batch") // Rlambda is a vector
@@ -135,10 +139,11 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealization
  \param Rseed seed to be stored for reproducibility of stochastic gcv computation
  \param RDOF_MATRIX matrix of dof possibly passed by the user
  \param Rtune tuning parameter for gcv, used in GAM methods
+ \param Rstc stopping criterion for optimized methods
 */
-OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rflag_parabolic, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune)
+OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, SEXP Rflag_parabolic, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
 {
-        builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune); // build common terms
+        builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct); // build common terms
 
         // Lambda
         if(this->criterion == "batch") // Rlambda is a vector

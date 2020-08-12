@@ -1,4 +1,4 @@
-checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, observations, FEMbasis, time_mesh = NULL, covariates = NULL, PDE_parameters=NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL, search, bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
+checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, observations, FEMbasis, time_mesh = NULL, covariates = NULL, PDE_parameters=NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL, search, bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 {
   #################### Parameter Check #########################
   
@@ -191,6 +191,15 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   }
   if(is.null(DOF_matrix) & DOF_evaluation == 'not_required' & loss_function == 'GCV')
     stop("Either 'DOF_matrix' different from NULL or 'DOF_evaluation' different from 'not_required', otherwise 'loss_function' = 'GCV' can't be computed")
+  
+  # --> TOLERANCE
+  if(!is.numeric(stop_criterion_tol))
+    stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
+  else if(stop_criterion_tol>=1 || stop_criterion_tol<=0)
+    stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
+  
+  if(optimization!='batch' & stop_criterion_tol!=0.05)
+    warning("'stop_criterion_tol' is not used in batch evaluation")
 
   return(space_varying)
 }

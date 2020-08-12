@@ -283,7 +283,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      incidence_matrix = NULL, areal.data.avg = TRUE,
                      search = "tree", bary.locations = NULL,
                      family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
-                     optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1)
+                     optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 {
   # Mesh identification
   if(class(FEMbasis$mesh) == "mesh.2D")
@@ -390,7 +390,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
     search = search, bary.locations = bary.locations,
     optimization = optimization, DOF_evaluation = DOF_evaluation, loss_function = loss_function,
-    lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+    lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
 
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying == FALSE)
@@ -452,7 +452,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
     {
@@ -462,7 +462,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         covariates = covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
     {
@@ -472,7 +472,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         covariates=covariates, PDE_parameters = PDE_parameters, ndim = ndim, mydim = mydim, BC=BC,
         incidence_matrix=incidence_matrix, areal.data.avg = areal.data.avg,
         search=search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
     {
@@ -484,7 +484,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
        covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        search = search, bary.locations = bary.locations,
-       optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+       optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = FEMbasis$mesh$nnodes
     }else if(class(FEMbasis$mesh) == 'mesh.3D')
     {
@@ -494,7 +494,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         covariates = covariates, ndim = ndim, mydim = mydim, BC = BC,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = FEMbasis$mesh$nnodes
     }
   }else
@@ -513,7 +513,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         FAMILY=family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == FALSE)
     {
@@ -524,7 +524,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
           incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
           FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
           search = search, bary.locations = bary.locations,
-          optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+          optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
         numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying == TRUE)
     {
@@ -535,7 +535,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = nrow(FEMbasis$mesh$nodes)
     }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
     {
@@ -548,7 +548,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = FEMbasis$mesh$nnodes
     }else if(class(FEMbasis$mesh) == 'mesh.3D')
     {
@@ -559,7 +559,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
         incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
         FAMILY = family, mu0 = mu0, max.steps.FPIRLS = max.steps.FPIRLS, scale.param = scale.param, threshold.FPIRLS = threshold.FPIRLS,
         search = search, bary.locations = bary.locations,
-        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor)
+        optim = optim, lambda = lambda, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
       numnodes = FEMbasis$mesh$nnodes
     }
   }
