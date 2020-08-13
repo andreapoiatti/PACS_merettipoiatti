@@ -163,3 +163,6 @@ NB dire nel newton che alla fine è meglio usare quello perchè le derivate andr
 
 
 eventuale BC questione divisione per lambda
+
+
+NB eventuale mettere in no cran la versione con le cartelle wildcard + required GNU make-> con cran eventuale togliere wildcard e indicare le cpp esplicite
