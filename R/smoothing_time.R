@@ -55,7 +55,7 @@ NULL
 #' The following possibilities are allowed: "not_required", "exact" and "stochastic"
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
 #' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
-#' Default value \code{DOF_evaluation="not_required}
+#' Default value \code{DOF_evaluation="not_required"}
 #' @param loss_function This parameter is used to understand if some loss function has to be evaluated.
 #' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
 #' In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
