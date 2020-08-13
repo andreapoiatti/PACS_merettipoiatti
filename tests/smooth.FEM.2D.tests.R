@@ -68,6 +68,7 @@ output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newto
 ### Test 1.6: Newton_fd stochastic GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
 
+
 #### Test 2: c-shaped domain ####
 #            locations != nodes
 #            laplacian
@@ -113,36 +114,29 @@ data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1])
 lambda = 10^seq(-3,3,by=0.25)
 
 #### Test 2.1: Without GCV
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG)
-# image(output_CPP$fit.FEM)
+                       FEMbasis=FEMbasis, lambda=lambda)
 
 #### Test 2.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[,which.min(output_CPP$GCV)]
+output_CPP$solution$beta
 
 #### Test 2.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[,which.min(output_CPP$GCV)]
+output_CPP$solution$beta
 
 
 #### Test 3: square domain ####
@@ -188,39 +182,28 @@ lambda= 10^seq(-6,-3,by=0.25)
 PDE_parameters = list(K = matrix(c(1,0,0,4), nrow = 2), b = c(0,0), c = 0)
 
 #### Test 3.1: Without GCV
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(observations=data, 
                        FEMbasis=FEMbasis, 
-                       lambda=lambda[7], 
-                       PDE_parameters=PDE_parameters,
-                       GCV=GCVFLAG)
-image(output_CPP$fit.FEM)
+                       lambda=lambda, 
+                       PDE_parameters=PDE_parameters)
 
-#### Test 1.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
+#### Test 3.2: With exact GCV
 output_CPP<-smooth.FEM(observations=data, 
                        FEMbasis=FEMbasis, 
                        lambda=lambda,
                        PDE_parameters=PDE_parameters,
-                       GCV=GCVFLAG,
-                       GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-#### Test 1.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
+#### Test 3.3: With stochastic GCV
 output_CPP<-smooth.FEM(observations=data, 
                        FEMbasis=FEMbasis, 
                        lambda=lambda, 
                        PDE_parameters=PDE_parameters,
-                       GCV=GCVFLAG, 
-                       GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
-
-
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 
 #### Test 4: quasicircular domain ####
@@ -231,6 +214,7 @@ image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
 #            order FE = 1
 
 rm(list=ls())
+graphics.off()
 
 data(quasicircle2Dareal)
 mesh = quasicircle2Dareal$mesh
@@ -289,12 +273,10 @@ u_func<-function(points)
 PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
 
 #### Test 4.1: Forcing term = 0
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(observations=data, 
                        incidence_matrix = incidence_matrix,
                        FEMbasis=FEMbasis, 
                        lambda=lambda,
-                       GCV=GCVFLAG,
                        BC = BC, 
                        PDE_parameters = PDE_parameters)
 plot(output_CPP$fit.FEM)
@@ -308,6 +290,7 @@ u_func<-function(points)
     output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
   output
 }
+
 # plot the forcing funcion
 xgrid=seq(from=-3,to=3,by=0.1)
 ygrid=seq(from=-3,to=3,by=0.1)
@@ -320,13 +303,11 @@ output_CPP<-smooth.FEM(observations=data,
                        incidence_matrix = incidence_matrix,
                        FEMbasis=FEMbasis, 
                        lambda=lambda,
-                       GCV=GCVFLAG,
                        BC = BC, 
                        PDE_parameters = PDE_parameters)
 plot(output_CPP$fit.FEM)
 
 #### Test 4.3: BC != 0
-
 # Add a constat to the data to change true BC
 data = data + 5
 
@@ -337,7 +318,6 @@ output_CPP<-smooth.FEM(observations=data,
                        incidence_matrix = incidence_matrix, 
                        FEMbasis=FEMbasis, 
                        lambda=lambda,
-                       GCV=GCVFLAG,
                        BC = BC, 
                        PDE_parameters = PDE_parameters)
 plot(output_CPP$fit.FEM)

@@ -34,26 +34,20 @@ data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 lambda = 10^seq(-2,0.5,by=0.25)
 
 #### Test 1.1: Without GCV
-GCVFLAG=FALSE
-output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG)
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
 plot(output_CPP$fit.FEM)
 
 #### Test 1.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 #### Test 1.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 
 #### Test 2: sphere domain ####
@@ -104,36 +98,30 @@ projected_locations = projection.points.2.5D(mesh, locations)
 lambda = 10^seq(-4,-2,by=0.25)
 
 #### Test 2.1: Without GCV
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(observations=data, 
                        locations = projected_locations, 
                        covariates = cov1,
                        FEMbasis=FEMbasis, 
-                       lambda=lambda[1],
-                       GCV=GCVFLAG)
+                       lambda=lambda[1])
 plot(output_CPP$fit.FEM)
-output_CPP$beta
+output_CPP$solution$beta
 
 #### Test 2.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations,
                        covariates = cov1,
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[which.min(output_CPP$GCV)]
+output_CPP$solution$beta
 
 #### Test 2.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
                        covariates = cov1,
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[which.min(output_CPP$GCV)]
+output_CPP$solution$beta

@@ -46,31 +46,25 @@ data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1])
 lambda= 10^seq(-9,-7,by=1) # for simulation choose a finer grid 
 
 #### Test 1.1: Without GCV
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(locations = locations, 
-                       observations=data, FEMbasis=FEMbasis, lambda=lambda[1],
-                       GCV=GCVFLAG)
+                       observations=data, FEMbasis=FEMbasis, lambda=lambda[1])
 plot(output_CPP$fit.FEM)
 
 #### Test 1.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
 # it takes lot of time
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 #### Test 1.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
 lambda= 10^seq(-9,-5,by=0.5)
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 
 #### Test 2: c-shaped domain ####
@@ -107,35 +101,29 @@ data = DatiEsatti + rnorm(length(DatiEsatti), mean=0, sd=0.05*abs(ran[2]-ran[1])
 lambda= 10^seq(-3,3,by=0.25)
 
 #### Test 2.1: Without GCV
-GCVFLAG=FALSE
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
-                       FEMbasis=FEMbasis, lambda=lambda[1],
-                       GCV=GCVFLAG)
+                       FEMbasis=FEMbasis, lambda=lambda[1])
 # plot(output_CPP$fit.FEM)
 
 #### Test 2.2: With exact GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Exact'
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[,which.min(output_CPP$GCV)]
+output_CPP$solution$beta
 
 #### Test 2.3: With stochastic GCV
-GCVFLAG=TRUE
-GCVMETHODFLAG='Stochastic'
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       GCV=GCVFLAG, GCVmethod = GCVMETHODFLAG)
-plot(log10(lambda), output_CPP$GCV)
-plot(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$GCV)],FEMbasis))
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-output_CPP$beta[,which.min(output_CPP$GCV)]
+output_CPP$solution$beta
 
 
