@@ -11,8 +11,4 @@ SOURCES_SRC= $(wildcard ./*.cpp)     #current directory cpp files
 SOURCES_C_SRC= $(wildcard ./*.c)       #current directory c files
 
 # Obtain the object files
-OBJECTS=$(SOURCES:.cpp=.o)
-OBJECTS+=$(SOURCES_SUB:.cpp=.o)
-OBJECTS+=$(SOURCES_C:.c=.o)
-OBJECTS+=$(SOURCES_SRC:.cpp=.o)
-OBJECTS+=$(SOURCES_C_SRC:.c=.o)
+OBJECTS=$(SOURCES:.cpp=.o) $(SOURCES_SUB:.cpp=.o) $(SOURCES_C:.c=.o) $(SOURCES_SRC:.cpp=.o) $(SOURCES_C_SRC:.c=.o)
