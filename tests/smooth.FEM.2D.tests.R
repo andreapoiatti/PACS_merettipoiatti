@@ -52,12 +52,12 @@ image(output_CPP$fit.FEM)
 #### Test 1.2: Batch With exact GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='exact', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
-image(FEM(output_CPP$fit.FEM$coeff[,output_CPP$optimization$lambda_position],FEMbasis))
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 #### Test 1.3: Batch stochastic GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
-image(FEM(output_CPP$fit.FEM$coeff[,which.min(output_CPP$optimization$GCV_vector)],FEMbasis))
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 ### Test 1.4: Newton exact GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton', DOF_evaluation='exact', loss_function='GCV')

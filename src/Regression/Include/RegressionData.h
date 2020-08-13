@@ -14,9 +14,9 @@
 class  RegressionData
 {
 	protected:
+		std::vector<Point> locations_; 			//!< Design matrix pointer and dimensions.
 		VectorXr 	   observations_; 		//!< Observations data
 		bool 		   locations_by_nodes_; 	//!< If location is on the mesh nodes or not.
-		std::vector<Point> locations_; 			//!< Design matrix pointer and dimensions.
 		UInt 		   nRegions_; 			//!< For areal data.
 		bool 		   arealDataAvg_; 		//!< Is areal data averaged ?
 		VectorXr	   WeightsMatrix_; 		//!< Weighted regression.
@@ -33,6 +33,9 @@ class  RegressionData
 		MatrixXr barycenters_; 				//!< Barycenter information
 		bool locations_by_barycenter_;
 
+		// Other parameters
+		UInt order_;
+
 		// Boundary + Initial
 		std::vector<Real> bc_values_;
 		std::vector<UInt> bc_indices_;
@@ -46,8 +49,6 @@ class  RegressionData
 		// Areal data
 		MatrixXi incidenceMatrix_;
 
-		// Other parameters
-		UInt order_;
 
 		bool flag_mass_;				//!< Mass penalization, only for separable version (flag_parabolic_==FALSE)
 		bool flag_parabolic_;
