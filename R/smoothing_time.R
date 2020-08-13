@@ -10,14 +10,10 @@ NULL
 #' This parameter can be \code{NULL}. In this case, if also the incidence matrix is \code{NULL} the spatial coordinates are assumed to coincide with the nodes of the \code{mesh}.
 #' @param time_locations A vector containing the times of the corresponding observations in the vector \code{observations}. 
 #' This parameter can be \code{NULL}. In this case the temporal locations are assumed to coincide with the nodes of the \code{time_mesh}.
-#'
 #' @param observations A matrix of #locations x #time_locations with the observed data values over the spatio-temporal domain.
 #' The spatial locations of the observations can be specified with the \code{locations} argument.
-#'
 #' @param FEMbasis A \code{FEMbasis} object describing the Finite Element basis, as created by \code{\link{create.FEM.basis}}.
 #' @param time_mesh A vector specifying the time mesh.
-#' @param lambdaS A scalar or vector of smoothing parameters.
-#' @param lambdaT A scalar or vector of smoothing parameters.
 #' @param covariates A #observations-by-#covariates matrix where each row represents the covariates associated with the corresponding observed data value in \code{observations}.
 #' @param PDE_parameters A list specifying the parameters of the PDE in the regularizing term. Default is NULL, i.e. regularization is by means of the Laplacian (stationary, isotropic case).
 #'  If the PDE is elliptic it must contain: \code{K}, a 2-by-2 matrix of diffusion coefficients. This induces an anisotropic
@@ -34,31 +30,51 @@ NULL
 #' \code{u} induces a reaction effect. The function must support recycling for efficiency reasons, thus if the input parameter is a #point-by-2 matrix, the output should be
 #' a vector with length #points.
 #' For 2.5D and 3D only the Laplacian is available (\code{PDE_parameters=NULL})
-
-#' @param incidence_matrix A #regions-by-#triangles/tetrahedrons matrix where the element (i,j) equals 1 if the j-th triangle/tetrahedron is in the i-th region and 0 otherwise.
-#' This is only for areal data. In case of pointwise data, this parameter is set to \code{NULL}.
 #' @param BC A list with two vectors:
 #'  \code{BC_indices}, a vector with the indices in \code{nodes} of boundary nodes where a Dirichlet Boundary Condition should be applied;
 #'  \code{BC_values}, a vector with the values that the spatial field must take at the nodes indicated in \code{BC_indices}.
+#' @param incidence_matrix A #regions-by-#triangles/tetrahedrons matrix where the element (i,j) equals 1 if the j-th triangle/tetrahedron is in the i-th region and 0 otherwise.
+#' This is only for areal data. In case of pointwise data, this parameter is set to \code{NULL}.
+#' @param areal.data.avg Boolean. It involves the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.
 #' @param FLAG_MASS Boolean. This parameter is considerd only for separable problems i.e. when \code{FLAG_PARABOLIC==FALSE}. If \code{TRUE} the mass matrix in space and in time are used, if \code{FALSE} they are substituted with proper identity matrices.
 #' @param FLAG_PARABOLIC Boolean. If \code{TRUE} the parabolic problem problem is selected, if \code{FALSE} the separable one.
 #' @param IC Initial condition needed in case of parabolic problem i.e. when \code{FLAG_PARABOLIC==FALSE}.This parameter has to be set only for parabolic. If \code{FLAG_PARABOLIC=TRUE} and \code{IC=NULL} it is necessary to provide
 #' also data at the initial time. IC will be estimated from it
-#' @param GCV Boolean. If \code{TRUE} the following quantities are computed: the trace of the smoothing matrix, the estimated error standard deviation,  and
-#'        the Generalized Cross Validation criterion, for each combination of the smoothing parameters specified in \code{lambdaS} and \code{lambdaT}.
-#' @param GCVmethod either "Exact" or "Stochastic". If set to "Exact" perform an exact (but possibly slow) computation of the GCV index. If set to "Stochastic" approximate the GCV with a stochastic algorithm.
-#'        This parameter is considered only when \code{GCV=TRUE}
-#' @param nrealizations Number of random points used in the stochastic computation of the dofs
-#' @param DOF_matrix Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
-#' since the computation of the dof is the most expensive part of GCV.
 #' @param search a flag to decide the search algorithm type (tree or naive or walking search algorithm).
 #' @param bary.locations A list with three vectors:
 #'  \code{locations}, location points which are same as the given locations options. (checks whether both locations are the same);
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
+#' @param optimization This parameter is used to select the optimization method related to the penalization factor.
+#' The following methods are implemented: "batch", "newton", "newton_fd". 
+#' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
+#' The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
+#' They implement respectively a pure Newton method and a finite differences Newton method.
+#' Default value \code{optimization="batch"}
+#' @param DOF_evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
+#' The following possibilities are allowed: "not_required", "exact" and "stochastic"
+#' In the former case no degree of freedom is computed, while the other two methods enable computation.
+#' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
+#' Default value \code{DOF_evaluation="not_required}
+#' @param loss_function This parameter is used to understand if some loss function has to be evaluated.
+#' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
+#' In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
+#' Default value \code{loss_function="unused"}
+#' @param lambdaS A scalar or vector of smoothing parameters.
+#' @param lambdaT A scalar or vector of smoothing parameters.
+#' @param nrealizations This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+#' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
+#' Default value \code{nrealizations=100}.
+#' @param seed This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+#' It is a positive integer that represents user defined seed employed in stochastic GCV computation.
+#' Default value \code{seed=0}.
+#' @param DOF_matrix Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
+#' since the computation of the dof is the most expensive part of GCV.
 #' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
 #' It is advised to set it grather than 1 to avoid overfitting.
-#' @param areal.data.avg Boolean. It involve the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.
+#' @param stop_criterion_tol Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
+#' Used only if \code{optimization="newton"} or \code{optimization="newton_fd"}.
+#' Default value \code{stop_criteion_tol=0.05}.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}
@@ -71,12 +87,12 @@ NULL
 #' \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' @description Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
-#' @usage smooth.FEM.time(locations = NULL, time_locations=NULL, observations, FEMbasis, 
-#'                       time_mesh=NULL, lambdaS, lambdaT = 1, covariates = NULL, 
-#'                       PDE_parameters=NULL, incidence_matrix = NULL, BC = NULL, FLAG_MASS = FALSE, 
-#'                       FLAG_PARABOLIC = FALSE, IC = NULL, GCV = FALSE,
-#'                       GCVmethod = "Stochastic", nrealizations = 100, DOF_matrix=NULL, 
-#'                       search = "tree", bary.locations = NULL, GCV.inflation.factor= 1, areal.data.avg = TRUE)
+#' @usagesmooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
+#'                            covariates = NULL, PDE_parameters = NULL,  BC = NULL,
+#'                            incidence_matrix = NULL, areal.data.avg = TRUE,
+#'                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+#'                            search = "tree", bary.locations = NULL,
+#'                            optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 #' @export
 
 #' @references Sangalli, L.M., Ramsay, J.O. & Ramsay, T.O., 2013. Spatial spline regression models. Journal of the Royal Statistical Society. Series B: Statistical Methodology, 75(4), pp. 681-703.
