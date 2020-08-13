@@ -4,12 +4,12 @@
 \alias{smooth.FEM}
 \title{Spatial regression with differential regularization}
 \usage{
-smooth.FEM(locations = NULL, observations, FEMbasis, lambda,
-                  covariates = NULL, PDE_parameters=NULL, incidence_matrix = NULL,
-                  BC = NULL, GCV = FALSE, GCVmethod = "Stochastic", nrealizations = 100,
-                  DOF_matrix=NULL, search = "tree", bary.locations = NULL,
-                  family="gaussian", mu0 = NULL, scale.param=NULL, threshold.FPIRLS=0.0002020, 
-                  max.steps.FPIRLS=15, GCV.inflation.factor=1, areal.data.avg = TRUE)
+smooth.FEM(locations = NULL, observations, FEMbasis,
+ covariates = NULL, PDE_parameters = NULL, BC = NULL,
+ incidence_matrix = NULL, areal.data.avg = TRUE,
+ search = "tree", bary.locations = NULL,
+ family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
+ optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -25,8 +25,6 @@ If the observations are observed only on a subset of the mesh nodes, fill with \
 \code{observations} in correspondence of unobserved data.}
 
 \item{FEMbasis}{A \code{FEMbasis} object describing the Finite Element basis, as created by \code{\link{create.FEM.basis}}.}
-
-\item{lambda}{A scalar or vector of smoothing parameters.}
 
 \item{covariates}{A #observations-by-#covariates matrix where each row represents the covariates associated with
 the corresponding observed data value in \code{observations} and each column is a different covariate.}
@@ -61,26 +59,15 @@ a vector with length #points.}
 }
 For 2.5D and 3D, only the Laplacian is available (\code{PDE_parameters=NULL}).}
 
-\item{incidence_matrix}{A #regions-by-#triangles/tetrahedrons matrix where the element (i,j) equals 1 if the j-th
-triangle/tetrahedron is in the i-th region and 0 otherwise.
-This is needed only for areal data. In case of pointwise data, this parameter is set to \code{NULL}.}
-
 \item{BC}{A list with two vectors:
 \code{BC_indices}, a vector with the indices in \code{nodes} of boundary nodes where a Dirichlet Boundary Condition should be applied;
 \code{BC_values}, a vector with the values that the spatial field must take at the nodes indicated in \code{BC_indices}.}
 
-\item{GCV}{Boolean. If \code{TRUE} the following quantities are computed: the trace of the smoothing matrix, the estimated error standard deviation,  and
-the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.}
+\item{incidence_matrix}{A #regions-by-#triangles/tetrahedrons matrix where the element (i,j) equals 1 if the j-th
+triangle/tetrahedron is in the i-th region and 0 otherwise.
+This is needed only for areal data. In case of pointwise data, this parameter is set to \code{NULL}.}
 
-\item{GCVmethod}{This parameter is considered only when \code{GCV=TRUE}. It can be either "Exact" or "Stochastic".
-If set to "Exact" the algoritm performs an exact (but possibly slow) computation
-of the GCV index. If set to "Stochastic" the GCV is approximated by a stochastic algorithm.}
-
-\item{nrealizations}{This parameter is considered only when \code{GCV=TRUE} and \code{GCVmethod = "Stochastic"}.
-It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.}
-
-\item{DOF_matrix}{Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
-since the computation of the dof is the most expensive part of GCV.}
+\item{areal.data.avg}{Boolean. It involves the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.}
 
 \item{search}{a flag to decide the search algorithm type (tree or naive or walking search algorithm).}
 
@@ -105,26 +92,43 @@ Default value \code{threshold.FPIRLS = 0.0002020}.}
 \item{max.steps.FPIRLS}{This parameter is used to limit the maximum number of iteration.
 Default value \code{max.steps.FPIRLS=15}.}
 
+\item{optimization}{This parameter is used to select the optimization method related to the penalization factor.
+The following methods are implemented: "batch", "newton", "newton_fd". 
+The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
+The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
+They implement respectively a pure Newton method and a finite differences Newton method.
+Default value \code{optimization="batch"}}
+
+\item{DOF_evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
+The following possibilities are allowed: "not_required", "exact" and "stochastic"
+In the former case no degree of freedom is computed, while the other two methods enable computation.
+Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
+Default value \code{DOF_evaluation="not_required"}}
+
+\item{loss_function}{This parameter is used to understand if some loss function has to be evaluated.
+The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
+In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
+Default value \code{loss_function="unused"}}
+
+\item{lambda}{a vector of penalization factors to be provided for evaluation if \code{optimization="batch"}, an optional initialization otherwise}
+
+\item{nrealizations}{This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
+Default value \code{nrealizations=100}.}
+
+\item{seed}{This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+It is a positive integer that represents user defined seed employed in stochastic GCV computation.
+Default value \code{seed=0}.}
+
+\item{DOF_matrix}{Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambda} is available from precedent computation. This allows to save time
+since the computation of the dof is the most expensive part of GCV.}
+
 \item{GCV.inflation.factor}{Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
 It is advised to set it grather than 1 to avoid overfitting.}
 
-\item{areal.data.avg}{Boolean. It involves the computation of Areal Data. If \code{TRUE} the areal data are averaged, otherwise not.}
-}
-\value{
-A list with the following variables:
-\itemize{
-   \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-   \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-   \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
-the smoothing parameter is equal to \code{lambda[j]}.}
-   \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
-   \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
-   \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
-   \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
-   \item{\code{fn_hat}}{ A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contain the evaluaton of the spatial field in the location points.}
-   \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
-   \item {\code{variance.est}}{ A vector which return the variance estimates for the Generative Additive Models}
-}
+\item{stop_criterion_tol}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
+Used only if \code{optimization="newton"} or \code{optimization="newton_fd"}.
+Default value \code{stop_criteion_tol=0.05}.}
 }
 \description{
 This function implements a spatial regression model with differential regularization.
@@ -157,10 +161,10 @@ plot(solution$fit.FEM)
 covariate = covs.test(mesh$nodes[,1], mesh$nodes[,2])
 data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 
-solution = smooth.FEM(observations = data, covariates = covariate, 
-                      FEMbasis = FEMbasis, lambda = lambda)
+solution = smooth.FEM(observations = data, covariates = covariate, FEMbasis = FEMbasis, lambda = lambda)
+
 # beta estimate:
-solution$beta
+solution$solution$beta
 # non-parametric estimate:
 plot(solution$fit.FEM)
 
@@ -169,9 +173,8 @@ lambda = 10^(-2:2)
 solution = smooth.FEM(observations = data,
                             covariates = covariate,
                             FEMbasis = FEMbasis,
-                            lambda = lambda,
-                            GCV = TRUE)
-bestLambda = lambda[which.min(solution$GCV)]
+                            lambda = lambda, DOF_evaluation = 'stochastic', loss_function = 'GCV')
+bestLambda = solution$optimization$lambda_solution
 
 
 #### Smoothing with prior information about anysotropy/non-stationarity and boundary conditions ####
@@ -304,7 +307,7 @@ image(solution$fit.FEM)
 Journal of the Royal Statistical Society: Series B (Statistical Methodology), 75(4), 681-703.}
    \item{Azzimonti, L., Sangalli, L. M., Secchi, P., Domanin, M., Nobile, F. (2015). Blood flow velocity field estimation
 via spatial regression with PDE penalization. Journal of the American Statistical Association, 110(511), 1057-1071.}
-   \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization. 
+   \item{Matthieu Wilhelm & Laura M. Sangalli (2016). Generalized spatial regression with differential regularization.
  Journal of Statistical Computation and Simulation, 86:13, 2497-2518.}
 }
 }

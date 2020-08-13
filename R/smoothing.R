@@ -140,7 +140,7 @@
 #'  space-varying coefficients.
 #'  The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions
 #'  can be imposed at the domain boundaries.
-#' @usage smooth.FEM(llocations = NULL, observations, FEMbasis,
+#' @usage smooth.FEM(locations = NULL, observations, FEMbasis,
 #'  covariates = NULL, PDE_parameters = NULL, BC = NULL,
 #'  incidence_matrix = NULL, areal.data.avg = TRUE,
 #'  search = "tree", bary.locations = NULL,
