@@ -38,6 +38,6 @@ Description: An implementation of regression models with partial differential re
 License: CC BY-NC-SA 4.0
 Copyright: See the individual source files for copyrights information
 NeedsCompilation: yes
-SystemRequirements: C++11, Gnumake
+SystemRequirements: C++11, GNU make
 RoxygenNote: 7.1.1
 Encoding: UTF-8
