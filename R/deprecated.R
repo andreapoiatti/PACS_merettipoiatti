@@ -634,13 +634,30 @@ R_tricoefCal = function(mesh)
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#' \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-#' \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#' \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when 
-#' the smoothing parameter is equal to \code{lambda[j]}.}
-#' \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
-#' \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
-#' \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
+#' \itemize{
+#'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
+#'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
+#'          \item{\code{g}}{Matrix, second half of solution vector}
+#'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
+#'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
+#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          }
+#'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
+#'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
+#'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+#'          }
+#'    \item{\code{time}}{Duration of the entire optimization computation}
+#'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+#' }
 #' @description This function implements a spatial regression model with differential regularization; isotropic and stationary case. In particular, the regularizing term involves the Laplacian of the spatial field. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
 #' @rdname fdaPDE-deprecated
 #' @export
@@ -675,13 +692,30 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#'          \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-#'          \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the PDE misfit for the estimated spatial field.}
-#'          \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when 
-#'          the smoothing parameter is equal to \code{lambda[j]}.}
-#'          \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
-#'          \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
-#'          \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
+#' \itemize{
+#'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
+#'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
+#'          \item{\code{g}}{Matrix, second half of solution vector}
+#'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
+#'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
+#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          }
+#'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
+#'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
+#'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+#'          }
+#'    \item{\code{time}}{Duration of the entire optimization computation}
+#'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+#' }
 #' @description This function implements a spatial regression model with differential regularization; anysotropic case. In particular, the regularizing term involves a second order elliptic PDE, that models the space-variation of the phenomenon. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
 #' @rdname fdaPDE-deprecated
 #' @export
@@ -721,13 +755,30 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'        the Generalized Cross Validation criterion, for each value of the smoothing parameter specified in \code{lambda}.
 #' @param CPP_CODE Boolean. If \code{TRUE} the computation relies on the C++ implementation of the algorithm. This usually ensures a much faster computation.
 #' @return A list with the following variables:
-#'          \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
-#'          \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the PDE misfit for the estimated spatial field.}
-#'          \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when 
-#'          the smoothing parameter is equal to \code{lambda[j]}.}
-#'          \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
-#'          \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
-#'          \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
+#' \itemize{
+#'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
+#'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
+#'          \item{\code{g}}{Matrix, second half of solution vector}
+#'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
+#'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
+#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          }
+#'    \item{\code{optimization}}{A detailed list of optimization related data:
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
+#'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
+#'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+#'          }
+#'    \item{\code{time}}{Duration of the entire optimization computation}
+#'    \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+#' }
 #' @description This function implements a spatial regression model with differential regularization; anysotropic and non-stationary case. In particular, the regularizing term involves a second order elliptic PDE with space-varying coefficients, that models the space-variation of the phenomenon. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
 #' @rdname fdaPDE-deprecated
 #' @export
