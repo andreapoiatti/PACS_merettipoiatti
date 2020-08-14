@@ -164,8 +164,8 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, 
 //! Simple method to print the characteristics of an optimization method
 void OptimizationData::print_opt_data(void) const
 {
-        std::cout << "Optimization data:\n";
-        std::cout << "Criterion: " << criterion << "\n";
-        std::cout << "DOF valuation: " << DOF_evaluation << "\n";
-        std::cout << "Loss Function: " << loss_function << "\n";
+        Rprintf("\nOptimization data:\n");
+        Rprintf("Criterion: %s\n", criterion.c_str());
+        Rprintf("DOF valuation: %s\n", DOF_evaluation.c_str());
+        Rprintf("Loss Function: %s\n",loss_function.c_str());
 }

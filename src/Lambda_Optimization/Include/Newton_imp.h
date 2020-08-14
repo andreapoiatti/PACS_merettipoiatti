@@ -29,7 +29,7 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
                }
        }
 
-       if(x>lambda_min/5||x<=0)
+       if(x>lambda_min/4||x<=0)
        {
                x = lambda_min/8;
        }
@@ -61,9 +61,12 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
                Auxiliary<Tuple>::divide(fsx, fpx, x);
                x = x_old - x;
                //if (x<1e-8) x=(1./(2*n_iter))*flesso/50;
-               if (x<1e-8)
+               if (x<=0)
                {
-                       x = (1./(2*n_iter))*lambda_min/8;
+                       Rprintf("\nProbably monotone increasing GCV function\n");
+
+                       fx = this->F.evaluate_f(x);
+                       return {x_old, n_iter};
                }
 
                //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
@@ -123,7 +126,7 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
                 }
         }
 
-        if (x>lambda_min/5|| x<=0)
+        if (x>lambda_min/4|| x<=0)
         {
                 x = lambda_min/8;
         }
@@ -163,10 +166,13 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
                 Auxiliary<Real>::divide(fsx, fpx, x);
                 x = x_old - x;
 
-                if (x<1e-7) {x=(1./(2*n_iter))*lambda_min/8;
+                if (x<=0) { //too small value
 
-                if (x<4e-6)
-                        x=5e-6;}
+                        Rprintf("\nProbably monotone increasing GCV function\n");
+
+                        fx = this->F.evaluate_f(x_old);
+                        return {x_old, n_iter};
+                                }
                 //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
                 Rprintf("Forward:\n");
                 fxph = this->F.evaluate_f(x+h);
