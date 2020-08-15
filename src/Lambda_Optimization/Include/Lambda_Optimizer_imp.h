@@ -107,7 +107,7 @@ void GCV_Family<InputCarrier, 1>::compute_z_hat_from_f_hat(const VectorXr & f_ha
 
         if (this->the_carrier.has_W())
         {
-                this->z_hat = (*this->the_carrier.get_Hp())*(*this->the_carrier.get_zp()) + (*this->the_carrier.get_Qp())*(*this->the_carrier.get_psip())*f_hat;
+                this->z_hat = (*this->the_carrier.get_Hp())*(*this->the_carrier.get_zp()) + this->the_carrier.lmbQ((*this->the_carrier.get_psip())*f_hat);
         }
         else
         {

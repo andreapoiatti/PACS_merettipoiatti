@@ -54,18 +54,12 @@ struct AuxiliaryOptimizer
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
+                universal_T_setter(MatrixXr & T, InputCarrier & carrier);
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_T_setter(MatrixXr & T, const InputCarrier & carrier);
+                universal_T_setter(MatrixXr & T, InputCarrier & carrier);
 
-        static void set_T_nW_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const std::vector<UInt> *bc_idxp);
-        static void set_T_W_a(MatrixXr & T, const VectorXr * Ap, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp,  const std::vector<UInt> *bc_idxp);
-        static void set_T_ln_nW_ptw(MatrixXr & T, const std::vector<UInt> * kp, UInt s,  const std::vector<UInt> *bc_idxp);
-        static void set_T_ln_W_ptw(MatrixXr & T, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt s,  const std::vector<UInt> *bc_idxp);
-        static void set_T_lnn_nW_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp,  const std::vector<UInt> *bc_idxp);
-        static void set_T_lnn_W_ptw(MatrixXr & T, const SpMat * psip, const SpMat * psi_tp, const MatrixXr * Qp,  const std::vector<UInt> *bc_idxp);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
@@ -93,26 +87,27 @@ struct AuxiliaryOptimizer
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
+                universal_z_hat_setter(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
+                universal_z_hat_setter(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda);
 
         template<typename InputCarrier>
-        static void common_z_hat_part(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S);
+        static void common_z_hat_part(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S);
 
-        static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, const MatrixXr * Qp, const MatrixXr & S, const VectorXr * zp);
+        template<typename InputCarrier>
+        static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, InputCarrier & carrier, const MatrixXr & S, const VectorXr * zp);
         static void set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, const UInt nnodes);
+                universal_b_setter(MatrixXr & b, InputCarrier & carrier, const MatrixXr & US, const UInt nnodes);
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, const UInt nnodes);
+                universal_b_setter(MatrixXr & b, InputCarrier & carrier, const MatrixXr & US, const UInt nnodes);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
@@ -126,11 +121,11 @@ struct AuxiliaryOptimizer
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
-                universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda);
+                universal_second_updater(AuxiliaryData<InputCarrier> & adt, InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda);
 
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
-                universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda);
+                universal_second_updater(AuxiliaryData<InputCarrier> & adt, InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>

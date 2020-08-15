@@ -212,6 +212,11 @@ class Carrier: public Extensions...
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         return (this->model->apply())(0,0);
                 }
+
+                inline MatrixXr lmbQ(const MatrixXr & u)
+                {
+                        return this->model->LeftMultiplybyQ(u);
+                }
 };
 //----------------------------------------------------------------------------//
 

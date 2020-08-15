@@ -90,8 +90,7 @@ class MixedFERegressionBase
 	        void setPsi(const MeshHandler<ORDER, mydim, ndim> & mesh_);
 		//! A method computing the no-covariates version of the system matrix
 		void buildMatrixNoCov(const SpMat & NWblock, const SpMat & SWblock,  const SpMat & SEblock);
-		//! A function that given a vector u, performs Q*u efficiently
-		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
+
 		//! A function which adds Dirichlet boundary conditions before solving the system ( Remark: BC for areal data are not implemented!)
 		void addDirichletBC();
 		//! A function which adds Dirichlet boundary conditions only to MatrixnoCov( Remark: BC for areal data are not implemented!)
@@ -193,6 +192,9 @@ class MixedFERegressionBase
 		//! A method returning the number of nodes of the mesh
 		inline UInt getnnodes_(void) const {return this->N_;}
 		inline bool isSV(void) const {return this->isSpaceVarying;}
+
+		//! A function that given a vector u, performs Q*u efficiently
+		MatrixXr LeftMultiplybyQ(const MatrixXr & u);
 
 		// -- APPLY --
 		//! The function solving the system, used by the children classes. Saves the result in _solution

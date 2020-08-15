@@ -995,6 +995,7 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	   sizeLambdaS=1;
 	else
 	   sizeLambdaS = optimizationData_.get_size_S();
+	UInt sizeLambdaT = optimizationData_.get_size_T();
 
 	this->_solution.resize(sizeLambdaS,sizeLambdaT);
 	this->_dof.resize(sizeLambdaS,sizeLambdaT);

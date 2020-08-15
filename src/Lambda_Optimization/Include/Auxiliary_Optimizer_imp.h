@@ -24,34 +24,28 @@ template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
         AuxiliaryOptimizer::universal_R_setter(MatrixXr & R, const InputCarrier & carrier, AuxiliaryData<InputCarrier> & adt)
         {
-
                 SpMat  R1p_= *carrier.get_R1p();         // Get the value of matrix R1
 
                 const std::vector<UInt>& bc_indices = *(carrier.get_bc_indicesp());
 
                 UInt nbc_indices = carrier.get_bc_indicesp()->size();
 
-                if (nbc_indices!=0)
+                if(nbc_indices!=0)
                 {
-                  Real pen=10e20;
-                  UInt id;
-                  for( auto i=0; i<nbc_indices; i++)
-          	 {
-          			id=bc_indices[i];
-
-
-          			R1p_.coeffRef(id,id)=pen;
-
-          	 }
-
-
+                        Real pen=10e20;
+                        UInt id;
+                        for(UInt i=0; i<nbc_indices; i++)
+                        {
+                		id = bc_indices[i];
+                		R1p_.coeffRef(id,id) = pen;
+                         }
                 }
 
                 //Sparse_LU solver;
-                Eigen::LLT<MatrixXr> factorized_R0p(MatrixXr(*(carrier.get_R0p())));	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
+                Eigen::SparseLU<SpMat> factorized_R0p(*(carrier.get_R0p()));	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
                 //solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-                R = (R1p_).transpose()*factorized_R0p.solve(MatrixXr(R1p_));            // R == _R1^t*R0^{-1}*R1
-                adt.f_ = ((R1p_).transpose())*factorized_R0p.solve((MatrixXr(*carrier.get_up())));
+                R = (R1p_).transpose()*factorized_R0p.solve(R1p_);            // R == _R1^t*R0^{-1}*R1
+                adt.f_ = ((R1p_).transpose())*factorized_R0p.solve((*carrier.get_up()));
                 //std::cout<<"f"<<adt.f_<<std::endl;
 
                 return 0;
@@ -66,27 +60,22 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
                 UInt nbc_indices = carrier.get_bc_indicesp()->size();
 
-                if (nbc_indices!=0)
+                if(nbc_indices!=0)
                 {
-                  Real pen=10e20;
-                  UInt id;
-                  for( auto i=0; i<nbc_indices; i++)
-          	 {
-          			id=bc_indices[i];
-
-
-          			R1p_.coeffRef(id,id)=pen;
-
-          	 }
-
-
+                        Real pen=10e20;
+                        UInt id;
+                        for(UInt i=0; i<nbc_indices; i++)
+                        {
+                                id = bc_indices[i];
+                                R1p_.coeffRef(id,id) = pen;
+                        }
                 }
 
                 //Sparse_LU solver;	                                 // define a factorized empty sparse Cholesky solver  [[LDLT???]]
                 //solver.compute(*(carrier.get_R0p()));		 // apply it to R0 to simplify the inverse
-                Eigen::LLT<MatrixXr> factorized_R0p(MatrixXr(*(carrier.get_R0p())));
+                Eigen::SparseLU<SpMat>factorized_R0p(*(carrier.get_R0p()));
 
-                R = (R1p_).transpose()*factorized_R0p.solve(MatrixXr(R1p_));            // R == _R1^t*R0^{-1}*R1
+                R = (R1p_).transpose()*factorized_R0p.solve(R1p_);            // R == _R1^t*R0^{-1}*R1
 
                 return 0;
         }
@@ -94,61 +83,52 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, InputCarrier & carrier)
         {
                 const VectorXr * Ap = carrier.get_Ap();
                 const SpMat * psip = carrier.get_psip();
                 const SpMat * psi_tp = carrier.get_psi_tp();
+                const std::vector<UInt> * bc_idxp = carrier.get_bc_indicesp();
 
-                if (carrier.has_W())
+                MatrixXr aux = (*psi_tp)*(*Ap).asDiagonal()*carrier.lmbQ(*psip);
+                UInt nbc_indices = bc_idxp->size();
+                if (nbc_indices!=0)
                 {
-                        const MatrixXr * Qp = carrier.get_Qp();
-                        AuxiliaryOptimizer::set_T_W_a(T, Ap, psip, psi_tp, Qp, carrier.get_bc_indicesp());
+                        Real pen=10e20;
+                        for(UInt i=0; i<nbc_indices; i++)
+                        {
+                                UInt id = (*bc_idxp)[i];
+                                aux(id,id) = pen;
+                        }
                 }
-                else
-                {
-                        AuxiliaryOptimizer::set_T_nW_a(T, Ap, psip, psi_tp, carrier.get_bc_indicesp());
-                }
+                // Avoid using Q
+                T += aux;
 
                 return 0;
         }
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, const InputCarrier & carrier)
+        AuxiliaryOptimizer::universal_T_setter(MatrixXr & T, InputCarrier & carrier)
         {
-                if (carrier.loc_are_nodes())
-                {
-                        // Non-null entries are added directly to the structure
-                        const std::vector<UInt> * kp  = carrier.get_obs_indicesp();
-                        const UInt s = carrier.get_n_obs();
+                const SpMat * psip = carrier.get_psip();
+                const SpMat * psi_tp = carrier.get_psi_tp();
+                const std::vector<UInt> * bc_idxp = carrier.get_bc_indicesp();
 
-                        if (carrier.has_W())
+                MatrixXr aux=(*psi_tp)*carrier.lmbQ(*psip);
+                UInt nbc_indices = bc_idxp->size();
+                if (nbc_indices!=0)
+                {
+                        Real pen = 10e20;
+                        for(UInt i=0; i<nbc_indices; i++)
                         {
-                                const MatrixXr * Qp = carrier.get_Qp();
-                                AuxiliaryOptimizer::set_T_ln_W_ptw(T, kp, Qp, s, carrier.get_bc_indicesp());
-                        }
-                        else
-                        {
-                                AuxiliaryOptimizer::set_T_ln_nW_ptw(T, kp, s, carrier.get_bc_indicesp());
+                                UInt id = (*bc_idxp)[i];
+                                aux(id,id) = pen;
                         }
 
                 }
-                else
-                {
-                        const SpMat * psip = carrier.get_psip();
-                        const SpMat * psi_tp = carrier.get_psi_tp();
-
-                        if (carrier.has_W())
-                        {
-                                const MatrixXr * Qp = carrier.get_Qp();
-                                AuxiliaryOptimizer::set_T_lnn_W_ptw(T, psip, psi_tp, Qp, carrier.get_bc_indicesp());
-                        }
-                        else
-                        {
-                                AuxiliaryOptimizer::set_T_lnn_nW_ptw(T, psip, psi_tp, carrier.get_bc_indicesp());
-                        }
-                }
+                // Full model, no simplification allowed
+                T += aux;
 
                 return 0;
         }
@@ -251,7 +231,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
+        AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
         {
                 common_z_hat_part(z_hat, carrier, S);
 
@@ -260,8 +240,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
                 if (carrier.has_W())
                 {
-                        const MatrixXr * Qp = carrier.get_Qp();
-                        adt.r_ = lambda*(*Qp)*adt.r_;
+                        adt.r_ = lambda*carrier.lmbQ(adt.r_);
 
                 }
                 else
@@ -279,7 +258,7 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
+        AuxiliaryOptimizer::universal_z_hat_setter(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S, AuxiliaryData<InputCarrier> & adt, const Real lambda)
         {
                 common_z_hat_part(z_hat, carrier, S);
 
@@ -287,14 +266,13 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
         }
 
 template<typename InputCarrier>
-void AuxiliaryOptimizer::common_z_hat_part(VectorXr & z_hat, const InputCarrier & carrier, const MatrixXr & S)
+void AuxiliaryOptimizer::common_z_hat_part(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S)
 {
         const VectorXr * zp = carrier.get_zp();
         if(carrier.has_W())
         {
                 const MatrixXr * Hp = carrier.get_Hp();
-                const MatrixXr * Qp = carrier.get_Qp();
-                AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, Qp, S, zp);
+                AuxiliaryOptimizer::set_z_hat_W(z_hat, Hp, carrier, S, zp);
         }
         else
         {
@@ -303,12 +281,18 @@ void AuxiliaryOptimizer::common_z_hat_part(VectorXr & z_hat, const InputCarrier 
 }
 
 template<typename InputCarrier>
+void AuxiliaryOptimizer::set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, InputCarrier & carrier, const MatrixXr & S, const VectorXr * zp)
+{
+        z_hat = ((*Hp)+carrier.lmbQ(S))*(*zp);
+}
+
+template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, const UInt nnodes)
+        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, InputCarrier & carrier, const MatrixXr & US, const UInt nnodes)
         {
                 if (carrier.has_W())
                 {
-                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(carrier.get_Ap()->asDiagonal())*(*carrier.get_Qp())*US;
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(carrier.get_Ap()->asDiagonal())*carrier.lmbQ(US);
                 }
                 else
                 {
@@ -319,11 +303,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, Inpu
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, const InputCarrier & carrier, const MatrixXr & US, const UInt nnodes)
+        AuxiliaryOptimizer::universal_b_setter(MatrixXr & b, InputCarrier & carrier, const MatrixXr & US, const UInt nnodes)
         {
                 if (carrier.has_W())
                 {
-                        b.topRows(nnodes) = (*carrier.get_psi_tp())*(*carrier.get_Qp())*US;
+                        b.topRows(nnodes) = (*carrier.get_psi_tp())*carrier.lmbQ(US);
                 }
                 else
                 {
@@ -364,11 +348,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda)
+        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda)
         {
                 const VectorXr * zp = carrier.get_zp();
                 if (carrier.has_W())
-                        adt.b_ = adt.p_.transpose()*(*carrier.get_Qp())*adt.p_;
+                        adt.b_ = adt.p_.transpose()*VectorXr(carrier.lmbQ(adt.p_));
                 else
                         adt.b_ = adt.p_.squaredNorm();
 
@@ -382,11 +366,11 @@ typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, Inp
 
 template<typename InputCarrier>
 typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,f_type>::value, UInt>::type
-        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, const InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda)
+        AuxiliaryOptimizer::universal_second_updater(AuxiliaryData<InputCarrier> & adt, InputCarrier & carrier, const MatrixXr & ddS, const VectorXr & eps, const Real lambda)
         {
                 const VectorXr * zp = carrier.get_zp();
                 if (carrier.has_W())
-                        adt.b_ = adt.t_.transpose()*(*carrier.get_Qp())*adt.t_;
+                        adt.b_ = adt.t_.transpose()*VectorXr(carrier.lmbQ(adt.t_));
                 else
                         adt.b_ = adt.t_.squaredNorm();
                 adt.c_ = -eps.transpose()*ddS*(*zp);
