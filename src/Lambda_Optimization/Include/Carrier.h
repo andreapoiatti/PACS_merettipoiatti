@@ -5,9 +5,9 @@
 #include <memory>
 #include <type_traits>
 #include "../../FdaPDE.h"
-#include "../../Regression/Include/MixedFERegression.h"
+#include "../../Regression/Include/Mixed_FE_Regression.h"
 #include "Optimization_Data.h"
-#include "../../Regression/Include/RegressionData.h"
+#include "../../Regression/Include/Regression_Data.h"
 
 // Declaration of classes that will be used as Extensions for Carrier
 class Areal;

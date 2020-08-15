@@ -5,17 +5,15 @@
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Mesh_Objects.h"
 #include "../../Mesh/Include/Mesh.h"
-#include "../../Regression/Include/MixedFERegression.h"
 #include "../../FE_Assemblers_Solvers/Include/Matrix_Assembler.h"
-#include "../../Regression/Include/RegressionData.h"
 #include "../../Global_Utilities/Include/Solver_Definitions.h"
 
 //Density Estimation
-#include "../../Density_Estimation/Include/DataProblem.h"
-#include "../../Density_Estimation/Include/FunctionalProblem.h"
-#include "../../Density_Estimation/Include/OptimizationAlgorithm.h"
-#include "../../Density_Estimation/Include/OptimizationAlgorithm_factory.h"
-#include "../../Density_Estimation/Include/FEDensityEstimation.h"
+#include "../../Density_Estimation/Include/Data_Problem.h"
+#include "../../Density_Estimation/Include/Functional_Problem.h"
+#include "../../Density_Estimation/Include/Optimization_Algorithm.h"
+#include "../../Density_Estimation/Include/Optimization_Algorithm_Factory.h"
+#include "../../Density_Estimation/Include/FE_Density_Estimation.h"
 
 template<typename Integrator, typename Integrator_noPoly, UInt ORDER, UInt mydim, UInt ndim>
 SEXP DE_init_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP RheatIter, SEXP Rlambda, SEXP Rnfolds, SEXP Rnsim, SEXP RstepProposals,

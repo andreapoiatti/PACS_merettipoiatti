@@ -1,5 +1,5 @@
-#ifndef __OPTIMIZATIONDATA_HPP__
-#define __OPTIMIZATIONDATA_HPP__
+#ifndef __OPTIMIZATION_DATA_H__
+#define __OPTIMIZATION_DATA_H__
 
 #include "../../FdaPDE.h"
 #include <string>

@@ -7,7 +7,7 @@
 #include <utility>
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Mesh.h"
-#include "../../Regression/Include/RegressionData.h"
+#include "../../Regression/Include/Regression_Data.h"
 
 //Output struct to be used to return values in R
 struct output_Data

@@ -1,6 +1,6 @@
 
-#ifndef BOUNDING_BOX_H_
-#define BOUNDING_BOX_H_
+#ifndef __BOUNDING_BOX_H__
+#define __BOUNDING_BOX_H__
 
 
 #include "../../FdaPDE.h"

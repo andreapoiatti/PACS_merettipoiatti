@@ -2,8 +2,8 @@
 #define __GAM_SKELETON_H__
 
 #include "../../FdaPDE.h"
-#include "../../Regression/GAM_Include/FPIRLS.h"
-#include "../../Regression/GAM_Include/FPIRLSfactory.h"
+#include "../../Regression/Include/FPIRLS.h"
+#include "../../Regression/Include/FPIRLS_Factory.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 

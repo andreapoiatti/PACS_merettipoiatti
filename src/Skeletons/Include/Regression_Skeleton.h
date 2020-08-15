@@ -3,7 +3,7 @@
 
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Mesh.h"
-#include "../../Regression/Include/MixedFERegression.h"
+#include "../../Regression/Include/Mixed_FE_Regression.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "../../Lambda_Optimization/Include/Carrier.h"
 #include "../../Lambda_Optimization/Include/Lambda_Optimizer.h"

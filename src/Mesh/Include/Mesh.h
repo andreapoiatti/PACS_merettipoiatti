@@ -6,9 +6,9 @@
 #include "Bounding_Box.h"
 #include "Tree_Header.h"
 #include "Domain.h"
-#include "Treenode.h"
+#include "Tree_Node.h"
 #include "Exception_Handling.h"
-#include "Adtree.h"
+#include "AD_Tree.h"
 #include <math.h>
 
 using std::vector;

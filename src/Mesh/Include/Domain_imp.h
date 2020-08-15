@@ -1,5 +1,5 @@
-#ifndef __DOMAIN__IMP_H__
-#define __DOMAIN__IMP_H__
+#ifndef __DOMAIN_IMP_H__
+#define __DOMAIN_IMP_H__
 
 template<class T>
 Real Domain<T>::tolerance_ = 1.e-3;

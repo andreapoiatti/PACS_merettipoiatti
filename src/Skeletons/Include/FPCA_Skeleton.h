@@ -3,8 +3,8 @@
 
 #include "../../FdaPDE.h"
 #include "../../Mesh/Include/Mesh.h"
-#include "../../FPCA/Include/MixedFEFPCA.h"
-#include "../../FPCA/Include/MixedFEFPCAfactory.h"
+#include "../../FPCA/Include/Mixed_FE_FPCA.h"
+#include "../../FPCA/Include/Mixed_FE_FPCA_Factory.h"
 
 template<typename Integrator,UInt ORDER, UInt mydim, UInt ndim>
 SEXP FPCA_skeleton(FPCAData &fPCAData, SEXP Rmesh, std::string validation)

@@ -1,5 +1,5 @@
-#ifndef _PREPROCESS_FACTORY_HPP_
-#define _PREPROCESS_FACTORY_HPP_
+#ifndef __PREPROCESS_FACTORY_H__
+#define __PREPROCESS_FACTORY_H__
 
 #include <memory>
 #include "../../Global_Utilities/Include/Make_Unique.h"

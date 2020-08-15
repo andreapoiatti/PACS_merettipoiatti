@@ -1,5 +1,5 @@
-#ifndef __GENERICPROXY_H__
-#define __GENERICPROXY_H__
+#ifndef __GENERIC_PROXY_H__
+#define __GENERIC_PROXY_H__
 #include <string>
 #include <memory>
 #include <iostream>

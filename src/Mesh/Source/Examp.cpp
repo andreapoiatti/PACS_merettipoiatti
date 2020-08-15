@@ -2,9 +2,9 @@
 #include "../Include/Mesh_Objects.h"
 #include "../Include/Bounding_Box.h"
 #include "../Include/Domain.h"
-#include "../Include/Treenode.h"
+#include "../Include/Tree_Node.h"
 #include "../Include/Tree_Header.h"
-#include "../Include/Adtree.h"
+#include "../Include/AD_Tree.h"
 #include "../Include/Mesh.h"
 
 extern "C"{

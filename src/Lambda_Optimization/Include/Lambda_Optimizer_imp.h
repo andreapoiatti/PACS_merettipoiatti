@@ -1,5 +1,5 @@
-#ifndef __LAMBDA_OPTIMIZER_IMP__
-#define __LAMBDA_OPTIMIZER_IMP__
+#ifndef __LAMBDA_OPTIMIZER_IMP_H__
+#define __LAMBDA_OPTIMIZER_IMP_H__
 
 // HEADERS
 #include <cstdlib>

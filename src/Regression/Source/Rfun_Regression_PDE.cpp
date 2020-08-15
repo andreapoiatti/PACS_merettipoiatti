@@ -3,7 +3,7 @@
 #include "../../Skeletons/Include/Regression_Skeleton.h"
 #include "../../Skeletons/Include/Regression_Skeleton_Time.h"
 #include "../../Skeletons/Include/GAM_Skeleton.h"
-#include "../Include/RegressionData.h"
+#include "../Include/Regression_Data.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 #include "../../Lambda_Optimization/Include/Optimization_Data.h"
 

@@ -1,6 +1,6 @@
 #include "../../FdaPDE.h"
 #include "../../Skeletons/Include/FPCA_Skeleton.h"
-#include "../Include/FPCAData.h"
+#include "../Include/FPCA_Data.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 
 extern "C" {

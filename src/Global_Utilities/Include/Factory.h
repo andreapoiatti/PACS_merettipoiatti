@@ -1,5 +1,5 @@
-#ifndef __H_FACTORY_H__
-#define __H_FACTORY_H__
+#ifndef __FACTORY_H__
+#define __FACTORY_H__
 #include <map>
 #include <vector>
 #include <memory>

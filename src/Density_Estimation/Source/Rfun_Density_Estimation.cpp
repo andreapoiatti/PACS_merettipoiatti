@@ -1,23 +1,19 @@
 #include "../../FdaPDE.h"
 #include "../../Skeletons/Include/DE_Skeleton.h"
 #include "../../Skeletons/Include/DE_Initialization_Skeleton.h"
-#include "../../Regression/Include/RegressionData.h"
 #include "../../Mesh/Include/Mesh_Objects.h"
 #include "../../FE_Assemblers_Solvers/Include/Integration.h"
 #include "../../Mesh/Include/Mesh.h"
 #include "../../FE_Assemblers_Solvers/Include/Finite_Element.h"
 #include "../../FE_Assemblers_Solvers/Include/Matrix_Assembler.h"
 #include "../../Global_Utilities/Include/Solver_Definitions.h"
-//#include <chrono>
-
-#include "../../Regression/Include/MixedFERegression.h"
 
 //Density Estimation
-#include "../Include/DataProblem.h"
-#include "../Include/FunctionalProblem.h"
-#include "../Include/OptimizationAlgorithm.h"
-#include "../Include/OptimizationAlgorithm_factory.h"
-#include "../Include/FEDensityEstimation.h"
+#include "../Include/Data_Problem.h"
+#include "../Include/Functional_Problem.h"
+#include "../Include/Optimization_Algorithm.h"
+#include "../Include/Optimization_Algorithm_Factory.h"
+#include "../Include/FE_Density_Estimation.h"
 
 
 extern "C" {
