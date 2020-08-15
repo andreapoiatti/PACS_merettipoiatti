@@ -577,7 +577,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 	const VectorXr * P = regressionData_.getWeightsMatrix(); // Matrix of weights for GAM
 
 	// First phase: Factorization of matrixNoCov
-	matrixNoCovdec_->compute(matrixNoCov_);
+	matrixNoCovdec_.compute(matrixNoCov_);
 
 	if(regressionData_.getCovariates()->rows() != 0)
 	{ // Needed only if there are covariates, else we can stop before
@@ -614,7 +614,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 		 	U_.topRows(nnodes) = psi_.transpose()*A_.asDiagonal()*U_.topRows(nnodes);
     		}
 
-		MatrixXr D = V_*matrixNoCovdec_->solve(U_);
+		MatrixXr D = V_*matrixNoCovdec_.solve(U_);
 
 		// G = C + D
 		MatrixXr G;
@@ -626,7 +626,7 @@ void MixedFERegressionBase<InputHandler>::system_factorize()
 		{
 			G = -W.transpose()*P->asDiagonal()*W + D;
 		}
-		Gdec_->compute(G);
+		Gdec_.compute(G);
 	}
 }
 
@@ -635,13 +635,13 @@ template<typename Derived>
 MatrixXr MixedFERegressionBase<InputHandler>::system_solve(const Eigen::MatrixBase<Derived> & b)
 {
 	// Resolution of the system matrixNoCov * x1 = b
-	MatrixXr x1 = matrixNoCovdec_->solve(b);
+	MatrixXr x1 = matrixNoCovdec_.solve(b);
 	if(regressionData_.getCovariates()->rows() != 0)
 	{
 		// Resolution of G * x2 = V * x1
-		MatrixXr x2 = Gdec_->solve(V_*x1);
+		MatrixXr x2 = Gdec_.solve(V_*x1);
 		// Resolution of the system matrixNoCov * x3 = U * x2
-		x1 -= matrixNoCovdec_->solve(U_*x2);
+		x1 -= matrixNoCovdec_.solve(U_*x2);
 	}
 	return x1;
 }
@@ -990,8 +990,11 @@ MatrixXv  MixedFERegressionBase<InputHandler>::apply(void)
 	UInt nnodes = N_*M_; // Define nuber of nodes
 	const VectorXr * obsp = regressionData_.getObservations(); // Get observations
 
-	UInt sizeLambdaS = optimizationData_.get_size_S();
-	UInt sizeLambdaT = optimizationData_.get_size_T();
+	UInt sizeLambdaS;
+	if (!regressionData_.isSpaceTime() && !isGAMData)
+	   sizeLambdaS=1;
+	else
+	   sizeLambdaS = optimizationData_.get_size_S();
 
 	this->_solution.resize(sizeLambdaS,sizeLambdaT);
 	this->_dof.resize(sizeLambdaS,sizeLambdaT);

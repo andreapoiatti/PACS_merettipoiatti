@@ -59,9 +59,9 @@ class MixedFERegressionBase
 		VectorXi 	element_ids_; 	//!< elements id information
 
 		// Factorizations
-		std::unique_ptr<Eigen::SparseLU<SpMat>> matrixNoCovdec_{new Eigen::SparseLU<SpMat>}; //!< Stores the factorization of matrixNoCov_
+		Eigen::SparseLU<SpMat> matrixNoCovdec_; //!< Stores the factorization of matrixNoCov_
 		//std::unique_ptr<Eigen::PartialPivLU<MatrixXr>>  matrixNoCovdec_{new Eigen::PartialPivLU<MatrixXr>}; //!< Stores the factorization of matrixNoCov_
-		std::unique_ptr<Eigen::PartialPivLU<MatrixXr>> Gdec_{new Eigen::PartialPivLU<MatrixXr>};	//!< Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
+		Eigen::PartialPivLU<MatrixXr> Gdec_;	//!< Stores factorization of G =  C + [V * matrixNoCov^-1 * U]
 
 		Eigen::PartialPivLU<MatrixXr> WTW_;	//!< Stores the factorization of W^T * W
 		bool isWTWfactorized_ = false;
