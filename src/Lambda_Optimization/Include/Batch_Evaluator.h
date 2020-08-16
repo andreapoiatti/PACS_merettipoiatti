@@ -20,9 +20,9 @@ template <typename Tuple, typename Hessian, typename... Extensions>
 class Vec_evaluation
 {
         protected:
-                std::vector<Real> lambda_vec;    //!< Vector of lambda to be evaluated
+                std::vector<Tuple> lambda_vec;    //!< Vector of lambda to be evaluated
 
-                Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
+                Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Tuple> & lambda_vec_):
                         F(F_), lambda_vec(lambda_vec_) {//Debugging purpose//Rprintf("Vector evaluator built\n");
                         }; //!< Constructor
 
@@ -33,7 +33,7 @@ class Vec_evaluation
                 virtual void compute_specific_parameters_best(void) {}; //!<Computes particular parameters related to the mimizing solution, only for minimizing solutions. It does nothing if not implemented
 
         public:
-                Function_Wrapper<Tuple, Tuple, Tuple, Hessian, Extensions...> & F; //!< F needed to be public, to be able to access to other methods of the class F from outside*/
+                Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F; //!< F needed to be public, to be able to access to other methods of the class F from outside*/
 
                 std::pair<std::vector<Real>, UInt> compute_vector(void) //!< Function which returns the vector of evaluations of GCV and the index of the corresponding minimum
                 {
@@ -75,8 +75,8 @@ class Vec_evaluation
  * \tparam       Extensions    input class if the computations need members already stored in a class
  */
 //!<Class inheriting form class Vec_evaluation, the function used is GCV evaluation
-template <typename Tuple, typename Hessian, typename ...Extensions>
-class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
+template <typename ...Extensions>
+class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
 {
         protected:
 
@@ -94,8 +94,8 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
                  }
 
         public:
-                Eval_GCV(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
-                        Vec_evaluation<Tuple, Hessian, Extensions...>(F_,lambda_vec_) {}; //! Constructor
+                Eval_GCV(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
+                        Vec_evaluation<Real, Real, Extensions...>(F_,lambda_vec_) {}; //! Constructor
 
                 output_Data  Get_optimization_vectorial(void) //! Output constructor
                 {

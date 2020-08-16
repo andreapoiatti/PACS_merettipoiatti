@@ -106,7 +106,8 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
  class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>
  {
          public:
-                 Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {Rprintf("Newton method built\n");}; //!Constructor
+                 Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Real, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {//Debugging purpose//Rprintf("Newton method built\n");
+         }; //!Constructor
                  /*! F cannot be const, it must be modified*/
 
                  std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override; //!< Apply Newton's method

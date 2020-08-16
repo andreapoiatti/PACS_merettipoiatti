@@ -140,7 +140,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 		//Rprintf("WARNING: start taking time\n");
 		//this will be used when batch will be correctly implemented, also for return elements
 		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
-		Eval_GCV<Real, Real, EvaluationType> eval(Fun, optr->get_lambda_S());  //debugging dummy trial: working
+		Eval_GCV<EvaluationType> eval(Fun, optr->get_lambda_S());  //debugging dummy trial: working
 		output_Data output = eval.Get_optimization_vectorial();
 
 		//Rprintf("WARNING: partial time after the optimization method\n");
