@@ -10,7 +10,8 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
        UInt  n_iter = 0;
        Real  error  = std::numeric_limits<Real>::infinity();
 
-       Rprintf("\n Starting Initializing lambda phase\n"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
+        //Debugging purpose
+       //Rprintf("\n Starting Initializing lambda phase\n"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
 
        Real valmin, valcur, lambda_min;
        UInt Nm = 6;
@@ -56,7 +57,7 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
 
                ++n_iter;
 
-               Rprintf("\nStep number %d  of EXACT-NEWTON\n", n_iter);
+
                x_old = x;
                Auxiliary<Tuple>::divide(fsx, fpx, x);
                x = x_old - x;
@@ -75,7 +76,8 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
 
 
                error = Auxiliary<Tuple>::residual(fpx);
-               Rprintf("Residual: %f\n", error);
+
+               Rprintf("\nStep number %d  of EXACT-NEWTON: residual = %f\n", n_iter, error);
 
                if(error<tolerance)
                {
@@ -107,7 +109,8 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
         Real error  = std::numeric_limits<Real>::infinity();
         Real h      = 4e-6;
 
-        Rprintf("\n Starting Initializing lambda phase"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
+        // Debugging purpose
+        //Rprintf("\n Starting Initializing lambda phase"); /*! Start from 6 lambda and find the minimum value of GCV to start from it the newton's method*/
 
         Real valmin, valcur, lambda_min;
         UInt Nm = 6;
@@ -133,18 +136,18 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
         Rprintf("\n Starting Newton's iterations: starting point lambda=%f\n",x);
 
         //only the first time applied here
-        Rprintf("Forward: \n");
+        //Rprintf("Forward: \n");
         Real fxph = this->F.evaluate_f(x+h);
-        Rprintf("Backward: \n");
+        //Rprintf("Backward: \n");
         Real fxmh = this->F.evaluate_f(x-h);
-        Rprintf("Center: \n");
+        //Rprintf("Center: \n");
         Real fx  = this->F.evaluate_f(x);
 
         Real fpx = (fxph-fxmh)/(2*h);
-        Rprintf("fp(x): %f\n", fpx);
+        //Rprintf("fp(x): %f\n", fpx);
 
         Real fsx = (fxph+fxmh-(2*fx))/(h*h);
-        Rprintf("fs(x): %f\n", fsx);
+        //Rprintf("fs(x): %f\n", fsx);
 
         while(n_iter < max_iter)
         {
@@ -161,7 +164,7 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
 
                 ++n_iter;
 
-                Rprintf("\nStep number %d  of FD-NEWTON\n", n_iter);
+
                 x_old = x;
                 Auxiliary<Real>::divide(fsx, fpx, x);
                 x = x_old - x;
@@ -174,9 +177,9 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
                         return {x_old, n_iter};
                                 }
                 //put here the updates in order to compute error on the correct derivative and to have z_hat updated for the solution
-                Rprintf("Forward:\n");
+                //Rprintf("Forward:\n");
                 fxph = this->F.evaluate_f(x+h);
-                Rprintf("Backward: \n");
+                //Rprintf("Backward: \n");
                 fxmh = this->F.evaluate_f(x-h);
 
 
@@ -184,7 +187,9 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
 
 
                 error = Auxiliary<Real>::residual(fpx);
-                Rprintf("residual: %f\n", error);
+
+                Rprintf("\nStep number %d  of FD-NEWTON: residual = %f\n", n_iter, error);
+
                 if (error < tolerance)
                 {       /*fpx=this->F.evaluate_f(x-0.5);
                         fsx=this->F.evaluate_f(x+0.5);
@@ -195,13 +200,13 @@ std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real 
                         return {x, n_iter};
 
                 }
-                Rprintf("Center: \n");
+                //Rprintf("Center: \n");
                 fx  = this->F.evaluate_f(x);
 
                 fsx = (fxph+fxmh-(2*fx))/(h*h);
 
-                Rprintf("fp(x): %f\n", fpx);
-                Rprintf("fs(x): %f\n", fsx);
+                //Rprintf("fp(x): %f\n", fpx);
+                //Rprintf("fs(x): %f\n", fsx);
         }
         fx  = this->F.evaluate_f(x);
         ch.set_max_iter();

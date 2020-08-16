@@ -83,7 +83,8 @@ class GOF_updater
                 {
                         if(start_ptr != lopt_ptr) // new pointer to be stored (or first time we store)
                         {
-                                Rprintf("--- Set updaters ---\n");
+                                //Debugging purpose
+                                //Rprintf("--- Set updaters ---\n");
                                 initialize(std::vector<Real>{-1.,-1.,-1.});     // dummy initialize the last lambdas
                                 updaters_setter(lopt_ptr);                      // set all the updaters from the given pointer
                                 start_ptr = lopt_ptr;                           // keep track of the pointer to avoid this procedure next time

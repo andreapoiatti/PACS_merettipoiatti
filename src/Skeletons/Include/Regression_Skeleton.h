@@ -90,7 +90,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 
 		timer Time_partial;
 		Time_partial.start();
-		Rprintf("WARNING: start taking time\n");
+		//Rprintf("WARNING: start taking time\n");
 
 		// Get the solution
 		output_Data output;
@@ -113,7 +113,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 			optim.combine_output_prediction(solution.topRows(solution.rows()/2).col(j),output,j);
 		}
 
-		Rprintf("WARNING: partial time after the optimization method\n");
+		//Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();
 
 		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
@@ -137,13 +137,13 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 	{
 		timer Time_partial;
 		Time_partial.start();
-		Rprintf("WARNING: start taking time\n");
+		//Rprintf("WARNING: start taking time\n");
 		//this will be used when batch will be correctly implemented, also for return elements
 		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
 		Eval_GCV<Real, Real, EvaluationType> eval(Fun, optr->get_lambda_S());  //debugging dummy trial: working
 		output_Data output = eval.Get_optimization_vectorial();
 
-		Rprintf("WARNING: partial time after the optimization method\n");
+		//Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();
 
 		// Get the solution
@@ -174,11 +174,11 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 
 		timer Time_partial;
 		Time_partial.start();
-		Rprintf("WARNING: start taking time\n");
+		//Rprintf("WARNING: start taking time\n");
 
 		std::pair<Real, UInt> lambda_couple = optim_p->compute(lambda, optr->get_stopping_criterion_tol(), 40, ch, GCV_v_, lambda_v_);
 
-		Rprintf("WARNING: partial time after the optimization method\n");
+		//Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();
 
 		// Get the solution

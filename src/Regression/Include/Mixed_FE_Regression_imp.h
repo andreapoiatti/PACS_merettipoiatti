@@ -920,7 +920,7 @@ void MixedFERegressionBase<InputHandler>::preapply(EOExpr<A> oper, const Forcing
 	this->_rightHandSide.topRows(nnodes)=rightHandData;
 
 	// Debugging purpose
-	Rprintf("Preliminary problem matrices building phase completed\n");
+	//Rprintf("Preliminary problem matrices building phase completed\n");
 }
 
 //----------------------------------------------------------------------------//

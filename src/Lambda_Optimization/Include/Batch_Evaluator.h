@@ -23,7 +23,8 @@ class Vec_evaluation
                 std::vector<Real> lambda_vec;    //!< Vector of lambda to be evaluated
 
                 Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
-                        F(F_), lambda_vec(lambda_vec_) {Rprintf("Vector evaluator built\n");}; //!< Constructor
+                        F(F_), lambda_vec(lambda_vec_) {//Debugging purpose//Rprintf("Vector evaluator built\n");
+                        }; //!< Constructor
 
                 /*!
                 Function to compute particular parameters related to the mimizing solution. It does nothing if not implemented. It is not pure virtual in order to be general and leave the possibility of instantiating the object without impementing that function
@@ -57,13 +58,13 @@ class Vec_evaluation
                         }
 
                         //DEBUGGING PURPOSE
-                        for (UInt i=0; i<dim; i++)
+                        /*for (UInt i=0; i<dim; i++)
                         {
                                 Rprintf("\nLambda: %f, GCV: %f\n",this->lambda_vec[i], evaluations[i]);
                         }
 
                         Rprintf("\nLambda opt: %f and GCV: %f\n",this->lambda_vec[index_min], evaluations[index_min]);
-
+                         */
                         return {evaluations,index_min};
                 }
 };
@@ -86,7 +87,8 @@ class Eval_GCV: public Vec_evaluation<Tuple, Hessian, Extensions...>
 
                 void compute_specific_parameters_best(void) override //!< Computes specific parameters needed for GCV
                 {
-                         Rprintf("Specific parameters for GCV computed\n");
+                        //Debugging purpose
+                        // Rprintf("Specific parameters for GCV computed\n");
 
                         this->F.set_output_partial_best();
                  }

@@ -525,8 +525,8 @@ Real GCV_Exact<InputCarrier, 1>::compute_f(Real lambda)
                 AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
 
         // Debugging purpose print
-        Rprintf("LAMBDA = %f\n",lambda);
-	Rprintf("GCV = %f\n",GCV_val);
+        //Rprintf("LAMBDA = %f\n",lambda);
+	//Rprintf("GCV = %f\n",GCV_val);
 
 	return GCV_val;
 }
@@ -554,7 +554,7 @@ Real GCV_Exact<InputCarrier, 1>::compute_fp(Real lambda)
                 AuxiliaryOptimizer::universal_GCV_d<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_);
 
         // Debugging purpose print
-	Rprintf("GCV_derivative = %f\n", GCV_der_val);
+	//Rprintf("GCV_derivative = %f\n", GCV_der_val);
 
 	return GCV_der_val;
 }
@@ -576,7 +576,7 @@ Real GCV_Exact<InputCarrier, 1>::compute_fs(Real lambda)
                 AuxiliaryOptimizer::universal_GCV_dd<InputCarrier>(this->adt, this->s, this->sigma_hat_sq, this->dor, this->trdS_, this->trddS_);
 
         // Debugging purpose print
-	Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
+	//Rprintf("GCV_second_derivative = %f\n", GCV_sec_der_val);
 
 	return GCV_sec_der_val;
 }
@@ -627,7 +627,8 @@ void GCV_Stochastic<InputCarrier, 1>::set_US_(void)
 
         // Validate the completion of the task
         this->us = true;
-        Rprintf("Random matrix for stochastic method succesfully built.\n");
+        //Debugging purpose
+        //Rprintf("Random matrix for stochastic method succesfully built.\n");
 
         /* Debugging purpose timer [part II]
          Rprintf("WARNING: time after the set_US method\n");
@@ -698,7 +699,7 @@ void GCV_Stochastic<InputCarrier, 1>::update_dof(Real lambda)
         {
                 Rprintf("No DOF computation required\n");
                 this->dof = m(this->use_index,0);
-                std::cout<< this->dof << std::endl;
+                //std::cout<< this->dof << std::endl;
         }
 }
 
@@ -786,8 +787,8 @@ Real GCV_Stochastic<InputCarrier, 1>::compute_f(Real lambda)
                 AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
 
         // Debugging purpose print
-        Rprintf("LAMBDA = %f\n",lambda);
-	Rprintf("GCV = %f\n",GCV_val);
+        //Rprintf("LAMBDA = %f\n",lambda);
+	//Rprintf("GCV = %f\n",GCV_val);
 
 	return GCV_val;
 }
