@@ -49,7 +49,7 @@ class  OptimizationData
                 std::vector<Real> lambdaS_backup;               //!< Backup vector of lambda_S (as passed by the user), used in GAM methods
 
                 // For optimized methods
-                Real stopping_criterion_tol = 0.05;             //!< Contains the user defined tolerance for optimzed methods
+                Real stopping_criterion_tol = 0.05;             //!< Contains the user defined tolerance for optimized methods
 
 
                 void builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct);
