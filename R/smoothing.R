@@ -347,6 +347,12 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   ##################### Checking parameters, sizes and conversion ################################
 
   # Preliminary consistency of optimization parameters
+  if(DOF_evaluation!='not_required' & loss_function!='GCV')
+  {
+    warning("Dof are computed, setting 'loss_function' to 'GCV'")
+    loss_function = 'GCV'
+  }
+  
   if(optimization == "batch")
   {
     optim = 0
