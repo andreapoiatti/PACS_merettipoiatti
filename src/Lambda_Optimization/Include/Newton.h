@@ -116,28 +116,27 @@ struct Auxiliary<VectorXr>  //!< Auxiliary class to perform elementary mathemati
 
 
 
+template <typename Tuple, typename Hessian, typename ...Extensions>
+class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
+{
+        //NOT yet implemented
+};
+
 //! Class to apply Newton method exploting finite differences to compute derivatives, inheriting from Opt_methods
 /*!
  * \tparam       Tuple          image type of the gradient of the function
  * \tparam       Hessian        image type of the Hessian of the function: if the dimension of the image is >1 (and domain >1), problems to store the hessian, it's a tensor
  * \tparam       Extensions    input class if the computations need members already stored in a class
  */
-
-template <typename Tuple, typename Hessian, typename ...Extensions>
-class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
+template <typename ...Extensions>
+class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Extensions...>
 {
+        public:
+                Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {}; //! Constructor
+                // NB F cannot be const
 
-                public:
-                        Newton_fd(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_) {}; //! Constructor
-                        // NB F cannot be const
-
-                        typename std::enable_if<std::is_floating_point<Tuple>::value&&std::is_floating_point<Hessian>::value, std::pair<Real, UInt>>::type
-                        compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override;
-
-
+                std::pair<Real, UInt> compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override;
 };
-
-
 
 
 #include "Newton_imp.h"

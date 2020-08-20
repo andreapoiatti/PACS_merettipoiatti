@@ -99,9 +99,8 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
        return {x, n_iter};
 }
 
-template <typename Tuple, typename Hessian, typename ...Extensions>
-typename std::enable_if<std::is_floating_point<Tuple>::value&&std::is_floating_point<Hessian>::value, std::pair<Real, UInt>>::type
- Newton_fd<Tuple, Hessian, Extensions...>::compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v)
+template <typename ...Extensions>
+std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v)
 {
         // Initialize the algorithm
         Real x_old;
