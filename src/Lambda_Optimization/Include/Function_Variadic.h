@@ -53,7 +53,7 @@
                 // -- OPEATORS --
                 //! Function version of a std::function () operator, use SFINAE to differentiate from the two possibilities of instantiation (derived or not)
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_enum<U>::value, Ctype>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Ctype>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_f(U lambda)
                 {
                         return g(lambda);
@@ -61,7 +61,7 @@
 
                 //! Function version of a std::function () operator, use SFINAE to differentiate from the two possibilities of instantiation (derived or not)
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_enum<U>::value, Ctype>::type
+                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_void<U>::value, Ctype>::type
                 evaluate_f(U lambda )
                 {
                         return this->compute_f(lambda);
@@ -69,7 +69,7 @@
 
                 //! Evaluation of first derivative, if derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_enum<U>::value, Tuple>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Tuple>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_first_derivative(U lambda)
                 {
                         return dg(lambda);
@@ -77,7 +77,7 @@
 
                 //! Evaluatio of first derivative, if not derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_enum<U>::value, Tuple>::type
+                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_void<U>::value, Tuple>::type
                 evaluate_first_derivative(U lambda)
                 {
                         return this->compute_fp(lambda);
@@ -85,7 +85,7 @@
 
                 //! Evaluation of second derivative, if derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_enum<U>::value, Hessian>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Hessian>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_second_derivative(U lambda)
                 {
                         return ddg(lambda);
@@ -93,7 +93,7 @@
 
                 //! Evaluation of second derivative, if not derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_enum<U>::value, Hessian>::type
+                typename std::enable_if<sizeof...(Extensions)!=0 || std::is_void<U>::value, Hessian>::type
                 evaluate_second_derivative(U lambda )
                 {
                         return this->compute_fs(lambda);
