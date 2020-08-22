@@ -82,7 +82,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 		GCV_Stochastic<CarrierType, 1> optim(carrier);
 		return optimizer_strategy_selection<GCV_Stochastic<CarrierType, 1>, CarrierType>(optim, carrier);
 	}
-	else if(optr->get_loss_function() == "unused" && optr->get_DOF_evaluation() == "not_required")
+	else // if(optr->get_loss_function() == "unused" && optr->get_DOF_evaluation() == "not_required")
 	{
 		Rprintf("Pure evaluation\n");
 		auto model  = carrier.get_model();
