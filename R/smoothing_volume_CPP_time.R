@@ -1,5 +1,5 @@
 CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FEMbasis, time_mesh,
-                                     covariates = NULL, ndim, mydim, BC = NULL, 
+                                     covariates = NULL, ndim, mydim, BC = NULL,
                                      incidence_matrix = NULL, areal.data.avg = TRUE,
                                      FLAG_MASS, FLAG_PARABOLIC, IC,
                                      search, bary.locations, optim , lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
@@ -54,7 +54,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   {
     BC$BC_values<-as.vector(BC$BC_values)
   }
-  
+
   if(is.null(lambdaS))
   {
     lambdaS<-vector(length=0)
@@ -62,7 +62,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   {
     lambdaS<-as.vector(lambdaS)
   }
-  
+
   if(is.null(lambdaT))
   {
     lambdaT<-vector(length=0)
@@ -70,7 +70,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   {
     lambdaT<-as.vector(lambdaT)
   }
-  
+
 
   ## Set propr type for correct C++ reading
   locations <- as.matrix(locations)
@@ -103,8 +103,8 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   IC <- as.matrix(IC)
   storage.mode(IC) <- "double"
   storage.mode(search) <- "integer"
-  storage.mode(optim) <- "integer"  
-  storage.mode(lambdaS) <- "double"  
+  storage.mode(optim) <- "integer"
+  storage.mode(lambdaS) <- "double"
   storage.mode(lambdaT) <- "double"
   DOF_matrix <- as.matrix(DOF_matrix)
   storage.mode(DOF_matrix) <- "double"
@@ -112,9 +112,11 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
   storage.mode(seed) <- "integer"
   storage.mode(GCV.inflation.factor) <- "double"
   storage.mode(stop_criterion_tol) <- "double"
-  
+
   ## IC estimation for parabolic smoothing from the first column of observations
   ICsol=NA
+  #empty dof matrix
+  DOF_matrix_IC<-matrix(nrow = 0, ncol = 1)
   if(nrow(IC)==0 && FLAG_PARABOLIC)
   {
     NobsIC = length(observations)%/%nrow(time_locations)
@@ -136,7 +138,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
     ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
      FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
      BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-     search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
+     search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix_IC, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
 
     ## shifting the lambdas interval if the best lambda is the smaller one and retry smoothing
     if(ICsol[[6]]==1)
@@ -147,7 +149,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
       ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
        FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
        BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-       search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
+       search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix_IC, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
     }
     else
     {
@@ -160,7 +162,7 @@ CPP_smooth.volume.FEM.time<-function(locations, time_locations, observations, FE
         ICsol <- .Call("regression_Laplace", locations, bary.locations, observations[1:NobsIC],
          FEMbasis$mesh, FEMbasis$order, mydim, ndim, covariatesIC,
          BC$BC_indices, BC$BC_values, incidence_matrix, areal.data.avg,
-         search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
+         search, as.integer(c(0,1,1)), lambdaSIC, nrealizations, seed, DOF_matrix_IC, GCV.inflation.factor, stop_criterion_tol, PACKAGE = "fdaPDE")
       }
     }
 
@@ -240,14 +242,14 @@ CPP_eval.volume.FEM.time = function(FEM.time, locations, time_locations, inciden
     storage.mode(bary.locations$barycenters) <- "double"
     barycenters <- as.matrix(bary.locations$barycenters)
   }
-  
+
 
   # if (search == 1) { #use Naive search
   #   print('This is Naive Search')
   # } else if (search == 2)  { #use Tree search (default)
   #   print('This is Tree Search')
   # }
-  
+
   #Calling the C++ function "eval_FEM_fd" in RPDE_interface.cpp
   evalmat = matrix(0,max(nrow(locations),nrow(incidence_matrix)),ncol(coeff))
   for (i in 1:ncol(coeff)){
