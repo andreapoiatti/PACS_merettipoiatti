@@ -66,11 +66,11 @@
 #' @param max.steps.FPIRLS This parameter is used to limit the maximum number of iteration.
 #' Default value \code{max.steps.FPIRLS=15}.
 #' @param optimization This parameter is used to select the optimization method related to the penalization factor.
-#' The following methods are implemented: "batch", "newton", "newton_fd". 
+#' The following methods are implemented: "grid", "newton", "newton_fd". 
 #' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 #' The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
 #' They implement respectively a pure Newton method and a finite differences Newton method.
-#' Default value \code{optimization="batch"}
+#' Default value \code{optimization="grid"}
 #' @param DOF_evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
 #' The following possibilities are allowed: "not_required", "exact" and "stochastic"
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
@@ -78,9 +78,9 @@
 #' Default value \code{DOF_evaluation="not_required"}
 #' @param loss_function This parameter is used to understand if some loss function has to be evaluated.
 #' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
-#' In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
+#' In the former case is that of \code{optimization='grid'} pure evaluation, while the second can be employed for optimization methods.
 #' Default value \code{loss_function="unused"}
-#' @param lambda a vector of penalization factors to be provided for evaluation if \code{optimization="batch"}, an optional initialization otherwise
+#' @param lambda a vector of penalization factors to be provided for evaluation if \code{optimization="grid"}, an optional initialization otherwise
 #' @param nrealizations This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
 #' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
 #' Default value \code{nrealizations=100}.
@@ -98,7 +98,7 @@
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
 #'          In al the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -145,7 +145,7 @@
 #'  incidence_matrix = NULL, areal.data.avg = TRUE,
 #'  search = "tree", bary.locations = NULL,
 #'  family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
-#'  optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+#'  optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 #' @export
 
 #' @references
@@ -324,7 +324,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      incidence_matrix = NULL, areal.data.avg = TRUE,
                      search = "tree", bary.locations = NULL,
                      family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
-                     optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+                     optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 {
   # Mesh identification
   if(class(FEMbasis$mesh) == "mesh.2D")
@@ -353,7 +353,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     loss_function = 'GCV'
   }
   
-  if(optimization == "batch")
+  if(optimization == "grid")
   {
     optim = 0
   }else if(optimization == "newton")
@@ -364,7 +364,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     optim = 2
   }else
   {
-    stop("'optimization' must belong to the following list: 'none', 'batch', 'newton', 'newton_fd'.")
+    stop("'optimization' must belong to the following list: 'none', 'grid', 'newton', 'newton_fd'.")
   }
 
   if(DOF_evaluation == 'not_required')
@@ -481,8 +481,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
 
   # OPTIMIZATION NOT IMPLEMENTED FOR GAM
-  if(family != 'gaussian'& optimization != 'batch')
-    stop("'optimization' = 'batch' is the only method implemented for GAM problems")
+  if(family != 'gaussian'& optimization != 'grid')
+    stop("'optimization' = 'grid' is the only method implemented for GAM problems")
 
 
   ################## End checking parameters, sizes and conversion #############################
@@ -691,7 +691,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     if(!is.null(covariates))
     {
-      if(optimization == 'batch' & DOF_evaluation == 'not_required' & loss_function == 'unused')
+      if(optimization == 'grid' & DOF_evaluation == 'not_required' & loss_function == 'unused')
       {
         beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
       }

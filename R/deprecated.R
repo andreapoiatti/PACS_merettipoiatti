@@ -637,7 +637,7 @@ R_tricoefCal = function(mesh)
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
 #'          In al the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -666,7 +666,7 @@ R_tricoefCal = function(mesh)
 smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 
@@ -695,7 +695,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
 #'          In al the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -722,7 +722,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 
@@ -758,7 +758,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="batch"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
 #'          In al the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -786,7 +786,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 smooth.FEM.PDE.sv.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'batch', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
   ans
 }
 

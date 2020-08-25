@@ -125,26 +125,26 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   
   # Optimization
   # --> General consistency rules
-  if(optimization != 'batch' & DOF_evaluation == 'non_required')
+  if(optimization != 'grid' & DOF_evaluation == 'non_required')
     stop("An optimized method needs to evaluate DOF, please specify a 'DOF_evaluation' method among 'stochastic' and 'exact'")
-  if(optimization != 'batch' & loss_function == 'unused')
+  if(optimization != 'grid' & loss_function == 'unused')
     stop("An optimized method needs a loss function to perform the evaluation, please select 'loss_function' as 'GCV'")
   if(optimization == 'newton' & DOF_evaluation == 'stochastic')
     stop("Newton method can only be applied in a 'DOF_evaluation' = 'exact' context")
   
   # --> Lambda related
-  if(optimization == 'batch' & FLAG_PARABOLIC == FALSE & (is.null(lambdaS) || is.null(lambdaT)))
-    stop("Both not NULL 'lambdaS'  and 'lambdaT' required for 'optimization' = 'batch' in separable context.")
-  if(optimization == 'batch' & FLAG_PARABOLIC == TRUE & is.null(lambdaS))
-    stop("Not NULL 'lambdaS' required for 'optimization' = 'batch' in parabolic context.")
+  if(optimization == 'grid' & FLAG_PARABOLIC == FALSE & (is.null(lambdaS) || is.null(lambdaT)))
+    stop("Both not NULL 'lambdaS'  and 'lambdaT' required for 'optimization' = 'grid' in separable context.")
+  if(optimization == 'grid' & FLAG_PARABOLIC == TRUE & is.null(lambdaS))
+    stop("Not NULL 'lambdaS' required for 'optimization' = 'grid' in parabolic context.")
   if(FLAG_PARABOLIC == 'TRUE' & !is.null(lambdaT))
     warning("'lambdaT' discarded in parabolic context")
-  if(optimization != 'batch' & !is.null(lambdaS))
+  if(optimization != 'grid' & !is.null(lambdaS))
   {
     if(length(lambdaS)>1) 
       warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
   }  
-  if(optimization != 'batch' & !is.null(lambdaT))
+  if(optimization != 'grid' & !is.null(lambdaT))
   {
     if(length(lambdaT)>1) 
       warning("In optimized methods 'lambdaS' and 'lambdaT' are initial values, all terms following the first will be discarded")
@@ -182,7 +182,7 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   # --> DOF_matrix related
   if(!is.null(DOF_matrix))
   {
-    if(optimization != 'batch')
+    if(optimization != 'grid')
       stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
     if(DOF_evaluation != 'not_required')
       stop("'DOF_matrix' is passed to the function, 'DOF_evaluation' should be 'not_required'")
@@ -198,8 +198,8 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   else if(stop_criterion_tol>=1 || stop_criterion_tol<=0)
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
   
-  if(optimization=='batch' & stop_criterion_tol!=0.05)
-    warning("'stop_criterion_tol' is not used in batch evaluation")
+  if(optimization=='grid' & stop_criterion_tol!=0.05)
+    warning("'stop_criterion_tol' is not used in grid evaluation")
 
   return(space_varying)
 }

@@ -98,17 +98,17 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   
   # Optimization
   # --> General consistency rules
-  if(optimization != 'batch' & DOF_evaluation == 'non_required')
+  if(optimization != 'grid' & DOF_evaluation == 'non_required')
     stop("An optimized method needs to evaluate DOF, please specify a 'DOF_evaluation' method among 'stochastic' and 'exact'")
-  if(optimization != 'batch' & loss_function == 'unused')
+  if(optimization != 'grid' & loss_function == 'unused')
     stop("An optimized method needs a loss function to perform the evaluation, please select 'loss_function' as 'GCV'")
   if(optimization == 'newton' & DOF_evaluation == 'stochastic')
     stop("Newton method can only be applied in a 'DOF_evaluation' = 'exact' context")
   
   # --> Lambda related
-  if(optimization == 'batch' & is.null(lambda))
-    stop("'lambda' required for 'optimization' = 'batch'; now is NULL.")
-  if(optimization != 'batch' & !is.null(lambda))
+  if(optimization == 'grid' & is.null(lambda))
+    stop("'lambda' required for 'optimization' = 'grid'; now is NULL.")
+  if(optimization != 'grid' & !is.null(lambda))
   {
     if(length(lambda) > 1)
       warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
@@ -145,7 +145,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   # --> DOF_matrix related
   if(!is.null(DOF_matrix))
   {
-    if(optimization != 'batch')
+    if(optimization != 'grid')
       stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
     if(DOF_evaluation != 'not_required')
       stop("'DOF_matrix' is passed to the function, 'DOF_evaluation' should be 'not_required'")
@@ -161,8 +161,8 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   else if(stop_criterion_tol>=1 || stop_criterion_tol<=0)
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
   
-  if(optimization=='batch' & stop_criterion_tol!=0.05)
-    warning("'stop_criterion_tol' is not used in batch evaluation")
+  if(optimization=='grid' & stop_criterion_tol!=0.05)
+    warning("'stop_criterion_tol' is not used in grid evaluation")
   
   # Return information
   return(space_varying)
