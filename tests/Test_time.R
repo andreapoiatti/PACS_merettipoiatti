@@ -24,5 +24,5 @@ data = matrix(data, nrow = nrow(mesh$nodes), ncol = length(time_locations), byro
 dofs=  matrix(c(48.36436), nrow = 1)
 
 solution = smooth.FEM.time(observations = data, time_locations = time_locations,
-                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, FLAG_PARABOLIC = FALSE, optimization = "batch", loss_function = "GCV", DOF_evaluation = "exact")
+                           FEMbasis = FEMbasis, lambdaS = lambdaS, lambdaT = lambdaT, FLAG_PARABOLIC = FALSE, optimization = "grid", loss_function = "GCV", DOF_evaluation = "exact")
 plot(solution$fit.FEM)
