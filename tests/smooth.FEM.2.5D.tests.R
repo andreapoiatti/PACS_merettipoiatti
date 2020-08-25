@@ -37,17 +37,39 @@ lambda = 10^seq(-2,0.5,by=0.25)
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
 plot(output_CPP$fit.FEM)
 
-#### Test 1.2: With exact GCV
+#### Test 1.2: Batch with exact GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                        optimization='batch', DOF_evaluation='exact', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-#### Test 1.3: With stochastic GCV
+#### Test 1.3: Batch with stochastic GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda,
                        optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+#### Test 1.4: Newton method with exact GCV, default initial lambda and tolerance
+#it takes a lot of time
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
+                       optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+#### Test 1.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+#it takes a lot of time
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+
+#### Test 1.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
 
 
 #### Test 2: sphere domain ####
@@ -106,7 +128,7 @@ output_CPP<-smooth.FEM(observations=data,
 plot(output_CPP$fit.FEM)
 output_CPP$solution$beta
 
-#### Test 2.2: With exact GCV
+#### Test 2.2: Batch with exact GCV
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations,
                        covariates = cov1,
                        FEMbasis=FEMbasis, lambda=lambda,
@@ -116,12 +138,44 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
-#### Test 2.3: With stochastic GCV
+#### Test 2.3: Batch with stochastic GCV
 output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
                        covariates = cov1,
                        FEMbasis=FEMbasis, lambda=lambda,
                        optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+#### Test 2.4: Newton method with exact GCV, default initial lambda and tolerance
+
+output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+#### Test 2.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+
+output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+
+plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+#### Test 2.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(observations=data, locations = projected_locations, 
+                       covariates = cov1,
+                       FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta

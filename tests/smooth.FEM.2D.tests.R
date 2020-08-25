@@ -45,27 +45,27 @@ data = sol_exact + rnorm(nnodes, mean=0, sd=0.05*abs(ran[2]-ran[1]))
 # Set smoothing parameter
 lambda = 10^seq(-6,-3,by=0.25)
 
-#### Test 1.1: Batch Without GCV
+#### Test 1.1: Without GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda)
 image(output_CPP$fit.FEM)
 
-#### Test 1.2: Batch With exact GCV
+#### Test 1.2: Batch with exact GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='exact', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-#### Test 1.3: Batch stochastic GCV
+#### Test 1.3: Batch with stochastic GCV
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, lambda=lambda, optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-### Test 1.4: Newton exact GCV
+### Test 1.4: Newton exact method with exact GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton', DOF_evaluation='exact', loss_function='GCV')
 
-### Test 1.5: Newton_fd exact GCV
+### Test 1.5: Newton_fd method with  exact GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
 
-### Test 1.6: Newton_fd stochastic GCV
+### Test 1.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
 output_CPP<-smooth.FEM(observations=data, FEMbasis=FEMbasis, optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
 
 
@@ -118,7 +118,7 @@ output_CPP<-smooth.FEM(locations = locations, observations=data,
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda)
 
-#### Test 2.2: With exact GCV
+#### Test 2.2: Batch with exact GCV
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
@@ -128,7 +128,7 @@ image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
 
-#### Test 2.3: With stochastic GCV
+#### Test 2.3: Batch with stochastic GCV
 output_CPP<-smooth.FEM(locations = locations, observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
@@ -137,6 +137,39 @@ plot(log10(lambda), output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
 output_CPP$solution$beta
+
+### Test 2.4: Newton exact method with exact  GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis,
+                       optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+### Test 2.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+### Test 2.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(locations = locations, observations=data, 
+                       covariates = cbind(cov1, cov2),
+                       FEMbasis=FEMbasis, 
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+output_CPP$solution$beta
+
+
+
 
 
 #### Test 3: square domain ####
@@ -187,7 +220,7 @@ output_CPP<-smooth.FEM(observations=data,
                        lambda=lambda, 
                        PDE_parameters=PDE_parameters)
 
-#### Test 3.2: With exact GCV
+#### Test 3.2: Batch with exact GCV
 output_CPP<-smooth.FEM(observations=data, 
                        FEMbasis=FEMbasis, 
                        lambda=lambda,
@@ -196,7 +229,7 @@ output_CPP<-smooth.FEM(observations=data,
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
-#### Test 3.3: With stochastic GCV
+#### Test 3.3: Batch with stochastic GCV
 output_CPP<-smooth.FEM(observations=data, 
                        FEMbasis=FEMbasis, 
                        lambda=lambda, 
@@ -204,6 +237,35 @@ output_CPP<-smooth.FEM(observations=data,
                        optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+
+### Test 3.4: Newton exact method with exact GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(observations=data, 
+                       FEMbasis=FEMbasis, 
+                       PDE_parameters=PDE_parameters,
+                       optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+### Test 3.5: Newton_fd method with exact GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(observations=data, 
+                       FEMbasis=FEMbasis, 
+                       PDE_parameters=PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+### Test 3.6: Newton_fd method with stochastic GCV, default initial lambda and tolerance
+output_CPP<-smooth.FEM(observations=data, 
+                       FEMbasis=FEMbasis, 
+                       PDE_parameters=PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+
+image(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
+
+
+
+
 
 
 #### Test 4: quasicircular domain ####
@@ -272,7 +334,8 @@ u_func<-function(points)
 }
 PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
 
-#### Test 4.1: Forcing term = 0
+
+#### Test 4.1.2: Forcing term = 0  batch without GCV 
 output_CPP<-smooth.FEM(observations=data, 
                        incidence_matrix = incidence_matrix,
                        FEMbasis=FEMbasis, 
@@ -281,7 +344,31 @@ output_CPP<-smooth.FEM(observations=data,
                        PDE_parameters = PDE_parameters)
 plot(output_CPP$fit.FEM)
 
-#### Test 4.2: Forcing term != 0
+
+#### Test 4.1.2: Forcing term = 0  batch with exact  GCV 
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+
+#### Test 4.1.3: Forcing term = 0  batch with stochatic  GCV 
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+
+
+#### Test 4.2.1: Forcing term != 0 without GCV 
 # forcing function != 0
 u_func<-function(points)
 {
@@ -299,6 +386,7 @@ lines(mesh$nodes[1:50,])
 
 PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
 
+
 output_CPP<-smooth.FEM(observations=data, 
                        incidence_matrix = incidence_matrix,
                        FEMbasis=FEMbasis, 
@@ -307,8 +395,95 @@ output_CPP<-smooth.FEM(observations=data,
                        PDE_parameters = PDE_parameters)
 plot(output_CPP$fit.FEM)
 
-#### Test 4.3: BC != 0
+
+#### Test 4.2.1: Forcing term != 0 without GCV 
+# forcing function != 0
+u_func<-function(points)
+{
+  output = array(0, c(1, nrow(points)))
+  for (i in 1:nrow(points))
+    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
+  output
+}
+
+# plot the forcing funcion
+xgrid=seq(from=-3,to=3,by=0.1)
+ygrid=seq(from=-3,to=3,by=0.1)
+image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
+lines(mesh$nodes[1:50,])
+
+PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
+
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters)
+plot(output_CPP$fit.FEM)
+
+
+#### Test 4.2.2: Forcing term != 0 batch with exact GCV 
+# forcing function != 0
+u_func<-function(points)
+{
+  output = array(0, c(1, nrow(points)))
+  for (i in 1:nrow(points))
+    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
+  output
+}
+
+# plot the forcing funcion
+xgrid=seq(from=-3,to=3,by=0.1)
+ygrid=seq(from=-3,to=3,by=0.1)
+image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
+lines(mesh$nodes[1:50,])
+
+PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
+
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+#### Test 4.2.3: Forcing term != 0 batch with stochastic GCV 
+# forcing function != 0
+u_func<-function(points)
+{
+  output = array(0, c(1, nrow(points)))
+  for (i in 1:nrow(points))
+    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
+  output
+}
+
+# plot the forcing funcion
+xgrid=seq(from=-3,to=3,by=0.1)
+ygrid=seq(from=-3,to=3,by=0.1)
+image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
+lines(mesh$nodes[1:50,])
+
+PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
+
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+
+#### Test 4.3.1: BC != 0      without GCV 
 # Add a constat to the data to change true BC
+data_backup=data #save a copy of original data
 data = data + 5
 
 # Set new value for the BC
@@ -320,4 +495,46 @@ output_CPP<-smooth.FEM(observations=data,
                        lambda=lambda,
                        BC = BC, 
                        PDE_parameters = PDE_parameters)
+data=data_backup #restore original data for next tests
 plot(output_CPP$fit.FEM)
+
+
+#### Test 4.3.2: BC != 0      batch with exact GCV 
+# Add a constat to the data to change true BC
+data_backup=data #save a copy of original data
+data = data + 5
+
+# Set new value for the BC
+BC$BC_values = rep(5,length(BC$BC_indices))
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix, 
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='exact', loss_function='GCV')
+data=data_backup #restore original data for next tests
+plot(output_CPP$fit.FEM)
+
+
+#### Test 4.3.3: BC != 0      batch with stochastic GCV 
+# Add a constat to the data to change true BC
+data_backup=data #save a copy of original data
+data = data + 5
+
+# Set new value for the BC
+BC$BC_values = rep(5,length(BC$BC_indices))
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix, 
+                       FEMbasis=FEMbasis, 
+                       lambda=lambda,
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='batch', DOF_evaluation='stochastic', loss_function='GCV')
+data=data_backup #restore original data for next tests
+plot(output_CPP$fit.FEM)
+
+
+

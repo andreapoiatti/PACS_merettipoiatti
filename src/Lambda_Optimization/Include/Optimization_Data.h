@@ -13,17 +13,17 @@
 class  OptimizationData
 {
         private:
-                std::string criterion      = "batch";           //!< batch [default], newton or newton_fd
+                std::string criterion      = "grid";           //!< grid [default], newton or newton_fd
                 std::string DOF_evaluation = "not_required";    //!< not_required [default], stochastic or exact
                 std::string loss_function  = "unused";          //!< unused [default] or GCV
 
-                // For batch
-                std::vector<Real> lambda_S = {-1.};             //!< Stores the vector of spatial lambdas to be evaluated in case of criterion = batch
-                std::vector<Real> lambda_T = {-1.};             //!< Stores the vector of temporal lambdas to be evaluated in case of criterion = batch
+                // For grid
+                std::vector<Real> lambda_S = {-1.};             //!< Stores the vector of spatial lambdas to be evaluated in case of criterion = grid
+                std::vector<Real> lambda_T = {-1.};             //!< Stores the vector of temporal lambdas to be evaluated in case of criterion = grid
                 UInt size_S = 1;                                //!< Size of vector lambda_S
                 UInt size_T = 1;                                //!< Size of vector lambda_T
 
-                // For batch fixed method
+                // For grid fixed method
                 UInt best_lambda_S = 0;	                        //!< Stores the index of the best lambdaS according to method
                 UInt best_lambda_T = 0;	                        //!< Stores the index of the best lambdaT according to method
                 Real best_value    = std::numeric_limits<Real>::max();	//!< Stores the value of the best loss function

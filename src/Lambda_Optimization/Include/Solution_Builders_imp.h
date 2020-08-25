@@ -21,7 +21,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
         {
                 code_string = 0;
         }
-        else if(output.content == "full_dof_batch")
+        else if(output.content == "full_dof_grid")
         {
                 code_string = 1;
         }

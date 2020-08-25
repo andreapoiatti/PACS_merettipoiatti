@@ -8,7 +8,7 @@
 #include "../../Lambda_Optimization/Include/Carrier.h"
 #include "../../Lambda_Optimization/Include/Lambda_Optimizer.h"
 #include "../../Lambda_Optimization/Include/Newton.h"
-#include "../../Lambda_Optimization/Include/Batch_Evaluator.h"
+#include "../../Lambda_Optimization/Include/Grid_Evaluator.h"
 #include "../../Lambda_Optimization/Include/Optimization_Methods_Factory.h"
 #include "../../Lambda_Optimization/Include/Solution_Builders.h"
 
@@ -133,12 +133,12 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 	typedef Function_Wrapper<Real, Real, Real, Real, EvaluationType> FunWr;
 
 	const OptimizationData * optr = carrier.get_opt_data();
-	if(optr->get_criterion() == "batch")
+	if(optr->get_criterion() == "grid")
 	{
 		timer Time_partial;
 		Time_partial.start();
 		//Rprintf("WARNING: start taking time\n");
-		//this will be used when batch will be correctly implemented, also for return elements
+		//this will be used when grid will be correctly implemented, also for return elements
 		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
 		Eval_GCV<EvaluationType> eval(Fun, optr->get_lambda_S());  //debugging dummy trial: working
 		output_Data output = eval.Get_optimization_vectorial();
@@ -155,7 +155,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
                 output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
-		//Solution_Builders::GCV_batch_sol(solution, output_vec);
+		//Solution_Builders::GCV_grid_sol(solution, output_vec);
 	}
 	else // 'not_required' optimization can't enter here!! [checked in R code]
 	{

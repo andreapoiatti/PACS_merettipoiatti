@@ -64,7 +64,7 @@ output_Data GCV_Family<InputCarrier, 1>::get_output_full(void)
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_output_partial_best(void)
 {
-        this->output.content            = "full_dof_batch";
+        this->output.content            = "full_dof_grid";
         this->output.z_hat              = MatrixXr(this->z_hat);
         this->output.sigma_hat_sq       = this->sigma_hat_sq;
 

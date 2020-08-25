@@ -24,7 +24,7 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
                 this->set_stopping_criterion_tol(REAL(Rsct)[0]);
         }
         else if(criterion == 0)
-                this->set_criterion("batch");
+                this->set_criterion("grid");
 
         UInt DOF_evaluation = INTEGER(Roptim)[1]; // Decipher the Roptim sequence of numbers, second DOF_evaluaton
         if(DOF_evaluation == 0)
@@ -118,7 +118,7 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda, SEXP Rnrealization
         builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct); // build common terms
 
         // Lambda
-        if(this->criterion == "batch") // Rlambda is a vector
+        if(this->criterion == "grid") // Rlambda is a vector
         {
                 fill_lambda(Rlambda, this->lambda_S, this->size_S);
                 set_lambdaS_backup(); // save a backup
@@ -146,7 +146,7 @@ OptimizationData::OptimizationData(SEXP Roptim, SEXP Rlambda_S, SEXP Rlambda_T, 
         builder_utility(Roptim, Rnrealizations, Rseed, RDOF_matrix, Rtune, Rsct); // build common terms
 
         // Lambda
-        if(this->criterion == "batch") // Rlambda is a vector
+        if(this->criterion == "grid") // Rlambda is a vector
         {
                 fill_lambda(Rlambda_S, this->lambda_S, this->size_S);
                 if(INTEGER(Rflag_parabolic)[0] == 0) // if separable add temporal lambda
