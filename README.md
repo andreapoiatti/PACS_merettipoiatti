@@ -12,7 +12,7 @@ Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying
 Compiled in both Win RStudio and Ubuntu 18.04 using g++ compiler. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE. If using Windows, it is advisable to install Rtools and then rgl, plot3D, plot3Drgl, geometry and RcppEigen libraries. 
 
 ## Subfolder structure:
-/src contains all C++ code and a special file named Makevars necessary to build and install the R package,
+/src contains all C++ code and a special file named Makevars necessary to build and install the R package. The code is now organized in subfolders and divided into source files and header files. See the report for the precise new orgaization.
 /R contains the R functions that wrap the C++ calls,
 /data contains the data to run the tests in /tests.
 /tests contains the test to be run and the file test_simulations.R, which contains the same test but organized in order to be repeated many times, as used in the report to find dthe boxplopts shown.
