@@ -18,7 +18,7 @@ Compiled in both Win RStudio and Ubuntu 18.04 using g++ compiler. If using a Lin
 
 /data contains the data to run the tests in /tests.
 
-/tests contains the test to be run and the file test_simulations.R, which contains the same test but organized in order to be repeated many times, as used in the report to find dthe boxplopts shown.
+/tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests. It also contains the file test_simulations.R, which contains the same tests but organized in order to be repeated many times, as used in the report to find the boxplopts shown in the test section.
 
 ## Installation:
 Two different methods are proposed in order to install the package in the R environment.  
