@@ -4,10 +4,11 @@ This repository contains the development version of fdaPDE package. In particula
 
 New features wrt CRAN: smooth regression for manifold and volumetric domains, also with areal data. Smooth fPCA over 2D, 2.5D and 3D domains, also with areal data.
 
+Bugs corrected in the areal data smoothing.
+
 smooth.FEM.basis, smooth.PDE.FEM.basis, smooth.FEM.PDE.sv.basis are deprecated, smooth.FEM has to be used in all cases.
 
-Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying regression have been fixed. Issues of point location in 2.5D have been fixed. Bugs corrected in the areal data smoothing.
-
+Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying regression have been fixed. Issues of point location in 2.5D have been fixed.
 Compiled in both Win RStudio and Ubuntu 18.04 using g++ compiler. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE. If using Windows, it is advisable to install Rtools and then rgl, plot3D, plot3Drgl, geometry and RcppEigen libraries. 
 
 ## Subfolder structure:
