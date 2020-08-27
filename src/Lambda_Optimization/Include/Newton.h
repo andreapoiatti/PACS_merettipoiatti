@@ -112,8 +112,9 @@ struct Auxiliary<VectorXr>
  class Newton_ex: public Opt_methods<Tuple, Hessian, Extensions...>
  {
          public:
-                 //! Constructor
+
                  /*!
+                  Constructor
                   \note F cannot be const, it must be modified
                  */
                  Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_)
@@ -122,7 +123,7 @@ struct Auxiliary<VectorXr>
                          // Rprintf("Newton method built\n");
                  };
 
-                 //! Apply Newton's method
+                 /*! Apply Newton's method */
                  std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override;
 };
 
@@ -143,8 +144,9 @@ template <typename ...Extensions>
 class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Extensions...>
 {
         public:
-                //! Constructor
+
                 /*!
+                 Constructor
                  \note F cannot be const, it must be modified
                 */
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {};

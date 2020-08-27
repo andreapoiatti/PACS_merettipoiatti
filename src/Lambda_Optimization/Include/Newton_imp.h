@@ -1,6 +1,16 @@
 #ifndef __NEWTON_IMP_H__
 #define __NEWTON_IMP_H__
 
+
+/*!
+ \param x0 the initial guess for the optimization method
+ \param tolerance the tolerance used as stopping criterion for the iterative optimization method
+ \param max_iter the maximum number of iterations
+ \param ch a reference to a Checker object, used to set the reason of termination of the iterations.
+ \param GCV_v a reference to the vector of GCV values evaluated during the iterative procedure
+ \param lambda_v a reference to the vector of lambda values explored during the iterative procedure
+ \return std::pair<Tuple, UInt>, a pair which containns the optimal lambda found and the number of iterations to reach the tolerance
+*/
 template <typename Tuple, typename Hessian, typename ...Extensions>
 std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v)
 {
@@ -100,6 +110,16 @@ std::pair<Tuple, UInt> Newton_ex<Tuple, Hessian, Extensions...>::compute (const 
        return {x, n_iter};
 }
 
+
+/*!
+ \param x0 the initial guess for the optimization method
+ \param tolerance the tolerance used as stopping criterion for the iterative optimization method
+ \param max_iter the maximum number of iterations
+ \param ch a reference to a Checker object, used to set the reason of termination of the iterations.
+ \param GCV_v a reference to the vector of GCV values evaluated during the iterative procedure
+ \param lambda_v a reference to the vector of lambda values explored during the iterative procedure
+ \return std::pair<Real, UInt>, a pair which containns the optimal lambda found and the number of iterations to reach the tolerance
+*/
 template <typename ...Extensions>
 std::pair<Real, UInt> Newton_fd<Real, Real, Extensions...>::compute (const Real & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v)
 {

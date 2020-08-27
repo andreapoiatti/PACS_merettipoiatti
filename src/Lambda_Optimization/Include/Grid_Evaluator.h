@@ -9,9 +9,8 @@
 #include "Function_Variadic.h"
 #include "Solution_Builders.h"
 
-
-//! Father class for a scalar function evaluation of a given vector of lambda values computing the minimum fuction value
 /*!
+ Father class for a scalar function evaluation of a given vector of lambda values computing the minimum fuction value
  \tparam Tuple image type of the gradient of the function
  \tparam Hessian image type of the Hessian of the function: if the dimension of the image is >1 (and domain >1), problems to store the hessian, it's a tensor
  \tparam Extensions input class if the computations need members already stored in a class
@@ -20,13 +19,15 @@ template <typename Tuple, typename Hessian, typename... Extensions>
 class Vec_evaluation
 {
         protected:
-                std::vector<Tuple> lambda_vec;    //!< Vector of lambda to be evaluated
+                 //! Vector of lambda to be evaluated
+                std::vector<Tuple> lambda_vec;
 
+                 /*! Constructor */
                 Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Tuple> & lambda_vec_):
                         F(F_), lambda_vec(lambda_vec_) {//Debugging purpose//Rprintf("Vector evaluator built\n");
-                        }; //!< Constructor
+                        };
 
-                //! Computes particular parameters related to the mimizing solution, for all the values evaluated. It does nothing if not implemented
+
                 /*!
                  Function to compute particular parameters related to the mimizing solution.
                  It does nothing if not implemented. It is not pure virtual in order to be general
@@ -34,16 +35,22 @@ class Vec_evaluation
                 */
                 virtual void compute_specific_parameters(void) {};
 
-                //! Computes particular parameters related to the mimizing solution.
+
                 /*
                  Only for minimizing solutions. It does nothing if not implemented
                 */
                 virtual void compute_specific_parameters_best(void) {};
 
         public:
-                Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;       //<! F needed to be public, to be able to access to other methods of the class F from outside*/
 
-                //! Function which returns the vector of evaluations of GCV and the index of the corresponding minimum
+                  /*!
+                  \note F needed to be public, to be able to access to other methods of the class F from outside
+                  */
+                Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;
+
+                /*!
+                 \return std::pair<std::vector<Real>, UInt> the vector of evaluations of GCV and the index of the corresponding minimum
+                */
                 std::pair<std::vector<Real>, UInt> compute_vector(void)
                 {
                         UInt dim = lambda_vec.size();
@@ -70,8 +77,8 @@ class Vec_evaluation
                 }
 };
 
-//!<Class inheriting form class Vec_evaluation, the function used is GCV evaluation
 /*!
+ Class inheriting form class Vec_evaluation, the function used is GCV evaluation
  \tparam Tuple image type of the gradient of the function
  \tparam Hessian image type of the Hessian of the function: if the dimension of the image is >1 (and domain >1), problems to store the hessian, it's a tensor
  \tparam Extensions input class if the computations need members already stored in a class
@@ -80,12 +87,18 @@ template <typename ...Extensions>
 class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
 {
         protected:
+                /*!
+                Computes specific parameters needed for GCV
+                */
                 void compute_specific_parameters(void) override
                 {
                  this->F.set_output_partial();
                 }
 
-                void compute_specific_parameters_best(void) override //!< Computes specific parameters needed for GCV
+                /*!
+                Computes specific parameters needed for GCV best values
+                */
+                void compute_specific_parameters_best(void) override
                 {
                         // Debugging purpose
                         // Rprintf("Specific parameters for GCV computed\n");
@@ -94,11 +107,15 @@ class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
                  }
 
         public:
-                //! Constructor
+                 /*! Constructor */
                 Eval_GCV(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
                         Vec_evaluation<Real, Real, Extensions...>(F_,lambda_vec_) {};
 
-                output_Data  Get_optimization_vectorial(void) // Output constructor
+                /*!
+                Function to build the output data
+                \return output_Data which contains the almost complete output to be returned to R
+                */
+                output_Data  Get_optimization_vectorial(void)
                 {
                         std::pair<std::vector<Real>, UInt> p = this->compute_vector();
                         output_Data output=this->F.get_output_full();
