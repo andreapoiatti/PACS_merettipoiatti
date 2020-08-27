@@ -705,6 +705,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       beta = NULL
     }
 
+    bestlambda=bigsol[[6]]
+    if(bestlambda == 1 || bestlambda == length(lambda))
+            warning("Your optimal 'GCV' is on the border of lambda sequence")
+
+
     if (loss_function == 'unused')
        { sd=-1 }
     else
@@ -721,7 +726,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
     optimization = list(
       lambda_solution = bigsol[[5]],
-      lambda_position = bigsol[[6]],
+      lambda_position = bestlambda,
       GCV = bigsol[[7]],
       optimization_details = list(
           iterations = bigsol[[8]],
