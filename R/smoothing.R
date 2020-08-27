@@ -705,13 +705,18 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       beta = NULL
     }
 
+    if (loss_function == 'unused')
+       { sd=-1 }
+    else
+       { sd = sqrt(bigsol[[4]])}
+
     solution = list(
       f = bigsol[[1]][1:numnodes,],
       g = bigsol[[1]][(numnodes+1):(2*numnodes),],
       z_hat = bigsol[[2]],
       beta = beta,
       rmse = bigsol[[3]],
-      estimated_sd = sqrt(bigsol[[4]])
+      estimated_sd=sd
     )
 
     optimization = list(
