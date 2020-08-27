@@ -20,10 +20,16 @@ class Checker
         public:
                 Checker(void): reached_max_iter(false), reached_tolerance(false) {}
 
-                inline void set_max_iter(void)  {reached_max_iter  = true;} //!< Sets max number of iterations
-                inline void set_tolerance(void) {reached_tolerance = true;} //!< Sets the tolerance for the optimization method
+                /*! Sets max number of iterations */
+                inline void set_max_iter(void)  {reached_max_iter  = true;}
 
-                inline int which(void) const   //!< Returns the reason of conclusion of the iterative method
+                /*! Sets the tolerance for the optimization method*/
+                inline void set_tolerance(void) {reached_tolerance = true;}
+
+                /*!
+                Returns the reason of conclusion of the iterative method
+                */
+                inline int which(void) const
                 {
                         if (reached_tolerance == true)
                                 return 1;
