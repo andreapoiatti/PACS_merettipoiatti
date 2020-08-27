@@ -481,6 +481,65 @@ output_CPP<-smooth.FEM(observations=data,
 plot(output_CPP$fit.FEM)
 
 
+#### Test 4.2.4: Forcing term != 0 Newton finite differences with exact GCV 
+# forcing function != 0
+u_func<-function(points)
+{
+  output = array(0, c(1, nrow(points)))
+  for (i in 1:nrow(points))
+    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
+  output
+}
+
+# plot the forcing funcion
+xgrid=seq(from=-3,to=3,by=0.1)
+ygrid=seq(from=-3,to=3,by=0.1)
+image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
+lines(mesh$nodes[1:50,])
+
+PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
+
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+
+#### Test 4.2.5: Forcing term != 0 Newton finite differences with stochastic GCV 
+# forcing function != 0
+u_func<-function(points)
+{
+  output = array(0, c(1, nrow(points)))
+  for (i in 1:nrow(points))
+    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
+  output
+}
+
+# plot the forcing funcion
+xgrid=seq(from=-3,to=3,by=0.1)
+ygrid=seq(from=-3,to=3,by=0.1)
+image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
+lines(mesh$nodes[1:50,])
+
+PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
+
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix,
+                       FEMbasis=FEMbasis, 
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+plot(output_CPP$fit.FEM)
+
+
+
+
+
 #### Test 4.3.1: BC != 0      without GCV 
 # Add a constat to the data to change true BC
 data_backup=data #save a copy of original data
@@ -537,4 +596,37 @@ data=data_backup #restore original data for next tests
 plot(output_CPP$fit.FEM)
 
 
+#### Test 4.3.4: BC != 0     Newton Finite differences with exact GCV 
+# Add a constat to the data to change true BC
+data_backup=data #save a copy of original data
+data = data + 5
+
+# Set new value for the BC
+BC$BC_values = rep(5,length(BC$BC_indices))
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix, 
+                       FEMbasis=FEMbasis, 
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+data=data_backup #restore original data for next tests
+plot(output_CPP$fit.FEM)
+
+#### Test 4.3.4: BC != 0     Newton Finite differences with stochastic GCV 
+# Add a constat to the data to change true BC
+data_backup=data #save a copy of original data
+data = data + 5
+
+# Set new value for the BC
+BC$BC_values = rep(5,length(BC$BC_indices))
+
+output_CPP<-smooth.FEM(observations=data, 
+                       incidence_matrix = incidence_matrix, 
+                       FEMbasis=FEMbasis, 
+                       BC = BC, 
+                       PDE_parameters = PDE_parameters,
+                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+data=data_backup #restore original data for next tests
+plot(output_CPP$fit.FEM)
 
