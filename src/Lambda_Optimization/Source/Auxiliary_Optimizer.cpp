@@ -1,15 +1,55 @@
 #include "../Include/Auxiliary_Optimizer.h"
 
-// THEORETICAL REMARK:
-// Since Psi is a rectangular permutation matrix, if function
-// k: loctions -> nodes s.t. Psi = Indicator(i,k[i]) then
-// Psi^t*Q   == Indicator(k[i],j)*q_ij
+//! Utility method for recycle boundary conditions correction
+/*!
+ \param mat the matrix on which to perform the correction, passed by reference
+ \param bc_idxp pointer of boundary condition indices
+ \note version for sparse matrices
+*/
+void AuxiliaryOptimizer::bc_utility(MatrixXr & mat, const std::vector<UInt> * bc_idxp)
+{
+        UInt nbc_indices = bc_idxp->size();
+        if(nbc_indices!=0) // Add boundary conditions
+        {
+                Real pen = 10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        mat(id,id) = pen;
+                }
 
-// IMPLEMENTATION OF THE REMARK:
-// the number of non-null entries of E is at most s^2,
-// we reserve a vector containing such entries and
-// we set the final matrix from these triplets
+        }
+}
 
+//! Utility method for recycle boundary conditions correction
+/*!
+ \param mat the matrix on which to perform the correction, passed by reference
+ \param bc_idxp pointer of boundary condition indices
+ \note version for full matrices
+*/
+void AuxiliaryOptimizer::bc_utility(SpMat & mat, const std::vector<UInt> * bc_idxp)
+{
+        UInt nbc_indices = bc_idxp->size();
+        if(nbc_indices!=0) // Add boundary conditions
+        {
+                Real pen = 10e20;
+                for(UInt i=0; i<nbc_indices; i++)
+                {
+                        UInt id = (*bc_idxp)[i];
+                        mat.coeffRef(id,id) = pen;
+                }
+
+        }
+}
+
+//! Utility method to compute matrix E in locationbynodes pointwise
+/*!
+ \param E the matrix to fill, passed by reference
+ \param kp pointer to identiy locations
+ \param Qp pointer to Q projection matrix
+ \param nr number of nodes
+ \param s number of observations
+*/
 void AuxiliaryOptimizer::set_E_ln_W_ptw(MatrixXr & E, const std::vector<UInt> * kp, const MatrixXr * Qp, UInt nr, UInt s)
 {
         E = MatrixXr::Zero(nr, s);
@@ -19,23 +59,36 @@ void AuxiliaryOptimizer::set_E_ln_W_ptw(MatrixXr & E, const std::vector<UInt> * 
                         E.coeffRef((*kp)[i], j) += (*Qp).coeff(i, j);
 }
 
+//! Utility method to compute matrix E in not-locationbynodes pointwise
+/*!
+ \param E the matrix to fill, passed by reference
+ \param psi_tp pointer to the transpose of Psi matrix
+ \param Qp pointer to Q projection matrix
+*/
 void AuxiliaryOptimizer::set_E_lnn_W_ptw(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp)
 {
         E = ((*psi_tp)*(*Qp));
 }
 
+//! Utility method to compute matrix E in areal setting, with regression
+/*!
+ \param E the matrix to fill, passed by reference
+ \param psi_tp pointer to the transpose of Psi matrix
+ \param Qp pointer to Q projection matrix
+ \param Ap pointer to areal vector
+*/
 void AuxiliaryOptimizer::set_E_W_a(MatrixXr & E, const SpMat * psi_tp, const MatrixXr * Qp, const VectorXr * Ap)
 {
         E = ((*psi_tp)*(*Ap).asDiagonal()*(*Qp));
 }
 
+//! Utility method to compute matrix E in areal setting, without regression
+/*!
+ \param E the matrix to fill, passed by reference
+ \param psi_tp pointer to the transpose of Psi matrix
+ \param Ap pointer to areal vector
+*/
 void AuxiliaryOptimizer::set_E_nW_a(MatrixXr & E, const SpMat * psi_tp, const VectorXr * Ap)
 {
         E = ((*psi_tp)*(*Ap).asDiagonal());
-}
-
-
-void AuxiliaryOptimizer::set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp)
-{
-        z_hat = S*(*zp);
 }

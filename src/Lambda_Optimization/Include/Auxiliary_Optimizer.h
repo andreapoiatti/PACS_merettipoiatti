@@ -1,48 +1,79 @@
 #ifndef __AUXILIARY_OPTIMIZER_H__
 #define __AUXILIARY_OPTIMIZER_H__
 
+// HEADERS
 #include <functional>
 #include <string>
 #include "../../FdaPDE.h"
-#include "Carrier.h"
 #include "../../FE_Assemblers_Solvers/Include/Solver.h"
 #include "../../Global_Utilities/Include/Solver_Definitions.h"
+#include "Carrier.h"
 #include "Solution_Builders.h"
 
-
+// CLASSES
+//! Template class for data storing and efficient management.
+/*!
+ General purpose class storing data useful for fastening computation in
+ Lambda_optimizer derived classes and AuxiliaryOptimizer. Its content
+ are matrices, vectors and doubles useful for GCV calculations.
+ \tparam InputCarrier the type of Carrier used in the optimization.
+ \tparam Enaable dummy typename for SFINAE instantiation of a more refined version for problems with forcing terms.
+ \sa Carrier, AuxiliaryOptimizer, Lambda_optimizer
+*/
 template<typename InputCarrier, typename Enable = void>
 struct AuxiliaryData
 {
-        MatrixXr K_;                            //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
-        MatrixXr F_;                            //!< stores K*v
+        MatrixXr K_;                            //!< stores T^{-1}*R                            [[nnodes x nnodes]]
+        MatrixXr F_;                            //!< stores K*v                                 [[nnodes x nnodes]]
         VectorXr t_;                            //!< stores dS*z;
         Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
         Real     b_;                            //!< Stores <t, Q*t>
         Real     c_;                            //!< Stores <eps_hat, ddS*z>
 };
 
-
+//! Template class for data storing and efficient management in forcing term based problems
+/*!
+ General purpose class storing data useful for fastening computation in
+ Lambda_optimizer derived classes and AuxiliaryOptimizer, spercialized under forcing
+ term based problems. Its content are matrices, vectors and doubles
+ useful for GCV calculations.
+ \tparam InputCarrier the type of Carrier used in the optimization.
+ \tparam typename for SFINAE instantiation of this more refined version for problems with forcing terms, distinguishing from base version.
+ \sa AuxiliaryData, Carrier, AuxiliaryOptimizer, Lambda_optimizer
+*/
 template<typename InputCarrier>
 struct AuxiliaryData<InputCarrier, typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value>::type>
 {
-        public:
-                MatrixXr K_;                            //!< stores T^{-1}*R                                              [[nnodes x nnodes]]
-                MatrixXr F_;                            //!< stores K*v
-                VectorXr t_;                            //!< stores dS*z;
-                Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
-                Real     b_;                            //!< Stores <t, Q*t>
-                Real     c_;                            //!< Stores <eps_hat, ddS*z>
-                VectorXr f_;
-                VectorXr g_;
-                VectorXr h_;
-                VectorXr p_;
-                VectorXr r_;
+        MatrixXr K_;                            //!< stores T^{-1}*R                            [[nnodes x nnodes]]
+        MatrixXr F_;                            //!< stores K*v                                 [[nnodes x nnodes]]
+        VectorXr t_;                            //!< stores dS*z;
+        Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
+        Real     b_;                            //!< Stores <t, Q*t>
+        Real     c_;                            //!< Stores <eps_hat, ddS*z>
+        VectorXr f_;                            //!< Stores R1^T*R0^{-1}*u
+        VectorXr g_;                            //!< Stores T^{-1}*f
+        VectorXr h_;                            //!< Stores (lambda*K-I)*g
+        VectorXr p_;                            //!< Stores Psi*h-t
+        VectorXr r_;                            //!< Stores Q*s
 
         void left_multiply_by_psi(const InputCarrier & carrier, VectorXr & ret, const VectorXr & vec);
 };
 
+
+//! General purpose class to support efficient case-driven computation of Lambda_Optimizer
+/*!
+ This struct is a collection of static methods called "universal" in their name
+ whose main purpose is to use SFINAE on the template InputCarrier type to provide
+ correct implementation for each possible method in Lambda_Optimizer derived classes.
+ Since functons are static no object of this class needs to be ever created
+ \sa AuxiliaryData,  Lambda_optimizer
+*/
 struct AuxiliaryOptimizer
 {
+        static void bc_utility(MatrixXr & mat, const std::vector<UInt> * bc_idxp);
+        static void bc_utility(SpMat & mat, const std::vector<UInt> * bc_idxp);
+        /* -------------------------------------------------------------------*/
+
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value, UInt>::type
                 universal_R_setter(MatrixXr & R, const InputCarrier & carrier, AuxiliaryData<InputCarrier> & adt);
@@ -59,7 +90,6 @@ struct AuxiliaryOptimizer
         template<typename InputCarrier>
         static typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Areal, InputCarrier>::value>,f_type>::value, UInt>::type
                 universal_T_setter(MatrixXr & T, InputCarrier & carrier);
-
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>
@@ -95,10 +125,6 @@ struct AuxiliaryOptimizer
 
         template<typename InputCarrier>
         static void common_z_hat_part(VectorXr & z_hat, InputCarrier & carrier, const MatrixXr & S);
-
-        template<typename InputCarrier>
-        static void set_z_hat_W(VectorXr & z_hat, const MatrixXr * Hp, InputCarrier & carrier, const MatrixXr & S, const VectorXr * zp);
-        static void set_z_hat_nW(VectorXr & z_hat, const MatrixXr & S, const VectorXr * zp);
         /* -------------------------------------------------------------------*/
 
         template<typename InputCarrier>

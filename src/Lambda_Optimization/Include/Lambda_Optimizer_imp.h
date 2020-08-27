@@ -40,7 +40,6 @@ output_Data GCV_Family<InputCarrier, 1>::get_output(std::pair<Real,UInt> optimal
 
 //! Full output for dof computation
 /*! Set and return all output data, dof included.
-
 */
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::set_output_partial(void)
