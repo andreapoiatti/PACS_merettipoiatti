@@ -12,7 +12,7 @@ Image.FEM has been restored. Bugs in fPCA, boundary conditions and space-varying
 Compiled in both Win RStudio and Ubuntu 18.04 using g++ compiler. If using a Linux machine, it is advisable to install rgl, geometry, plot3D and plot3Drgl before fdaPDE. If using Windows, it is advisable to install Rtools and then rgl, plot3D, plot3Drgl, geometry and RcppEigen libraries. 
 
 ## New subfolder structure:
-/src contains all C++ code and a special file named Makevars necessary to build and install the R package. The code is now organized in subfolders and divided into source files and header files. See the report for the precise new orgaization. We suggest to use a base-8 scale as spacing scale in order to preserve the code style.
+/src contains all C++ code and a special file named Makevars necessary to build and install the R package. The code is now organized in subfolders and divided into source files and header files. See the report for the precise new orgaization. We suggest to use a base-8 scale as spacing scale for visualization, in order to preserve the code style.
 
 /R contains the R functions that wrap the C++ calls,
 
