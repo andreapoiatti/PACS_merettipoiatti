@@ -13,7 +13,7 @@
 class  OptimizationData
 {
         private:
-                std::string criterion      = "grid";           //!< grid [default], newton or newton_fd
+                std::string criterion      = "grid";            //!< grid [default], newton or newton_fd
                 std::string DOF_evaluation = "not_required";    //!< not_required [default], stochastic or exact
                 std::string loss_function  = "unused";          //!< unused [default] or GCV
 
@@ -37,7 +37,7 @@ class  OptimizationData
                 // To keep track of optimization
                 Real last_lS_used = std::numeric_limits<Real>::infinity();      //!< last lambda_S used in optimization
                 Real last_lT_used = std::numeric_limits<Real>::infinity();      //!< last lambda_T used in optimization
-                Real current_lambdaS = -1.;                     //!< Value of the lambda_S for which we are currently performing the computation
+                Real current_lambdaS = -1.;                                     //!< Value of the lambda_S for which we are currently performing the computation
 
                 // If already present
                 MatrixXr DOF_matrix;                            //!< Matrix of dof (if passed by the user no need to compute dofs, we can use this)
@@ -79,7 +79,7 @@ class  OptimizationData
                 inline void set_last_lS_used(const Real last_lS_used_) {last_lS_used = last_lS_used_;}                          //!< Setter of last_lS_used \param last_lS_used_ new last_lS_used
                 inline void set_last_lT_used(const Real last_lT_used_) {last_lT_used = last_lT_used_;}                          //!< Setter of last_lT_used \param last_lT_used_ new last_lT_used
                 inline void set_DOF_matrix(const MatrixXr & DOF_matrix_) {DOF_matrix = DOF_matrix_;}                            //!< Setter of DOF_matrix \param DOF_matrix_ new DOF_matrix
-                inline void set_stopping_criterion_tol(Real stc_) {stopping_criterion_tol = stc_;}                            //!< Setter of stopping_criterion_tol \param stc_ new stopping_criterion_tol
+                inline void set_stopping_criterion_tol(Real stc_) {stopping_criterion_tol = stc_;}                              //!< Setter of stopping_criterion_tol \param stc_ new stopping_criterion_tol
                 inline void set_tuning(const Real tuning_) {tuning = tuning_;}                                                  //!< Setter of tuning \param tuning_ new tuning
                 inline void set_current_lambdaS(const Real new_lambdaS) {current_lambdaS = new_lambdaS;}                        //!< Utility for GAM problems, that always need a vector \param new_lambdaS, new current_lambdaS
                 inline void setCurrentLambda(UInt lambda_index) {lambda_S = std::vector<Real>(1,lambdaS_backup[lambda_index]);} //!< Setter of a backup of lambda_S manpualted in setCurrentLambda

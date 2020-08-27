@@ -49,6 +49,10 @@ void GCV_Family<InputCarrier, 1>::set_output_partial(void)
 
 }
 
+//! Getter of the fill output
+/*!
+ \return the full output_Data struct
+*/
 template<typename InputCarrier>
 output_Data GCV_Family<InputCarrier, 1>::get_output_full(void)
 {
@@ -74,8 +78,6 @@ void GCV_Family<InputCarrier, 1>::set_output_partial_best(void)
  \param f_hat the system soultion from which to evaluate the predictions
  \return output_Data struct containing predictions
 */
-
-
 template<typename InputCarrier>
 void GCV_Family<InputCarrier, 1>::combine_output_prediction(const VectorXr & f_hat, output_Data & outp, UInt cols)
 {
@@ -786,8 +788,8 @@ Real GCV_Stochastic<InputCarrier, 1>::compute_f(Real lambda)
                 AuxiliaryOptimizer::universal_GCV<InputCarrier>(this->s, this->sigma_hat_sq, this->dor);
 
         // Debugging purpose print
-        //Rprintf("LAMBDA = %f\n",lambda);
-	//Rprintf("GCV = %f\n",GCV_val);
+        // Rprintf("LAMBDA = %f\n",lambda);
+	// Rprintf("GCV = %f\n",GCV_val);
 
 	return GCV_val;
 }

@@ -23,8 +23,8 @@
 template<typename InputCarrier, typename Enable = void>
 struct AuxiliaryData
 {
-        MatrixXr K_;                            //!< stores T^{-1}*R                            [[nnodes x nnodes]]
-        MatrixXr F_;                            //!< stores K*v                                 [[nnodes x nnodes]]
+        MatrixXr K_;                            //!< stores T^{-1}*R                            [nnodes x nnodes]
+        MatrixXr F_;                            //!< stores K*v                                 [nnodes x nnodes]
         VectorXr t_;                            //!< stores dS*z;
         Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
         Real     b_;                            //!< Stores <t, Q*t>
@@ -44,8 +44,8 @@ struct AuxiliaryData
 template<typename InputCarrier>
 struct AuxiliaryData<InputCarrier, typename std::enable_if<std::is_same<multi_bool_type<std::is_base_of<Forced, InputCarrier>::value>,t_type>::value>::type>
 {
-        MatrixXr K_;                            //!< stores T^{-1}*R                            [[nnodes x nnodes]]
-        MatrixXr F_;                            //!< stores K*v                                 [[nnodes x nnodes]]
+        MatrixXr K_;                            //!< stores T^{-1}*R                            [nnodes x nnodes]
+        MatrixXr F_;                            //!< stores K*v                                 [nnodes x nnodes]
         VectorXr t_;                            //!< stores dS*z;
         Real     a_;                            //!< Stores the value of <eps_hat, dS*z>
         Real     b_;                            //!< Stores <t, Q*t>
