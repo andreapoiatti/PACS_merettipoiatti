@@ -24,9 +24,10 @@ class Vec_evaluation
 
                  /*! Constructor */
                 Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Tuple> & lambda_vec_):
-                        F(F_), lambda_vec(lambda_vec_) {//Debugging purpose//Rprintf("Vector evaluator built\n");
-                        };
-
+                F(F_), lambda_vec(lambda_vec_)
+                {
+                        //Debugging purpose//Rprintf("Vector evaluator built\n");
+                };
 
                 /*!
                  Function to compute particular parameters related to the mimizing solution.
@@ -43,9 +44,9 @@ class Vec_evaluation
 
         public:
 
-                  /*!
-                  \note F needed to be public, to be able to access to other methods of the class F from outside
-                  */
+                /*!
+                 \note F needed to be public, to be able to access to other methods of the class F from outside
+                */
                 Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;
 
                 /*!

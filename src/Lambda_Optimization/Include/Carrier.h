@@ -6,8 +6,8 @@
 #include <type_traits>
 #include "../../FdaPDE.h"
 #include "../../Regression/Include/Mixed_FE_Regression.h"
-#include "Optimization_Data.h"
 #include "../../Regression/Include/Regression_Data.h"
+#include "Optimization_Data.h"
 
 // Declaration of classes that will be used as Extensions for Carrier
 class Areal;
@@ -145,48 +145,48 @@ class Carrier: public Extensions...
                 }
 
                 // GETTERS
-                inline OptimizationData * get_opt_data(void) {return this->opt_data;}                           //!< Getter of opt_data
-                inline bool loc_are_nodes(void) const {return this->locations_are_nodes;}                       //!< Getter of locations_are_nodes
-                inline bool has_W(void) const {return this->has_covariates;}                                    //!< Getter of has_covariates
-                inline bool is_areal(void) const {return this->areal_data;}                                     //!< Getter of areal_data
-                inline bool is_temporal(void) const {return this->temporal_data;}                               //!< Getter of temporal_data
-                inline UInt get_n_obs(void) const {return this->n_obs;}                                         //!< Getter of n_obs [# locations]
-                inline UInt get_n_nodes(void) const {return this->n_nodes;}                                     //!< Getter of n_nodes [# nodes]
-                inline const std::vector<UInt> * get_obs_indicesp(void) const {return this->obs_indicesp;}      //!< Getter of obs_indicesp
-                inline const VectorXr * get_zp(void) const {return this->zp;}                                   //!< Getter of zp
-                inline const MatrixXr * get_Wp(void) const {return this->Wp;}                                   //!< Getter of Wp
-                inline const MatrixXr * get_Hp(void) const {return this->Hp;}                                   //!< Getter of Hp
-                inline const MatrixXr * get_Qp(void) const {return this->Qp;}                                   //!< Getter of Qp
-                inline const SpMat * get_DMatp(void) const {return this->DMatp;}                                //!< Getter of DMatp
-                inline const SpMat * get_R1p(void) const {return this->R1p;}                                    //!< Getter of R1p
-                inline const SpMat * get_R0p(void) const {return this->R0p;}                                    //!< Getter of R0p
-                inline const SpMat * get_psip(void) const {return this->psip;}                                  //!< Getter of psip
-                inline const SpMat * get_psi_tp(void) const {return this->psi_tp;}                              //!< Getter of psi_tp
-                inline const VectorXr * get_rhsp(void) const {return this->rhsp;}                               //!< Getter of rhsp
-                inline const std::vector<Real> * get_bc_valuesp(void) const {return this->bc_valuesp;}          //!< Getter of bc_valuesp
-                inline const std::vector<UInt> * get_bc_indicesp(void) const {return this->bc_indicesp;}        //!< Getter of bc_indicesp
-                inline const MixedFERegressionBase<InputHandler> * get_model(void) const {return this->model;}
+                inline OptimizationData * get_opt_data(void) {return this->opt_data;}                           //!< Getter of opt_data \return opt_data
+                inline bool loc_are_nodes(void) const {return this->locations_are_nodes;}                       //!< Getter of locations_are_nodes \return locations_are_nodes
+                inline bool has_W(void) const {return this->has_covariates;}                                    //!< Getter of has_covariates \return has_covariates
+                inline bool is_areal(void) const {return this->areal_data;}                                     //!< Getter of areal_data \return areal_data
+                inline bool is_temporal(void) const {return this->temporal_data;}                               //!< Getter of temporal_data \return temporal_data
+                inline UInt get_n_obs(void) const {return this->n_obs;}                                         //!< Getter of n_obs [# locations] \return n_obs
+                inline UInt get_n_nodes(void) const {return this->n_nodes;}                                     //!< Getter of n_nodes [# nodes] \return n_nodes
+                inline const std::vector<UInt> * get_obs_indicesp(void) const {return this->obs_indicesp;}      //!< Getter of obs_indicesp \return obs_indicesp
+                inline const VectorXr * get_zp(void) const {return this->zp;}                                   //!< Getter of zp \return zp
+                inline const MatrixXr * get_Wp(void) const {return this->Wp;}                                   //!< Getter of Wp \return Wp
+                inline const MatrixXr * get_Hp(void) const {return this->Hp;}                                   //!< Getter of Hp \return Hp
+                inline const MatrixXr * get_Qp(void) const {return this->Qp;}                                   //!< Getter of Qp \return Qp
+                inline const SpMat * get_DMatp(void) const {return this->DMatp;}                                //!< Getter of DMatp \return DMatp
+                inline const SpMat * get_R1p(void) const {return this->R1p;}                                    //!< Getter of R1p \return R1p
+                inline const SpMat * get_R0p(void) const {return this->R0p;}                                    //!< Getter of R0p \return R0p
+                inline const SpMat * get_psip(void) const {return this->psip;}                                  //!< Getter of psip \return psip
+                inline const SpMat * get_psi_tp(void) const {return this->psi_tp;}                              //!< Getter of psi_tp \return pst_tp
+                inline const VectorXr * get_rhsp(void) const {return this->rhsp;}                               //!< Getter of rhsp \return rhsp
+                inline const std::vector<Real> * get_bc_valuesp(void) const {return this->bc_valuesp;}          //!< Getter of bc_valuesp \return bc_valuesp
+                inline const std::vector<UInt> * get_bc_indicesp(void) const {return this->bc_indicesp;}        //!< Getter of bc_indicesp \return bc_indicesp
+                inline const MixedFERegressionBase<InputHandler> * get_model(void) const {return this->model;}  //!< Getter of model \return model
 
                 // SETTERS
-                inline void set_model(MixedFERegressionBase<InputHandler> * md) {this->model=md;};                                      //!< Setter of model
-                inline void set_opt_data(OptimizationData * opt_data_) {this->opt_data = opt_data_;}                                    //!< Setter of opt_data
-                inline void set_loc_are_nodes(const bool locations_are_nodes_) {this->locations_are_nodes = locations_are_nodes_;}      //!< Setter of locations_are_nodes
-                inline void set_has_W(const bool has_covariates_) {this->has_covariates = has_covariates_;}                             //!< Setter of has_covariates
-                inline void set_n_obs(const UInt n_obs_) {this->n_obs = n_obs_;}                                                        //!< Setter of n_obs
-                inline void set_n_nodes(const UInt n_nodes_) {this->n_nodes = n_nodes_;}                                                //!< Setter of n_nodes
-                inline void set_obs_indicesp(const std::vector<UInt> * obs_indicesp_) {this->obs_indicesp = obs_indicesp_;}             //!< Setter of obs_indicesp
-                inline void set_zp(const VectorXr * zp_) {this->zp = zp_;}                                                              //!< Setter of zp
-                inline void set_Wp(const MatrixXr * Wp_) {this->Wp = Wp_;}                                                              //!< Setter of Wp
-                inline void set_Hp(const MatrixXr * Hp_) {this->Hp = Hp_;}                                                              //!< Setter of Hp
-                inline void set_Qp(const MatrixXr * Qp_) {this->Qp = Qp_;}                                                              //!< Setter of Qp
-                inline void set_DMatp(const SpMat * DMatp_) {this->DMatp = DMatp_;}                                                     //!< Setter of DMatp
-                inline void set_R1p(const SpMat * R1p_) {this->R1p = R1p_;}                                                             //!< Setter of R1p
-                inline void set_R0p(const SpMat * R0p_) {this->R0p = R0p_;}                                                             //!< Setter of R0p
-                inline void set_psip(const SpMat * psip_) {this->psip = psip_;}                                                         //!< Setter of psip
-                inline void set_psi_tp(const SpMat * psi_tp_) {this->psi_tp = psi_tp_;}                                                 //!< Setter of psi_tp
-                inline void set_rhsp(const VectorXr * rhsp_) {this->rhsp = rhsp_;}                                                      //!< Setter of rhsp
-                inline void set_bc_valuesp(const std::vector<Real> * bc_valuesp_) {this->bc_valuesp = bc_valuesp_;}                     //!< Setter of bc_valuesp
-                inline void set_bc_indicesp(const std::vector<UInt> * bc_indicesp_) {this->bc_indicesp = bc_indicesp_;}                 //!< Setter of bc-bc_indicesp
+                inline void set_model(MixedFERegressionBase<InputHandler> * md) {this->model = md;};                                    //!< Setter of model \param md new model
+                inline void set_opt_data(OptimizationData * opt_data_) {this->opt_data = opt_data_;}                                    //!< Setter of opt_data \param opt_data_ new opt_data
+                inline void set_loc_are_nodes(const bool locations_are_nodes_) {this->locations_are_nodes = locations_are_nodes_;}      //!< Setter of locations_are_nodes \param locations_are_nodes_ new loc_are_nodes
+                inline void set_has_W(const bool has_covariates_) {this->has_covariates = has_covariates_;}                             //!< Setter of has_covariates \param has_covariates_ new has_covariates
+                inline void set_n_obs(const UInt n_obs_) {this->n_obs = n_obs_;}                                                        //!< Setter of n_obs \param n_obs_ new n_obs
+                inline void set_n_nodes(const UInt n_nodes_) {this->n_nodes = n_nodes_;}                                                //!< Setter of n_nodes \param n_nodes_ new n_nodes
+                inline void set_obs_indicesp(const std::vector<UInt> * obs_indicesp_) {this->obs_indicesp = obs_indicesp_;}             //!< Setter of obs_indicesp \param obs_indicesp_ new obs_indicesp
+                inline void set_zp(const VectorXr * zp_) {this->zp = zp_;}                                                              //!< Setter of zp \param zp_ new zp
+                inline void set_Wp(const MatrixXr * Wp_) {this->Wp = Wp_;}                                                              //!< Setter of Wp \param Wp_ new Wp
+                inline void set_Hp(const MatrixXr * Hp_) {this->Hp = Hp_;}                                                              //!< Setter of Hp \param Hp_ new Hp
+                inline void set_Qp(const MatrixXr * Qp_) {this->Qp = Qp_;}                                                              //!< Setter of Qp \param Qp_ new Qp
+                inline void set_DMatp(const SpMat * DMatp_) {this->DMatp = DMatp_;}                                                     //!< Setter of DMatp \param DMatp_ new DMatp
+                inline void set_R1p(const SpMat * R1p_) {this->R1p = R1p_;}                                                             //!< Setter of R1p \param R1p_ new R1p
+                inline void set_R0p(const SpMat * R0p_) {this->R0p = R0p_;}                                                             //!< Setter of R0p \param R0p_ new R0p
+                inline void set_psip(const SpMat * psip_) {this->psip = psip_;}                                                         //!< Setter of psip \param psip_ new psip
+                inline void set_psi_tp(const SpMat * psi_tp_) {this->psi_tp = psi_tp_;}                                                 //!< Setter of psi_tp \param psi_tp_ new psip
+                inline void set_rhsp(const VectorXr * rhsp_) {this->rhsp = rhsp_;}                                                      //!< Setter of rhsp \param rhsp_ new rhsp
+                inline void set_bc_valuesp(const std::vector<Real> * bc_valuesp_) {this->bc_valuesp = bc_valuesp_;}                     //!< Setter of bc_valuesp \param bc_valuesp_ new bc_valuesp
+                inline void set_bc_indicesp(const std::vector<UInt> * bc_indicesp_) {this->bc_indicesp = bc_indicesp_;}                 //!< Setter of bc_indicesp \param bc_indicesp_new bc_indicesp
 
                 // APPLY FUNCTIONS
                 //! Method to the system given a lambda and a right hand side of the system
@@ -262,12 +262,12 @@ class Areal
                 }
 
                 // GETTERS
-                inline UInt get_n_regions(void) const {return this->n_regions;}         //!<  Getter of n_regions
-                inline const VectorXr * get_Ap(void) const {return this->Ap;}           //!<  Getter of Ap
+                inline UInt get_n_regions(void) const {return this->n_regions;}         //!<  Getter of n_regions \return n_regions
+                inline const VectorXr * get_Ap(void) const {return this->Ap;}           //!<  Getter of Ap \return Ap
 
                 // SETTERS
-                inline void set_n_regions(UInt n_regions_) {this->n_regions = n_regions_;}      //!< Setter of n_regions
-                inline void set_Ap(const VectorXr * Ap_) {this->Ap = Ap_;}                      //!< Setter of Ap
+                inline void set_n_regions(UInt n_regions_) {this->n_regions = n_regions_;}      //!< Setter of n_regions \param n_regions_ new n_regions
+                inline void set_Ap(const VectorXr * Ap_) {this->Ap = Ap_;}                      //!< Setter of Ap \param Ap_ new Ap
 };
 
 //! Forcing term extension for Carrier
@@ -302,10 +302,10 @@ class Forced
                 }
 
                 // GETTERS
-                inline const VectorXr * get_up(void) const {return this->up;}   //!< Getter of up
+                inline const VectorXr * get_up(void) const {return this->up;}   //!< Getter of up \return up
 
                 // SETTERS
-                inline void set_up(const VectorXr * up_) {this->up = up_;}      //!< Setter of up
+                inline void set_up(const VectorXr * up_) {this->up = up_;}      //!< Setter of up \param up_ new up
 };
 
 class Temporal
@@ -315,10 +315,26 @@ class Temporal
 //----------------------------------------------------------------------------//
 
 // *** CARRIER BUILDER ***
+
+
+//! Utility class used to build the Carrier variadic template
+/*!
+ This class is a collection of static methods used to build any possible
+ useful Carrier type construct, so far implemented
+ \tparam DataHandler the type of regression problem from which to build the Carrier
+*/
 template<typename DataHandler>
 class CarrierBuilder
 {
         private:
+                //! Method to fill the backbone of Carrier structure via its global setter
+                /*
+                  \tparam Extensions... further information that has to be included into the Carrier
+                  \param car a Carrier type object to undergo the general setter
+                  \param data DataHandler from which to build the Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                */
                 template<typename... Extensions>
                 static void set_plain_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
@@ -328,12 +344,28 @@ class CarrierBuilder
                                 mc.getR0_(), mc.getpsi_(), mc.getpsi_t_(), mc.getrhs_(), data.getDirichletValues(), data.getDirichletIndices());
                 }
 
+                //! Method to fill the eventual Areal part of an areal carrier
+                /*
+                  \tparam Extensions... further information that has to be included into the Carrier
+                  \param car a Carrier type object to undergo the areal setter
+                  \param data DataHandler from which to build the areal Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the areal Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                */
                 template<typename... Extensions>
                 static void set_areal_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
                         car.set_all_areal(data.getNumberOfRegions(), mc.getA_());
                 }
 
+                //! Method to fill the eventual Forced part of a forced carrier
+                /*
+                  \tparam Extensions... further information that has to be included into the Carrier
+                  \param car a Carrier type object to undergo the forced setter
+                  \param data DataHandler from which to build the forced Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the forced Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                */
                 template<typename... Extensions>
                 static void set_forced_data(Carrier<DataHandler, Extensions...> & car, const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
@@ -341,6 +373,13 @@ class CarrierBuilder
                 }
 
         public:
+                //! Plain pointwise Carrier static builder
+                /*
+                  \param data DataHandler from which to build the Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                  \return the built Carrier
+                */
                 static Carrier<DataHandler> build_plain_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {       //da modificare, non serve copiarli due volte!
                         Carrier<DataHandler> car;
@@ -349,6 +388,13 @@ class CarrierBuilder
                         return car;
                 }
 
+                //! Areal Carrier static builder
+                /*
+                  \param data DataHandler from which to build the Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                  \return the built Carrier
+                */
                 static Carrier<DataHandler, Areal> build_areal_carrier(const DataHandler & data,  MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Areal> car;
@@ -358,6 +404,13 @@ class CarrierBuilder
                         return car;
                 }
 
+                //! Forced pointwise Carrier static builder
+                /*
+                  \param data DataHandler from which to build the Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                  \return the built Carrier
+                */
                 static Carrier<DataHandler, Forced> build_forced_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Forced> car;
@@ -367,6 +420,13 @@ class CarrierBuilder
                         return car;
                 }
 
+                //! Forced Areal Carrier static builder
+                /*
+                  \param data DataHandler from which to build the Carrier
+                  \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
+                  \param optimizationData optimization data to store in the Carrier
+                  \return the built Carrier
+                */
                 static Carrier<DataHandler, Forced, Areal> build_forced_areal_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc,  OptimizationData & optimizationData)
                 {
                         Carrier<DataHandler, Forced, Areal> car;

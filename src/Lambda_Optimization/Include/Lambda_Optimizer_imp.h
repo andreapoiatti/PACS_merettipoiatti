@@ -104,8 +104,6 @@ void GCV_Family<InputCarrier, 1>::compute_z_hat_from_f_hat(const VectorXr & f_ha
 {
         // z_hat  = H*z+Q*Psi*g_hat
 
-        // [[TODO IMPROVEMENT fixing optimization in psi]]
-
         if (this->the_carrier.has_W())
         {
                 this->z_hat = (*this->the_carrier.get_Hp())*(*this->the_carrier.get_zp()) + this->the_carrier.lmbQ((*this->the_carrier.get_psip())*f_hat);
@@ -598,7 +596,6 @@ void GCV_Stochastic<InputCarrier, 1>::set_US_(void)
 
         // [[TODO Creation of the random generators ]]
         // set the seed
-
         UInt seed = this->the_carrier.get_opt_data()->get_seed();
         if(seed == 0)
         {
