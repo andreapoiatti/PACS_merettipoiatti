@@ -75,11 +75,6 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
       stop("'BC_indices' required in BC;  is NULL.")
     if (is.null(BC$BC_values))
       stop("'BC_indices' required in BC;  is NULL.")
-    if(optimization == 'newton')
-    {
-      optimization = 'newton_fd'
-      warning("'newton' 'optimization' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
-    }
   }
   
   # Check the locations in 'bary.locations' and 'locations' are the same

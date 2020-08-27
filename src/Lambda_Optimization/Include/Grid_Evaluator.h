@@ -22,33 +22,29 @@ class Vec_evaluation
                  //! Vector of lambda to be evaluated
                 std::vector<Tuple> lambda_vec;
 
-                 /*! Constructor */
+                //! Constructor
                 Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Tuple> & lambda_vec_):
                 F(F_), lambda_vec(lambda_vec_)
                 {
-                        //Debugging purpose//Rprintf("Vector evaluator built\n");
+                        // Debugging purpose
+                        // Rprintf("Vector evaluator built\n");
                 };
 
-                /*!
-                 Function to compute particular parameters related to the mimizing solution.
+                // Function to compute particular parameters related to the mimizing solution.
+                /*
                  It does nothing if not implemented. It is not pure virtual in order to be general
                  and leave the possibility of instantiating the object without implementing that function
                 */
                 virtual void compute_specific_parameters(void) {};
 
 
-                /*
-                 Only for minimizing solutions. It does nothing if not implemented
-                */
+                //! Only for minimizing solutions. It does nothing if not implemented
                 virtual void compute_specific_parameters_best(void) {};
 
         public:
+                Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;       //!< F needed to be public, to be able to access to other methods of the class F from outside
 
-                /*!
-                 \note F needed to be public, to be able to access to other methods of the class F from outside
-                */
-                Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;
-
+                // Main method function
                 /*!
                  \return std::pair<std::vector<Real>, UInt> the vector of evaluations of GCV and the index of the corresponding minimum
                 */
@@ -88,17 +84,13 @@ template <typename ...Extensions>
 class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
 {
         protected:
-                /*!
-                Computes specific parameters needed for GCV
-                */
+                //! Computes specific parameters needed for GCV
                 void compute_specific_parameters(void) override
                 {
-                 this->F.set_output_partial();
+                        this->F.set_output_partial();
                 }
 
-                /*!
-                Computes specific parameters needed for GCV best values
-                */
+                //! Computes specific parameters needed for GCV best values
                 void compute_specific_parameters_best(void) override
                 {
                         // Debugging purpose
@@ -108,13 +100,13 @@ class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
                  }
 
         public:
-                 /*! Constructor */
+                //! Constructor
                 Eval_GCV(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
                         Vec_evaluation<Real, Real, Extensions...>(F_,lambda_vec_) {};
 
-                /*!
-                Function to build the output data
-                \return output_Data which contains the almost complete output to be returned to R
+                //! Function to build the output data
+                /*
+                 \return output_Data which contains the almost complete output to be returned to R
                 */
                 output_Data  Get_optimization_vectorial(void)
                 {

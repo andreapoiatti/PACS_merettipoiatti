@@ -14,20 +14,22 @@
 class Checker
 {
         private:
-                bool reached_max_iter;
-                bool reached_tolerance;
+                bool reached_max_iter;          //!< Boolean for maximum number ot iterations reached
+                bool reached_tolerance;         //!< Boolean for tolerane reached
 
         public:
+                //! Basic Constructor: everything seta as false
                 Checker(void): reached_max_iter(false), reached_tolerance(false) {}
 
-                /*! Sets max number of iterations */
+                //! Sets max number of iterations as true
                 inline void set_max_iter(void)  {reached_max_iter  = true;}
 
-                /*! Sets the tolerance for the optimization method*/
+                //! Sets the tolerance for the optimization method as true
                 inline void set_tolerance(void) {reached_tolerance = true;}
 
-                /*!
-                Returns the reason of conclusion of the iterative method
+                //! Returns the reason of conclusion of the iterative method
+                /*
+                 \return th code type of the problem
                 */
                 inline int which(void) const
                 {
@@ -119,8 +121,8 @@ struct Auxiliary<VectorXr>
  {
          public:
 
-                 /*!
-                  Constructor
+                 // Constructor
+                 /*
                   \note F cannot be const, it must be modified
                  */
                  Newton_ex(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_): Opt_methods<Tuple, Hessian, Extensions...>(F_)
@@ -129,7 +131,7 @@ struct Auxiliary<VectorXr>
                          // Rprintf("Newton method built\n");
                  };
 
-                 /*! Apply Newton's method */
+                 //! Apply Newton's method
                  std::pair<Tuple, UInt> compute (const Tuple & x0, const Real tolerance, const UInt max_iter, Checker & ch, std::vector<Real> & GCV_v, std::vector<Real> & lambda_v) override;
 };
 
@@ -137,7 +139,7 @@ struct Auxiliary<VectorXr>
 template <typename Tuple, typename Hessian, typename ...Extensions>
 class Newton_fd: public Opt_methods<Tuple, Hessian, Extensions...>
 {
-        //NOT yet implemented
+        // NOT yet implemented
 };
 
 //! Class to apply Newton method exploting finite differences to compute derivatives, inheriting from Opt_methods
@@ -151,8 +153,8 @@ class Newton_fd<Real, Real, Extensions...>: public Opt_methods<Real, Real, Exten
 {
         public:
 
-                /*!
-                 Constructor
+                // Constructor
+                /*
                  \note F cannot be const, it must be modified
                 */
                 Newton_fd(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_): Opt_methods<Real, Real, Extensions...>(F_) {};

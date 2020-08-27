@@ -2,15 +2,15 @@
 #define __REGRESSION_SKELETON_H__
 
 #include "../../FdaPDE.h"
-#include "../../Mesh/Include/Mesh.h"
-#include "../../Regression/Include/Mixed_FE_Regression.h"
-#include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "../../Lambda_Optimization/Include/Carrier.h"
+#include "../../Lambda_Optimization/Include/Grid_Evaluator.h"
 #include "../../Lambda_Optimization/Include/Lambda_Optimizer.h"
 #include "../../Lambda_Optimization/Include/Newton.h"
-#include "../../Lambda_Optimization/Include/Grid_Evaluator.h"
+#include "../../Lambda_Optimization/Include/Optimization_Data.h"
 #include "../../Lambda_Optimization/Include/Optimization_Methods_Factory.h"
 #include "../../Lambda_Optimization/Include/Solution_Builders.h"
+#include "../../Mesh/Include/Mesh.h"
+#include "../../Regression/Include/Mixed_FE_Regression.h"
 
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier);
@@ -26,7 +26,8 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
 	regression.template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh);
 
         std::pair<MatrixXr, output_Data> solution_bricks;
-	//Build the carrier
+
+	// Build the carrier
 	if(regression.isSV())
 	{
 		if(regressionData.getNumberOfRegions()>0)
@@ -89,7 +90,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 
 		timer Time_partial;
 		Time_partial.start();
-		//Rprintf("WARNING: start taking time\n");
+		// Rprintf("WARNING: start taking time\n");
 
 		// Get the solution
 		output_Data output;
@@ -112,12 +113,12 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 			optim.combine_output_prediction(solution.topRows(solution.rows()/2).col(j),output,j);
 		}
 
-		//Rprintf("WARNING: partial time after the optimization method\n");
+		// Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();
 
 		output.time_partial = T.tv_sec + 1e-9*T.tv_nsec;
 
-                //postponed after apply in order to have betas computed
+                // postponed after apply in order to have betas computed
                 output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
@@ -136,13 +137,14 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 	{
 		timer Time_partial;
 		Time_partial.start();
-		//Rprintf("WARNING: start taking time\n");
-		//this will be used when grid will be correctly implemented, also for return elements
-		//Eval_GCV<Real, Real, GCV_Exact<Carrier<MixedFERegression<InputHandler, Integrator, ORDER, mydim, ndim>>, 1>> eval(Fun, *(optimizationData.get_lambdas_()));
-		Eval_GCV<EvaluationType> eval(Fun, optr->get_lambda_S());  //debugging dummy trial: working
+		// Rprintf("WARNING: start taking time\n");
+
+		// this will be used when grid will be correctly implemented, also for return elements
+
+		Eval_GCV<EvaluationType> eval(Fun, optr->get_lambda_S());
 		output_Data output = eval.Get_optimization_vectorial();
 
-		//Rprintf("WARNING: partial time after the optimization method\n");
+		// Rprintf("WARNING: partial time after the optimization method\n");
 		timespec T = Time_partial.stop();
 
 		// Get the solution
@@ -154,7 +156,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
                 output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
-		//Solution_Builders::GCV_grid_sol(solution, output_vec);
+		// Solution_Builders::GCV_grid_sol(solution, output_vec);
 	}
 	else // 'not_required' optimization can't enter here!! [checked in R code]
 	{
@@ -166,14 +168,15 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 		std::vector<Real> lambda_v_;
 		std::vector<Real> GCV_v_;
 		Real lambda = optr->get_initial_lambda_S();
-		if(lambda <=0)
+
+		if(lambda<=0)
 		{
 			lambda = -1.0;
 		}
 
 		timer Time_partial;
 		Time_partial.start();
-		//Rprintf("WARNING: start taking time\n");
+		// Rprintf("WARNING: start taking time\n");
 
 		std::pair<Real, UInt> lambda_couple = optim_p->compute(lambda, optr->get_stopping_criterion_tol(), 40, ch, GCV_v_, lambda_v_);
 
@@ -181,13 +184,13 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 		timespec T = Time_partial.stop();
 
 		// Get the solution
-		//to compute f and g hat
+		// to compute f and g hat
 		MatrixXr solution = carrier.apply(lambda_couple.first);
 
-                 //postponed after apply in order to have betas computed
-		//now the last values in GCV_exact are the correct ones, related to the last iteration
-	         output_Data  output = optim_p->F.get_output(lambda_couple, T, GCV_v_, lambda_v_, ch.which()); //this is why F has to be public in Opt_methods
-		 //the copy is necessary for the bulders outside
+		// postponed after apply in order to have betas computed
+		// now the last values in GCV_exact are the correct ones, related to the last iteration
+		output_Data  output = optim_p->F.get_output(lambda_couple, T, GCV_v_, lambda_v_, ch.which()); //this is why F has to be public in Opt_methods
+		// the copy is necessary for the bulders outside
 
 		return {solution, output};
 	}

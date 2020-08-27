@@ -352,7 +352,14 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     warning("Dof are computed, setting 'loss_function' to 'GCV'")
     loss_function = 'GCV'
   }
-
+  
+  
+  if(!is.null(BC) & optimization == 'newton')
+  {
+    optimization = 'newton_fd'
+    warning("'newton' 'optimization' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
+  }
+  
   if(optimization == "grid")
   {
     optim = 0
