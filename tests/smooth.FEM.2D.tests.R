@@ -613,7 +613,7 @@ output_CPP<-smooth.FEM(observations=data,
 data=data_backup #restore original data for next tests
 plot(output_CPP$fit.FEM)
 
-#### Test 4.3.4: BC != 0     Newton Finite differences with stochastic GCV 
+#### Test 4.3.5: BC != 0     Newton Finite differences with stochastic GCV 
 # Add a constat to the data to change true BC
 data_backup=data #save a copy of original data
 data = data + 5
