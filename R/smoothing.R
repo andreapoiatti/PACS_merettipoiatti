@@ -66,7 +66,7 @@
 #' @param max.steps.FPIRLS This parameter is used to limit the maximum number of iteration.
 #' Default value \code{max.steps.FPIRLS=15}.
 #' @param optimization This parameter is used to select the optimization method related to the penalization factor.
-#' The following methods are implemented: "grid", "newton", "newton_fd". 
+#' The following methods are implemented: "grid", "newton", "newton_fd".
 #' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 #' The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
 #' They implement respectively a pure Newton method and a finite differences Newton method.
@@ -105,7 +105,7 @@
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
 #'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
 #'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
-#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
@@ -180,7 +180,7 @@
 #' data = fs.test(mesh$nodes[,1], mesh$nodes[,2]) + 2*covariate + rnorm(nrow(mesh$nodes), sd = 0.5)
 #'
 #' solution = smooth.FEM(observations = data, covariates = covariate, FEMbasis = FEMbasis, lambda = lambda)
-#' 
+#'
 #' # beta estimate:
 #' solution$solution$beta
 #' # non-parametric estimate:
@@ -352,7 +352,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     warning("Dof are computed, setting 'loss_function' to 'GCV'")
     loss_function = 'GCV'
   }
-  
+
   if(optimization == "grid")
   {
     optim = 0
@@ -616,11 +616,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     f = bigsol[[1]][1:numnodes,]
     g = bigsol[[1]][(numnodes+1):(2*numnodes),]
-  
+
     dof = bigsol[[2]]
     GCV_ = bigsol[[3]]
     bestlambda = bigsol[[4]]+1
-  
+
     if(!is.null(covariates))
     {
       beta = matrix(data=bigsol[[5]],nrow=ncol(covariates),ncol=length(lambda))
@@ -629,7 +629,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     {
       beta = NULL
     }
-  
+
     # Save information of Tree Mesh
     tree_mesh = list(
     treelev = bigsol[[6]][1],
@@ -639,29 +639,29 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     node_left_child = bigsol[[9]][,2],
     node_right_child = bigsol[[9]][,3],
     node_box= bigsol[[10]])
-  
+
     # Reconstruct FEMbasis with tree mesh
     mesh.class= class(FEMbasis$mesh)
-    if (is.null(FEMbasis$mesh$treelev)) 
+    if (is.null(FEMbasis$mesh$treelev))
     { #if doesn't exist the tree information
       FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
     } #if already exist the tree information, don't append
     class(FEMbasis$mesh) = mesh.class
-  
+
     # Save information of Barycenter
-    if (is.null(bary.locations)) 
+    if (is.null(bary.locations))
     {
         bary.locations = list(locations=locations, element_ids = bigsol[[11]], barycenters = bigsol[[12]])
     }
     class(bary.locations) = "bary.locations"
-  
+
     # Make Functional objects object
     fit.FEM  = FEM(f, FEMbasis)
     PDEmisfit.FEM = FEM(g, FEMbasis)
-  
+
     # Prepare return list
     reslist = NULL
-  
+
     if(DOF_evaluation!='not_required' || (DOF_evaluation=='not_required' && !is.null(DOF_matrix)))
     {
     	if(bestlambda == 1 || bestlambda == length(lambda))
@@ -674,7 +674,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     {
       reslist=list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, beta = beta, bary.locations = bary.locations)
     }
-  
+
     # GAM outputs
     if(sum(family==c("binomial", "exponential", "gamma", "poisson")) == 1)
     {
@@ -684,7 +684,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       if( variance.est[1]<0 ) variance.est = NULL
       reslist = c(reslist, list(fn.eval = fn.eval, J_minima = J_minima, variance.est = variance.est))
     }
-  
+
     return(reslist)
   }
   else
@@ -704,16 +704,16 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     {
       beta = NULL
     }
-    
+
     solution = list(
       f = bigsol[[1]][1:numnodes,],
       g = bigsol[[1]][(numnodes+1):(2*numnodes),],
       z_hat = bigsol[[2]],
       beta = beta,
       rmse = bigsol[[3]],
-      estimated_sd = bigsol[[4]]
+      estimated_sd = sqrt(bigsol[[4]])
     )
-    
+
     optimization = list(
       lambda_solution = bigsol[[5]],
       lambda_position = bigsol[[6]],
@@ -726,9 +726,9 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       lambda_vector = bigsol[[12]],
       GCV_vector = bigsol[[13]]
     )
-    
+
     time = bigsol[[14]]
-    
+
     # Save information of Tree Mesh
     tree_mesh = list(
       treelev = bigsol[[16]][1],
@@ -738,26 +738,26 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       node_left_child = bigsol[[19]][,2],
       node_right_child = bigsol[[19]][,3],
       node_box= bigsol[[20]])
-    
+
     #Reconstruct FEMbasis with tree mesh
     mesh.class= class(FEMbasis$mesh)
-    if (is.null(FEMbasis$mesh$treelev)) 
+    if (is.null(FEMbasis$mesh$treelev))
     { #if doesn't exist the tree information
       FEMbasis$mesh = append(FEMbasis$mesh, tree_mesh)
     } #if already exist the tree information, don't append
     class(FEMbasis$mesh) = mesh.class
-    
+
     # Save information of Barycenter
-    if (is.null(bary.locations)) 
+    if (is.null(bary.locations))
     {
       bary.locations = list(locations=locations, element_ids = bigsol[[21]], barycenters = bigsol[[22]])
     }
     class(bary.locations) = "bary.locations"
-    
+
     # Make Functional objects object
     fit.FEM  = FEM(solution$f, FEMbasis)
     PDEmisfit.FEM = FEM(solution$g, FEMbasis)
-    
+
     reslist = list(fit.FEM = fit.FEM, PDEmisfit.FEM = PDEmisfit.FEM, solution = solution,
                 optimization  = optimization, time = time, bary.locations = bary.locations)
     return(reslist)
