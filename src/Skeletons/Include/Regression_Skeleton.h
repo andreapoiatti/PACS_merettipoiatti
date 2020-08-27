@@ -20,14 +20,14 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 template<typename InputHandler, typename Integrator, UInt ORDER, UInt mydim, UInt ndim>
 SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optimizationData, SEXP Rmesh)
 {
-	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);
-	MixedFERegression<InputHandler> regression(regressionData, optimizationData, mesh.num_nodes());
+	MeshHandler<ORDER, mydim, ndim> mesh(Rmesh);	// Create the mesh
+	MixedFERegression<InputHandler> regression(regressionData, optimizationData, mesh.num_nodes()); // Define the mixed object
 
-	regression.template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh);
+	regression.template preapply<ORDER,mydim,ndim, Integrator, IntegratorGaussP3, 0, 0>(mesh); // preliminary apply (preapply) to store all problem matrices
 
-        std::pair<MatrixXr, output_Data> solution_bricks;
+        std::pair<MatrixXr, output_Data> solution_bricks;	// Prepare solution to be filled
 
-	// Build the carrier
+	// Build the Carrier according to problem type
 	if(regression.isSV())
 	{
 		if(regressionData.getNumberOfRegions()>0)
@@ -66,10 +66,16 @@ SEXP regression_skeleton(InputHandler & regressionData, OptimizationData & optim
  	return Solution_Builders::build_solution_plain_regression<InputHandler, ORDER, mydim, ndim>(solution_bricks.first,solution_bricks.second,mesh,regressionData);
 }
 
+//! Function to select the right optimization method
+/*
+ \tparam CarrierType the type of Carrier to be employed
+ \param carrier the Carrier used for the methods
+ \return the solution to pass to the Solution_Builders
+*/
 template<typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrier)
 {
-	// Build the optimizer				[[ TO DO factory]]
+	// Build the optimizer
 	const OptimizationData * optr = carrier.get_opt_data();
 	if(optr->get_loss_function() == "GCV" && optr->get_DOF_evaluation() == "exact")
 	{
@@ -125,6 +131,14 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 	}
 }
 
+//! Function to apply the optimization strategy, grid or Newton
+/*
+\\tparam EvaluationType optimization type to be used
+ \tparam CarrierType the type of Carrier to be employed
+ \param optim EvaluationType containing the class related to the function to be optimized,together with the method (exact or stochastic)
+ \param carrier the Carrier used for the methods
+ \return the solution to pass to the Solution_Builders
+*/
 template<typename EvaluationType, typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 {

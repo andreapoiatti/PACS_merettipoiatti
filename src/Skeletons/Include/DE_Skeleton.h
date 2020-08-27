@@ -33,7 +33,7 @@ SEXP DE_skeleton(SEXP Rdata, SEXP Rorder, SEXP Rfvec, SEXP RheatStep, SEXP Rheat
 	// Construct FEDE object
 	FEDE<Integrator, Integrator_noPoly, ORDER, mydim, ndim> fede(dataProblem, functionalProblem, minimizationAlgo, preprocess_method);
 
-  // Perform the whole task
+  	// Perform the whole task
 	fede.apply();
 
 	// Collect results
