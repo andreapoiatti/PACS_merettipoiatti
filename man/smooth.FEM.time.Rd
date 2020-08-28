@@ -4,15 +4,12 @@
 \alias{smooth.FEM.time}
 \title{Space-time regression with differential regularization}
 \usage{
-smooth.FEM.time(locations = NULL, time_locations = NULL, observations,
-  FEMbasis, time_mesh = NULL, covariates = NULL,
-  PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL,
-  areal.data.avg = TRUE, FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE,
-  IC = NULL, search = "tree", bary.locations = NULL,
-  optimization = "batch", DOF_evaluation = "not_required",
-  loss_function = "unused", lambdaS = NULL, lambdaT = NULL,
-  nrealizations = 100, seed = 0, DOF_matrix = NULL,
-  GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
+                           covariates = NULL, PDE_parameters = NULL,  BC = NULL,
+                           incidence_matrix = NULL, areal.data.avg = TRUE,
+                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+                           search = "tree", bary.locations = NULL,
+                           optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 }
 \arguments{
 \item{locations}{A matrix where each row specifies the spatial coordinates \code{x} and \code{y} (and \code{z} if ndim=3) of the corresponding observations in the vector \code{observations}.
@@ -69,12 +66,12 @@ also data at the initial time. IC will be estimated from it}
 \code{element ids}, a vector of element id of the points from the mesh where they are located;
 \code{barycenters}, a vector of barycenter of points from the located element.}
 
-\item{optimization}{This parameter is used to select the optimization method related to the penalization factor.
-The following methods are implemented: "batch", "newton", "newton_fd". 
+\item{optimization}{This parameter is used to select the optimization method related to smoothing parameter.
+The following methods are implemented: "grid", "newton", "newton_fd". 
 The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
 They implement respectively a pure Newton method and a finite differences Newton method.
-Default value \code{optimization="batch"}}
+Default value \code{optimization="grid"}}
 
 \item{DOF_evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
 The following possibilities are allowed: "not_required", "exact" and "stochastic"
@@ -84,7 +81,7 @@ Default value \code{DOF_evaluation="not_required"}}
 
 \item{loss_function}{This parameter is used to understand if some loss function has to be evaluated.
 The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
-In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
+In the former case is that of \code{optimization='grid'} pure evaluation, while the second can be employed for optimization methods.
 Default value \code{loss_function="unused"}}
 
 \item{lambdaS}{A scalar or vector of smoothing parameters.}

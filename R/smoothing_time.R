@@ -45,7 +45,7 @@ NULL
 #'  \code{locations}, location points which are same as the given locations options. (checks whether both locations are the same);
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
-#' @param optimization This parameter is used to select the optimization method related to the penalization factor.
+#' @param optimization This parameter is used to select the optimization method related to smoothing parameter.
 #' The following methods are implemented: "grid", "newton", "newton_fd". 
 #' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 #' The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
@@ -87,7 +87,7 @@ NULL
 #' \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' @description Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
-#' @usagesmooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
+#' @usage smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
 #'                            covariates = NULL, PDE_parameters = NULL,  BC = NULL,
 #'                            incidence_matrix = NULL, areal.data.avg = TRUE,
 #'                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,

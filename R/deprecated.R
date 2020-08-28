@@ -638,19 +638,19 @@ R_tricoefCal = function(mesh)
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
-#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
 #'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
-#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
-#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
-#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
@@ -696,19 +696,19 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
-#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
 #'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
-#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
-#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
-#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
@@ -759,19 +759,19 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
 #'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
-#'          In al the other cases is returned just the column related to the best penalization parameter
+#'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
 #'          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
 #'          \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
-#'          \item{\code{rmse}{Estimate of the root mean square error in the locations}
-#'          \item{\code{estimated_sd}{Estiimate of the standard deviation of the error} 
+#'          \item{\code{rmse}}{Estimate of the root mean square error in the locations}
+#'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
 #'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
-#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination}
+#'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
 #'          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
 #'          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}

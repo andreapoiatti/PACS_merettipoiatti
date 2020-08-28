@@ -9,7 +9,7 @@ smooth.FEM(locations = NULL, observations, FEMbasis,
  incidence_matrix = NULL, areal.data.avg = TRUE,
  search = "tree", bary.locations = NULL,
  family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
- optimization = "batch", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+ optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
 }
 \arguments{
 \item{locations}{A #observations-by-2 matrix in the 2D case and #observations-by-3 matrix in the 2.5D and 3D case, where
@@ -92,12 +92,12 @@ Default value \code{threshold.FPIRLS = 0.0002020}.}
 \item{max.steps.FPIRLS}{This parameter is used to limit the maximum number of iteration.
 Default value \code{max.steps.FPIRLS=15}.}
 
-\item{optimization}{This parameter is used to select the optimization method related to the penalization factor.
-The following methods are implemented: "batch", "newton", "newton_fd". 
+\item{optimization}{This parameter is used to select the optimization method related to the smoothing parameter.
+The following methods are implemented: "grid", "newton", "newton_fd".
 The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
 They implement respectively a pure Newton method and a finite differences Newton method.
-Default value \code{optimization="batch"}}
+Default value \code{optimization="grid"}}
 
 \item{DOF_evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
 The following possibilities are allowed: "not_required", "exact" and "stochastic"
@@ -107,10 +107,10 @@ Default value \code{DOF_evaluation="not_required"}}
 
 \item{loss_function}{This parameter is used to understand if some loss function has to be evaluated.
 The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
-In the former case is that of \code{optimization='batch'} pure evaluation, while the second can be employed for optimization methods.
+In the former case is that of \code{optimization='grid'} pure evaluation, while the second can be employed for optimization methods.
 Default value \code{loss_function="unused"}}
 
-\item{lambda}{a vector of penalization factors to be provided for evaluation if \code{optimization="batch"}, an optional initialization otherwise}
+\item{lambda}{a vector of penalization factors to be provided for evaluation if \code{optimization="grid"}, an optional initialization otherwise}
 
 \item{nrealizations}{This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
 It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
@@ -129,6 +129,47 @@ It is advised to set it grather than 1 to avoid overfitting.}
 \item{stop_criterion_tol}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
 Used only if \code{optimization="newton"} or \code{optimization="newton_fd"}.
 Default value \code{stop_criteion_tol=0.05}.}
+}
+\value{
+A list with the following variables in \code{family="gaussian"} case:
+\itemize{
+   \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
+   \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
+   \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
+         In all the other cases is returned just the column related to the best penalization parameter
+         \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
+         \item{\code{g}}{Matrix, second half of solution vector}
+         \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
+         \item{\code{beta}}{If \code{covariates} is not \code{NULL}, a matrix with number of rows equal to the number of covariates and number of columns equal to length of lambda. It is the regression coefficients estimate}
+         \item{\code{rmse}}{Estimate of the root mean square error in the locations}
+         \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
+         }
+   \item{\code{optimization}}{A detailed list of optimization related data:
+         \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+         \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+         \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
+         \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
+         \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
+         \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
+         \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
+         }
+   \item{\code{time}}{Duration of the entire optimization computation}
+   \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+}
+A list with the following variables in others GAM case:
+\itemize{
+   \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
+   \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
+   \item{\code{beta}}{If covariates is not \code{NULL}, a matrix with number of rows equal to the number of covariates and numer of columns equal to length of lambda.  The \code{j}th column represents the vector of regression coefficients when
+the smoothing parameter is equal to \code{lambda[j]}.}
+   \item{\code{edf}}{If GCV is \code{TRUE}, a scalar or vector with the trace of the smoothing matrix for each value of the smoothing parameter specified in \code{lambda}.}
+   \item{\code{stderr}}{If GCV is \code{TRUE}, a scalar or vector with the estimate of the standard deviation of the error for each value of the smoothing parameter specified in \code{lambda}.}
+   \item{\code{GCV}}{If GCV is \code{TRUE}, a  scalar or vector with the value of the GCV criterion for each value of the smoothing parameter specified in \code{lambda}.}
+   \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
+   \item{\code{fn_hat}}{ A matrix with number of rows equal to number of locations and number of columns equal to length of lambda. Each column contain the evaluaton of the spatial field in the location points.}
+   \item{\code{J_minima}}{A vector of the same length of lambda, containing the reached minima for each value of the smoothing parameter.}
+   \item {\code{variance.est}}{ A vector which return the variance estimates for the Generative Additive Models}
+}
 }
 \description{
 This function implements a spatial regression model with differential regularization.
