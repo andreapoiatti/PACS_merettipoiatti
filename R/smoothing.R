@@ -718,7 +718,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
 
 
     if (loss_function == 'unused')
-       { sd=-1 }
+       { sd = -1 }
     else
        { sd = sqrt(bigsol[[4]])}
 
@@ -730,15 +730,35 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
       rmse = bigsol[[3]],
       estimated_sd=sd
     )
+    term = bigsol[[9]]
+    ot = bigsol[[10]]
 
+    if(term == 1)
+    {
+      termination = "reached tolerance"
+    }else if(term == 2){
+      termination = "reachd max number iterations"
+    }else{
+      termination = "uninformative"
+    }
+
+    if(ot == 0)
+    {
+      optimization_type = "full optimization"
+    }else if(ot == 1){
+      optimization_type = "full DOF grid"
+    }else{
+      optimization_type = "uninformative"
+    }
+    
     optimization = list(
       lambda_solution = bigsol[[5]],
       lambda_position = bestlambda,
       GCV = bigsol[[7]],
       optimization_details = list(
           iterations = bigsol[[8]],
-          termination = bigsol[[9]],
-        optimization_type = bigsol[[10]]),
+          termination = termination,
+          optimization_type = optimization_type),
       dof = bigsol[[11]],
       lambda_vector = bigsol[[12]],
       GCV_vector = bigsol[[13]]
