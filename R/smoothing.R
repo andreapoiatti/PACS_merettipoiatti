@@ -72,14 +72,14 @@
 #' They implement respectively a pure Newton method and a finite differences Newton method.
 #' Default value \code{lambda.selection.criterion="grid"}
 #' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
-#' The following possibilities are allowed: "not_required", "exact" and "stochastic"
+#' The following possibilities are allowed: NULL, "exact" and "stochastic"
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
 #' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
-#' Default value \code{DOF.evaluation="not_required"}
+#' Default value \code{DOF.evaluation=NULL}
 #' @param lambda.selection.lossfunction This parameter is used to understand if some loss function has to be evaluated.
-#' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
+#' The following possibilities are allowed: NULL and "GCV" (generalized cross validation)
 #' In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
-#' Default value \code{lambda.selection.lossfunction="unused"}
+#' Default value \code{lambda.selection.lossfunction=NULL}
 #' @param lambda a vector of penalization factors to be provided for evaluation if \code{lambda.selection.criterion="grid"}, an optional initialization otherwise
 #' @param DOF.stochastic.realizations This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 #' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
@@ -98,7 +98,7 @@
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction=NULL}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -108,8 +108,8 @@
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
-#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
-#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
 #'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
@@ -145,7 +145,7 @@
 #'  incidence_matrix = NULL, areal.data.avg = TRUE,
 #'  search = "tree", bary.locations = NULL,
 #'  family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
-#'  lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused", lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+#'  lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 #' @export
 
 #' @references
@@ -324,7 +324,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
                      incidence_matrix = NULL, areal.data.avg = TRUE,
                      search = "tree", bary.locations = NULL,
                      family = "gaussian", mu0 = NULL, scale.param = NULL, threshold.FPIRLS = 0.0002020, max.steps.FPIRLS = 15,
-                     lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused",
+                     lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
                      lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   # Mesh identification
@@ -348,19 +348,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   ##################### Checking parameters, sizes and conversion ################################
 
   # Preliminary consistency of optimization parameters
-  if(DOF.evaluation!='not_required' & lambda.selection.lossfunction!='GCV')
-  {
-    warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
-    lambda.selection.lossfunction = 'GCV'
-  }
-  
-  
-  if(!is.null(BC) & lambda.selection.criterion == 'newton')
-  {
-    lambda.selection.criterion = 'newton_fd'
-    warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
-  }
-  
   if(lambda.selection.criterion == "grid")
   {
     optim = 0
@@ -374,8 +361,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'lambda.selection.criterion' must belong to the following list: 'none', 'grid', 'newton', 'newton_fd'.")
   }
-
-  if(DOF.evaluation == 'not_required')
+  
+  if(is.null(DOF.evaluation))
   {
     optim = c(optim,0)
   }else if(DOF.evaluation == 'stochastic')
@@ -388,8 +375,8 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'DOF.evaluation' must be 'not_required', 'stochastic' or 'exact'.")
   }
-
-  if(lambda.selection.lossfunction == 'unused')
+  
+  if(is.null(lambda.selection.lossfunction))
   {
     optim = c(optim,0)
   }else if(lambda.selection.lossfunction == 'GCV')
@@ -399,6 +386,36 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     stop("'lambda.selection.lossfunction' has to be 'GCV'.")
   }
+  
+  # --> General consistency rules
+  if(optim[2]!=0 & optim[3]==0)
+  {
+    warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
+    optim[3] = 1
+  }
+  
+  if(!is.null(BC) & optim[1]==1)
+  {
+    warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
+    optim[1] = 2
+  }
+  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1))
+  {
+    warning("This method needs evaluate DOF, selecting 'DOF.evaluation'='stochastic'")
+    optim[2] = 1
+  }
+  if(optim[1]!=0 & optim[3]==0)
+  {
+    warning("An optimized method needs a loss function to perform the evaluation, selecting 'lambda.selection.lossfunction' as 'GCV'")
+    optim[3] = 1
+  }
+  
+  if(is.null(lambda) & optim[1] == 0)
+  {
+    warning("the lambda passed is NULL, passing to default optimized methods")
+    optim = c(2,1,1)
+  }
+  
 
   if(any(lambda<=0))
   	stop("'lambda' can not be less than or equal to 0")
@@ -444,8 +461,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     covariates = covariates, PDE_parameters = PDE_parameters, BC = BC,
     incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
     search = search, bary.locations = bary.locations,
-    lambda.selection.criterion = lambda.selection.criterion, DOF.evaluation = DOF.evaluation, lambda.selection.lossfunction = lambda.selection.lossfunction,
-    lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
+    optim = optim, lambda = lambda, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed,
     DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
   # If I have PDE non-sv case I need (constant) matrices as parameters
@@ -490,7 +506,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   }
 
   # OPTIMIZATION NOT IMPLEMENTED FOR GAM
-  if(family != 'gaussian'& lambda.selection.criterion != 'grid')
+  if(family != 'gaussian'& optim[1]!=0)
     stop("'lambda.selection.criterion' = 'grid' is the only method implemented for GAM problems")
 
 
@@ -681,7 +697,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     # Prepare return list
     reslist = NULL
 
-    if(DOF.evaluation!='not_required' || (DOF.evaluation=='not_required' && !is.null(DOF.matrix)))
+    if(optim[1]!=0 & (optim[2]!=0 || (optim[2]==0 && !is.null(DOF.matrix))))
     {
     	if(bestlambda == 1 || bestlambda == length(lambda))
     		warning("Your optimal 'GCV' is on the border of lambda sequence")
@@ -710,7 +726,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
   {
     if(!is.null(covariates))
     {
-      if(lambda.selection.criterion == 'grid' & DOF.evaluation == 'not_required' & lambda.selection.lossfunction == 'unused')
+      if(optim[1]==0 & is.null(DOF.matrix) & optim[3]==0)
       {
         beta = matrix(data=bigsol[[15]],nrow=ncol(covariates),ncol=length(lambda))
       }
@@ -725,11 +741,11 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     }
 
     bestlambda=bigsol[[6]]
-    if(bestlambda == 1 || bestlambda == length(lambda))
+    if(optim[1]==0 & (bestlambda == 1 || bestlambda == length(lambda)))
             warning("Your optimal 'GCV' is on the border of lambda sequence")
 
 
-    if (lambda.selection.lossfunction == 'unused')
+    if (is.null(lambda.selection.lossfunction))
        { sd = -1 }
     else
        { sd = sqrt(bigsol[[4]])}

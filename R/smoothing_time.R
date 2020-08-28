@@ -52,14 +52,14 @@ NULL
 #' They implement respectively a pure Newton method and a finite differences Newton method.
 #' Default value \code{lambda.selection.criterion="grid"}
 #' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
-#' The following possibilities are allowed: "not_required", "exact" and "stochastic"
+#' The following possibilities are allowed: NULL, "exact" and "stochastic"
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
 #' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
-#' Default value \code{DOF.evaluation="not_required"}
+#' Default value \code{DOF.evaluation=NULL}
 #' @param lambda.selection.lossfunction This parameter is used to understand if some loss function has to be evaluated.
-#' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
+#' The following possibilities are allowed: NULL and "GCV" (generalized cross validation)
 #' In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
-#' Default value \code{lambda.selection.lossfunction="unused"}
+#' Default value \code{lambda.selection.lossfunction=NULL}
 #' @param lambdaS A scalar or vector of smoothing parameters.
 #' @param lambdaT A scalar or vector of smoothing parameters.
 #' @param DOF.stochastic.realizations This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
@@ -92,7 +92,7 @@ NULL
 #'                            incidence_matrix = NULL, areal.data.avg = TRUE,
 #'                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
 #'                            search = "tree", bary.locations = NULL,
-#'                            lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused", lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+#'                            lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 #' @export
 
 #' @references Sangalli, L.M., Ramsay, J.O. & Ramsay, T.O., 2013. Spatial spline regression models. Journal of the Royal Statistical Society. Series B: Statistical Methodology, 75(4), pp. 681-703.
@@ -127,7 +127,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           incidence_matrix = NULL, areal.data.avg = TRUE,
                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                           search = "tree", bary.locations = NULL,
-                          lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused", lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+                          lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -148,11 +148,6 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   ##################### Checking parameters, sizes and conversion ################################
 
   # Preliminary consistency of optimization parameters
-  if(DOF.evaluation!='not_required' & lambda.selection.lossfunction!='GCV')
-  {
-    warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
-    lambda.selection.lossfunction = 'GCV'
-  }
   
   if(lambda.selection.criterion == "grid")
   {
@@ -199,6 +194,28 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   
   if(any(lambdaS<=0) || any(lambdaT<=0))
     stop("'lambda' can not be less than or equal to 0")
+  
+  if(DOF.evaluation!='not_required' & lambda.selection.lossfunction!='GCV')
+  {
+    warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
+    lambda.selection.lossfunction = 'GCV'
+  }
+  
+  if(!is.null(BC) & optim[1]==1)
+  {
+    warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
+    optim[1] = 2
+  }
+  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1))
+  {
+    warning("This method needs evaluate DOF, selecting 'DOF.evaluation'='stochastic'")
+    optim[2] = 1
+  }
+  if(optim[1]!=0 & optim[3]==0)
+  {
+    warning("An optimized method needs a loss function to perform the evaluation, selecting 'lambda.selection.lossfunction' as 'GCV'")
+    optim[3] = 1
+  }
   
   # Search algorithm
   if(search=="naive")
@@ -250,7 +267,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                   incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
                   FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
                   search = search, bary.locations = bary.locations,
-                  lambda.selection.criterion = lambda.selection.criterion, DOF.evaluation = DOF.evaluation, lambda.selection.lossfunction = lambda.selection.lossfunction, 
+                  optim = optim, 
                   lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
   # If I have PDE non-sv case I need (constant) matrices as parameters

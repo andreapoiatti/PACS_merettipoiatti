@@ -1,4 +1,4 @@
-checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, lambda.selection.criterion = 'none', DOF.evaluation = 'not_required', lambda.selection.lossfunction = 'unused', lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, optim, lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   #################### Full Consistency Parameter Check #########################
   
@@ -92,18 +92,13 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   } # end of bary.locations
   
   # Optimization
-  # --> General consistency rules
-  if(lambda.selection.criterion != 'grid' & DOF.evaluation == 'non_required')
-    stop("An optimized method needs to evaluate DOF, please specify a 'DOF.evaluation' method among 'stochastic' and 'exact'")
-  if(lambda.selection.criterion != 'grid' & lambda.selection.lossfunction == 'unused')
-    stop("An optimized method needs a loss function to perform the evaluation, please select 'lambda.selection.lossfunction' as 'GCV'")
-  if(lambda.selection.criterion == 'newton' & DOF.evaluation == 'stochastic')
+  if(optim[1] == 1 & optim[2] == 1)
     stop("Newton method can only be applied in a 'DOF.evaluation' = 'exact' context")
   
   # --> Lambda related
-  if(lambda.selection.criterion == 'grid' & is.null(lambda))
+  if(optim[1] == 0 & is.null(lambda))
     stop("'lambda' required for 'lambda.selection.criterion' = 'grid'; now is NULL.")
-  if(lambda.selection.criterion != 'grid' & !is.null(lambda))
+  if(optim[1] != 0 & !is.null(lambda))
   {
     if(length(lambda) > 1)
       warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
@@ -120,8 +115,8 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   else if(DOF.stochastic.seed < 0)
     stop("'DOF.stochastic.seed' must be a non-negative integer")
   
-  if((DOF.stochastic.realizations != 100 || DOF.stochastic.seed != 0) & DOF.evaluation != 'stochastic')
-    warning("'nrealzations' and 'DOF.stochastic.seed' are used just with 'DOF.evaluation' = 'stochastic'")
+  if((DOF.stochastic.realizations != 100 || DOF.stochastic.seed != 0) & optim[2] != 1)
+    warning("'DOF.stochastic.realizations' and 'DOF.stochastic.seed' are used just with 'DOF.evaluation' = 'stochastic'")
   
   # --> GCV.inflation.factor related
   if(is.null(GCV.inflation.factor))
@@ -134,21 +129,21 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   {
     stop("'GCV.inflation.factor' must be a non-negative real")
   }
-  if(GCV.inflation.factor != 1 & lambda.selection.lossfunction != 'GCV')
+  if(GCV.inflation.factor != 1 & optim[3] != 1)
     warning("'GCV' not selected as 'loss function', 'GCV.inflation.factor' unused")
   
   # --> DOF.matrix related
   if(!is.null(DOF.matrix))
   {
-    if(lambda.selection.criterion != 'grid')
+    if(optim[1]!=0)
       stop("An optimization method needs DOF to be computed during the call, please set 'DOF.matrix' to 'NULL")
-    if(DOF.evaluation != 'not_required')
-      stop("'DOF.matrix' is passed to the function, 'DOF.evaluation' should be 'not_required'")
-    if(lambda.selection.lossfunction != 'GCV')
+    if(optim[2]!=0)
+      stop("'DOF.matrix' is passed to the function, 'DOF.evaluation' should be NULL")
+    if(optim[3]!=1)
       warning("'GCV' is not the 'lambda.selection.lossfunction'. DOF.matrix is passed but GCV is not computed")
   }
-  if(is.null(DOF.matrix) & DOF.evaluation == 'not_required' & lambda.selection.lossfunction == 'GCV')
-    stop("Either 'DOF.matrix' different from NULL or 'DOF.evaluation' different from 'not_required', otherwise 'lambda.selection.lossfunction' = 'GCV' can't be computed")
+  if(is.null(DOF.matrix) & optim[2]==0 & optim[3]==1)
+    stop("Either 'DOF.matrix' different from NULL or 'DOF.evaluation' different from NULL, otherwise 'lambda.selection.lossfunction' = 'GCV' can't be computed")
   
   # --> TOLERANCE
   if(!is.numeric(lambda.optimization.tolerance))
@@ -156,7 +151,7 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   else if(lambda.optimization.tolerance>=1 || lambda.optimization.tolerance<=0)
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
   
-  if(lambda.selection.criterion=='grid' & lambda.optimization.tolerance!=0.05)
+  if(optim[1]==0 & lambda.optimization.tolerance!=0.05)
     warning("'lambda.optimization.tolerance' is not used in grid evaluation")
   
   # Return information
