@@ -152,7 +152,7 @@ checkSmoothingParameters_time<-function(locations = NULL, time_locations=NULL, o
   else if(DOF.stochastic.seed < 0)
     stop("'DOF.stochastic.seed' must be a non-negative integer")
   
-  if((DOF.stochastic.realizations != 100 || DOF.stochastic.seed != 0) & optim[2]==1)
+  if((DOF.stochastic.realizations != 100 || DOF.stochastic.seed != 0) & optim[2]!=1)
     warning("'nrealzations' and 'DOF.stochastic.seed' are used just with 'DOF.evaluation' = 'stochastic'")
   
   # --> GCV.inflation.factor related
