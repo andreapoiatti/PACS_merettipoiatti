@@ -54,7 +54,7 @@ plot(output_CPP$fit.FEM)
 # it takes lot of time
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       optimization='grid', DOF_evaluation='exact', loss_function='GCV')
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -62,7 +62,7 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 lambda= 10^seq(-9,-5,by=0.5)
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, lambda=lambda,
-                       optimization='grid', DOF_evaluation='stochastic', loss_function='GCV')
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -71,7 +71,7 @@ plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 #monotone increasing GCV function
 output_CPP<-smooth.FEM(locations = locations, 
                        observations=data, FEMbasis=FEMbasis, 
-                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -123,7 +123,7 @@ output_CPP<-smooth.FEM(observations=data,
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       optimization='grid', DOF_evaluation='exact', loss_function='GCV')
+                       lambda.selection.criterion='grid', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -133,7 +133,7 @@ output_CPP$solution$beta
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis, lambda=lambda,
-                       optimization='grid', DOF_evaluation='stochastic', loss_function='GCV')
+                       lambda.selection.criterion='grid', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 plot(log10(lambda), output_CPP$optimization$GCV_vector)
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -143,7 +143,7 @@ output_CPP$solution$beta
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis,
-                       optimization='newton', DOF_evaluation='exact', loss_function='GCV')
+                       lambda.selection.criterion='newton', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -153,7 +153,7 @@ output_CPP$solution$beta
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis,
-                       optimization='newton_fd', DOF_evaluation='exact', loss_function='GCV')
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='exact', lambda.selection.lossfunction='GCV')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 
@@ -163,7 +163,7 @@ output_CPP$solution$beta
 output_CPP<-smooth.FEM(observations=data, 
                        covariates = cbind(cov1, cov2),
                        FEMbasis=FEMbasis,
-                       optimization='newton_fd', DOF_evaluation='stochastic', loss_function='GCV')
+                       lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 
 plot(FEM(output_CPP$fit.FEM$coeff,FEMbasis))
 

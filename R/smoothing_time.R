@@ -45,35 +45,35 @@ NULL
 #'  \code{locations}, location points which are same as the given locations options. (checks whether both locations are the same);
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
-#' @param optimization This parameter is used to select the optimization method related to smoothing parameter.
+#' @param lambda.selection.criterion This parameter is used to select the optimization method related to smoothing parameter.
 #' The following methods are implemented: "grid", "newton", "newton_fd". 
 #' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
-#' The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
+#' The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
 #' They implement respectively a pure Newton method and a finite differences Newton method.
-#' Default value \code{optimization="grid"}
-#' @param DOF_evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
+#' Default value \code{lambda.selection.criterion="grid"}
+#' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
 #' The following possibilities are allowed: "not_required", "exact" and "stochastic"
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
 #' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
-#' Default value \code{DOF_evaluation="not_required"}
-#' @param loss_function This parameter is used to understand if some loss function has to be evaluated.
+#' Default value \code{DOF.evaluation="not_required"}
+#' @param lambda.selection.lossfunction This parameter is used to understand if some loss function has to be evaluated.
 #' The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
-#' In the former case is that of \code{optimization='grid'} pure evaluation, while the second can be employed for optimization methods.
-#' Default value \code{loss_function="unused"}
+#' In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
+#' Default value \code{lambda.selection.lossfunction="unused"}
 #' @param lambdaS A scalar or vector of smoothing parameters.
 #' @param lambdaT A scalar or vector of smoothing parameters.
-#' @param nrealizations This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+#' @param DOF.stochastic.realizations This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 #' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
-#' Default value \code{nrealizations=100}.
-#' @param seed This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+#' Default value \code{DOF.stochastic.realizations=100}.
+#' @param DOF.stochastic.seed This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 #' It is a positive integer that represents user defined seed employed in stochastic GCV computation.
-#' Default value \code{seed=0}.
-#' @param DOF_matrix Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
+#' Default value \code{DOF.stochastic.seed=0}.
+#' @param DOF.matrix Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
 #' since the computation of the dof is the most expensive part of GCV.
 #' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
 #' It is advised to set it grather than 1 to avoid overfitting.
-#' @param stop_criterion_tol Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-#' Used only if \code{optimization="newton"} or \code{optimization="newton_fd"}.
+#' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
+#' Used only if \code{lambda.selection.criterion="newton"} or \code{lambda.selection.criterion="newton_fd"}.
 #' Default value \code{stop_criteion_tol=0.05}.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
@@ -92,7 +92,7 @@ NULL
 #'                            incidence_matrix = NULL, areal.data.avg = TRUE,
 #'                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
 #'                            search = "tree", bary.locations = NULL,
-#'                            optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+#'                            lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused", lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 #' @export
 
 #' @references Sangalli, L.M., Ramsay, J.O. & Ramsay, T.O., 2013. Spatial spline regression models. Journal of the Royal Statistical Society. Series B: Statistical Methodology, 75(4), pp. 681-703.
@@ -127,7 +127,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           incidence_matrix = NULL, areal.data.avg = TRUE,
                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                           search = "tree", bary.locations = NULL,
-                          optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+                          lambda.selection.criterion = "grid", DOF.evaluation = "not_required", lambda.selection.lossfunction = "unused", lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
@@ -148,53 +148,53 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   ##################### Checking parameters, sizes and conversion ################################
 
   # Preliminary consistency of optimization parameters
-  if(DOF_evaluation!='not_required' & loss_function!='GCV')
+  if(DOF.evaluation!='not_required' & lambda.selection.lossfunction!='GCV')
   {
-    warning("Dof are computed, setting 'loss_function' to 'GCV'")
-    loss_function = 'GCV'
+    warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
+    lambda.selection.lossfunction = 'GCV'
   }
   
-  if(optimization == "grid")
+  if(lambda.selection.criterion == "grid")
   {
     optim = 0  
-  }else if(optimization == "newton")
+  }else if(lambda.selection.criterion == "newton")
   {
     optim = 1
-  }else if(optimization == "newton_fd")
+  }else if(lambda.selection.criterion == "newton_fd")
   {
     optim = 2
   }else
   {
-    stop("'optimization' must belong to the following list: 'none', 'grid', 'newton', 'newton_fd'.")
+    stop("'lambda.selection.criterion' must belong to the following list: 'none', 'grid', 'newton', 'newton_fd'.")
   }  
   
-  if(optimization != 'grid')
-    stop("'optimization' = 'grid' is the only method implemented for spatio-temporal problems")
+  if(lambda.selection.criterion != 'grid')
+    stop("'lambda.selection.criterion' = 'grid' is the only method implemented for spatio-temporal problems")
   
   
-  if(DOF_evaluation == 'not_required')
+  if(DOF.evaluation == 'not_required')
   {
     optim = c(optim,0)
-  }else if(DOF_evaluation == 'stochastic')
+  }else if(DOF.evaluation == 'stochastic')
   {
     optim = c(optim,1)
-  }else if(DOF_evaluation == 'exact')
+  }else if(DOF.evaluation == 'exact')
   {
     optim = c(optim,2)
   }else
   {
-    stop("'DOF_evaluation' must be 'not_required', 'stochastic' or 'exact'.")
+    stop("'DOF.evaluation' must be 'not_required', 'stochastic' or 'exact'.")
   }
   
-  if(loss_function == 'unused')
+  if(lambda.selection.lossfunction == 'unused')
   {
     optim = c(optim,0)
-  }else if(loss_function == 'GCV')
+  }else if(lambda.selection.lossfunction == 'GCV')
   {
     optim = c(optim,1)
   }else
   {
-    stop("'loss_function' has to be 'GCV'.")
+    stop("'lambda.selection.lossfunction' has to be 'GCV'.")
   }
   
   if(any(lambdaS<=0) || any(lambdaT<=0))
@@ -229,8 +229,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   observations = as.matrix(observations)
   if(!is.null(covariates))
     covariates = as.matrix(covariates)
-  if(!is.null(DOF_matrix))
-    DOF_matrix = as.matrix(DOF_matrix)
+  if(!is.null(DOF.matrix))
+    DOF.matrix = as.matrix(DOF.matrix)
   if(!is.null(incidence_matrix))
     incidence_matrix = as.matrix(incidence_matrix)
   if(!is.null(IC))
@@ -250,8 +250,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                   incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg, 
                   FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
                   search = search, bary.locations = bary.locations,
-                  optimization = optimization, DOF_evaluation = DOF_evaluation, loss_function = loss_function, 
-                  lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+                  lambda.selection.criterion = lambda.selection.criterion, DOF.evaluation = DOF.evaluation, lambda.selection.lossfunction = lambda.selection.lossfunction, 
+                  lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
 
   # If I have PDE non-sv case I need (constant) matrices as parameters
   if(!is.null(PDE_parameters) & space_varying==FALSE)
@@ -266,7 +266,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     covariates = covariates, PDE_parameters = PDE_parameters, incidence_matrix = incidence_matrix,
     BC = BC, space_varying = space_varying, ndim = ndim, mydim = mydim,
     FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
-    lambdaS = lambdaS, lambdaT = lambdaT, DOF_matrix = DOF_matrix)
+    lambdaS = lambdaS, lambdaT = lambdaT, DOF.matrix = DOF.matrix)
   
   # Further check
   observations<-as.vector(observations)
@@ -316,7 +316,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==FALSE)
   {
     bigsol = NULL
@@ -326,7 +326,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
        incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
        FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
        search = search, bary.locations = bary.locations,
-       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+       optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
                                       
   }else if(class(FEMbasis$mesh) == 'mesh.2D' & !is.null(PDE_parameters) & space_varying==TRUE)
   {
@@ -337,7 +337,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.2.5D')
   {
     bigsol = NULL
@@ -347,7 +347,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }else if(class(FEMbasis$mesh) == 'mesh.3D')
   {
     bigsol = NULL
@@ -357,7 +357,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
       incidence_matrix = incidence_matrix, areal.data.avg = areal.data.avg,
       FLAG_MASS = FLAG_MASS, FLAG_PARABOLIC = FLAG_PARABOLIC, IC = IC,
       search = search, bary.locations = bary.locations,
-      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, nrealizations = nrealizations, seed = seed, DOF_matrix = DOF_matrix, GCV.inflation.factor = GCV.inflation.factor, stop_criterion_tol = stop_criterion_tol)
+      optim = optim, lambdaS = lambdaS, lambdaT = lambdaT, DOF.stochastic.realizations = DOF.stochastic.realizations, DOF.stochastic.seed = DOF.stochastic.seed, DOF.matrix = DOF.matrix, GCV.inflation.factor = GCV.inflation.factor, lambda.optimization.tolerance = lambda.optimization.tolerance)
   }
 
   # ---------- Solution -----------
@@ -428,7 +428,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   # Prepare return list
   reslist = NULL
 
-  if(loss_function == 'GCV')
+  if(lambda.selection.lossfunction == 'GCV')
   {
     stderr=sqrt(GCV_*(length(observations)-dof)/length(observations))
     reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,

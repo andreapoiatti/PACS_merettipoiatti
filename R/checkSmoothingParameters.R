@@ -1,4 +1,4 @@
-checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, optimization = 'none', DOF_evaluation = 'not_required', loss_function = 'unused', lambda = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, BC = NULL, incidence_matrix = NULL, areal.data.avg = TRUE, search = 'tree', bary.locations = NULL, lambda.selection.criterion = 'none', DOF.evaluation = 'not_required', lambda.selection.lossfunction = 'unused', lambda = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   #################### Full Consistency Parameter Check #########################
   
@@ -93,35 +93,35 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   
   # Optimization
   # --> General consistency rules
-  if(optimization != 'grid' & DOF_evaluation == 'non_required')
-    stop("An optimized method needs to evaluate DOF, please specify a 'DOF_evaluation' method among 'stochastic' and 'exact'")
-  if(optimization != 'grid' & loss_function == 'unused')
-    stop("An optimized method needs a loss function to perform the evaluation, please select 'loss_function' as 'GCV'")
-  if(optimization == 'newton' & DOF_evaluation == 'stochastic')
-    stop("Newton method can only be applied in a 'DOF_evaluation' = 'exact' context")
+  if(lambda.selection.criterion != 'grid' & DOF.evaluation == 'non_required')
+    stop("An optimized method needs to evaluate DOF, please specify a 'DOF.evaluation' method among 'stochastic' and 'exact'")
+  if(lambda.selection.criterion != 'grid' & lambda.selection.lossfunction == 'unused')
+    stop("An optimized method needs a loss function to perform the evaluation, please select 'lambda.selection.lossfunction' as 'GCV'")
+  if(lambda.selection.criterion == 'newton' & DOF.evaluation == 'stochastic')
+    stop("Newton method can only be applied in a 'DOF.evaluation' = 'exact' context")
   
   # --> Lambda related
-  if(optimization == 'grid' & is.null(lambda))
-    stop("'lambda' required for 'optimization' = 'grid'; now is NULL.")
-  if(optimization != 'grid' & !is.null(lambda))
+  if(lambda.selection.criterion == 'grid' & is.null(lambda))
+    stop("'lambda' required for 'lambda.selection.criterion' = 'grid'; now is NULL.")
+  if(lambda.selection.criterion != 'grid' & !is.null(lambda))
   {
     if(length(lambda) > 1)
       warning("In optimized methods 'lambda' is the initial value, all terms following the first will be discarded")
   }
 
   # --> Stochastic related data
-  if(!is.numeric(nrealizations))
-    stop("'nrealizations' must be a positive integer")
-  else if(nrealizations < 1)
-    stop("'nrealizations' must be a positive integer")
+  if(!is.numeric(DOF.stochastic.realizations))
+    stop("'DOF.stochastic.realizations' must be a positive integer")
+  else if(DOF.stochastic.realizations < 1)
+    stop("'DOF.stochastic.realizations' must be a positive integer")
   
-  if(!is.numeric(seed))
-    stop("'seed' must be a non-negative integer")
-  else if(seed < 0)
-    stop("'seed' must be a non-negative integer")
+  if(!is.numeric(DOF.stochastic.seed))
+    stop("'DOF.stochastic.seed' must be a non-negative integer")
+  else if(DOF.stochastic.seed < 0)
+    stop("'DOF.stochastic.seed' must be a non-negative integer")
   
-  if((nrealizations != 100 || seed != 0) & DOF_evaluation != 'stochastic')
-    warning("'nrealzations' and 'seed' are used just with 'DOF_evaluation' = 'stochastic'")
+  if((DOF.stochastic.realizations != 100 || DOF.stochastic.seed != 0) & DOF.evaluation != 'stochastic')
+    warning("'nrealzations' and 'DOF.stochastic.seed' are used just with 'DOF.evaluation' = 'stochastic'")
   
   # --> GCV.inflation.factor related
   if(is.null(GCV.inflation.factor))
@@ -134,36 +134,36 @@ checkSmoothingParameters<-function(locations = NULL, observations, FEMbasis, cov
   {
     stop("'GCV.inflation.factor' must be a non-negative real")
   }
-  if(GCV.inflation.factor != 1 & loss_function != 'GCV')
+  if(GCV.inflation.factor != 1 & lambda.selection.lossfunction != 'GCV')
     warning("'GCV' not selected as 'loss function', 'GCV.inflation.factor' unused")
   
-  # --> DOF_matrix related
-  if(!is.null(DOF_matrix))
+  # --> DOF.matrix related
+  if(!is.null(DOF.matrix))
   {
-    if(optimization != 'grid')
-      stop("An optimization method needs DOF to be computed during the call, please set 'DOF_matrix' to 'NULL")
-    if(DOF_evaluation != 'not_required')
-      stop("'DOF_matrix' is passed to the function, 'DOF_evaluation' should be 'not_required'")
-    if(loss_function != 'GCV')
-      warning("'GCV' is not the 'loss_function'. DOF_matrix is passed but GCV is not computed")
+    if(lambda.selection.criterion != 'grid')
+      stop("An optimization method needs DOF to be computed during the call, please set 'DOF.matrix' to 'NULL")
+    if(DOF.evaluation != 'not_required')
+      stop("'DOF.matrix' is passed to the function, 'DOF.evaluation' should be 'not_required'")
+    if(lambda.selection.lossfunction != 'GCV')
+      warning("'GCV' is not the 'lambda.selection.lossfunction'. DOF.matrix is passed but GCV is not computed")
   }
-  if(is.null(DOF_matrix) & DOF_evaluation == 'not_required' & loss_function == 'GCV')
-    stop("Either 'DOF_matrix' different from NULL or 'DOF_evaluation' different from 'not_required', otherwise 'loss_function' = 'GCV' can't be computed")
+  if(is.null(DOF.matrix) & DOF.evaluation == 'not_required' & lambda.selection.lossfunction == 'GCV')
+    stop("Either 'DOF.matrix' different from NULL or 'DOF.evaluation' different from 'not_required', otherwise 'lambda.selection.lossfunction' = 'GCV' can't be computed")
   
   # --> TOLERANCE
-  if(!is.numeric(stop_criterion_tol))
+  if(!is.numeric(lambda.optimization.tolerance))
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
-  else if(stop_criterion_tol>=1 || stop_criterion_tol<=0)
+  else if(lambda.optimization.tolerance>=1 || lambda.optimization.tolerance<=0)
     stop("'stopping_criterion_tol' must be a numeric percentage between 0 and 1")
   
-  if(optimization=='grid' & stop_criterion_tol!=0.05)
-    warning("'stop_criterion_tol' is not used in grid evaluation")
+  if(lambda.selection.criterion=='grid' & lambda.optimization.tolerance!=0.05)
+    warning("'lambda.optimization.tolerance' is not used in grid evaluation")
   
   # Return information
   return(space_varying)
 }
 
-checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, incidence_matrix = NULL, BC = NULL, space_varying = FALSE, ndim, mydim, lambda = NULL, DOF_matrix = NULL)
+checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis, covariates = NULL, PDE_parameters = NULL, incidence_matrix = NULL, BC = NULL, space_varying = FALSE, ndim, mydim, lambda = NULL, DOF.matrix = NULL)
 {
   #################### Parameter Check #########################
   # Observations
@@ -276,19 +276,19 @@ checkSmoothingParametersSize<-function(locations = NULL, observations, FEMbasis,
     if(nrow(lambda)<1)
       stop("'lambda' must contain at least one element")
   }
-  if(!is.null(DOF_matrix))
+  if(!is.null(DOF.matrix))
   {    
-    if(ncol(DOF_matrix) != 1)
+    if(ncol(DOF.matrix) != 1)
     {
-      stop("'DOF_matrix' must be a column vector")
+      stop("'DOF.matrix' must be a column vector")
     }
     
     if(is.null(lambda))
     {
-      stop("The number of rows of DOF_matrix is different from the number of lambda")
-    } else if(nrow(DOF_matrix)!=length(lambda))
+      stop("The number of rows of DOF.matrix is different from the number of lambda")
+    } else if(nrow(DOF.matrix)!=length(lambda))
     {
-      stop("The number of rows of DOF_matrix is different from the number of lambda")
+      stop("The number of rows of DOF.matrix is different from the number of lambda")
     }
   }
 }

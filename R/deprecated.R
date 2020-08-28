@@ -637,7 +637,7 @@ R_tricoefCal = function(mesh)
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -647,8 +647,8 @@ R_tricoefCal = function(mesh)
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
-#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
-#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
 #'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
@@ -666,7 +666,7 @@ R_tricoefCal = function(mesh)
 smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis, covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = 'not_required', lambda.selection.lossfunction='unused',lambda=lambda)
   ans
 }
 
@@ -695,7 +695,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -705,8 +705,8 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
-#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
-#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
 #'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
@@ -722,7 +722,7 @@ smooth.FEM.basis<-function(locations = NULL, observations, FEMbasis, lambda, cov
 smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = 'not_required', lambda.selection.lossfunction='unused',lambda=lambda)
   ans
 }
 
@@ -758,7 +758,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #' \itemize{
 #'    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
 #'    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
-#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{optimization="grid"} and \code{loss_function="unused"}.
+#'    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction="unused"}.
 #'          In all the other cases is returned just the column related to the best penalization parameter
 #'          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
 #'          \item{\code{g}}{Matrix, second half of solution vector}
@@ -768,8 +768,8 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 #'          \item{\code{estimated_sd}}{Estiimate of the standard deviation of the error}
 #'          }
 #'    \item{\code{optimization}}{A detailed list of optimization related data:
-#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
-#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{loss_function}, -1 if \code{loss_function="unused"}}
+#'          \item{\code{lambda_solution}}{numerical value of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
+#'          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction="unused"}}
 #'          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
 #'          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
 #'          \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
@@ -786,7 +786,7 @@ smooth.FEM.PDE.basis<-function(locations = NULL, observations, FEMbasis, lambda,
 smooth.FEM.PDE.sv.basis<-function(locations = NULL, observations, FEMbasis, lambda, PDE_parameters, covariates = NULL, BC = NULL, GCV = FALSE, CPP_CODE = TRUE)
 {
   .Deprecated("smooth.FEM", package = "fdaPDE")
-  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,optimization = 'grid', DOF_evaluation = 'not_required', loss_function='unused',lambda=lambda)
+  ans=smooth.FEM(locations=locations,observations=observations,FEMbasis=FEMbasis,PDE_parameters=PDE_parameters,covariates=covariates,BC=BC,lambda.selection.criterion = 'grid', DOF.evaluation = 'not_required', lambda.selection.lossfunction='unused',lambda=lambda)
   ans
 }
 
