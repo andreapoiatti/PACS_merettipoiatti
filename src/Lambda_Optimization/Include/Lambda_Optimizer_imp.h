@@ -435,7 +435,7 @@ template<typename InputCarrier>
 void GCV_Exact<InputCarrier, 1>::update_dor(Real lambda)
 {
         // dor = #locations - dof
-        this->dor = this->s-this->dof;
+        this->dor = this->s-this->dof*this->the_carrier.get_opt_data()->get_tuning();
 
         if (this->dor < 0)   // Just in case of bad computation
         {
@@ -711,7 +711,7 @@ template<typename InputCarrier>
 void GCV_Stochastic<InputCarrier, 1>::update_dor(Real lambda)
 {
         // dor = #locations - dof
-        this->dor = this->s-this->dof;
+        this->dor = this->s-this->dof*this->the_carrier.get_opt_data()->get_tuning();
 
         if (this->dor < 0)   // Just in case of bad computation
         {
