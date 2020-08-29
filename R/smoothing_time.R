@@ -167,7 +167,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     stop("'lambda.selection.criterion' = 'grid' is the only method implemented for spatio-temporal problems")
   
   
-  if(DOF.evaluation == 'not_required')
+  if(is.null(DOF.evaluation))
   {
     optim = c(optim,0)
   }else if(DOF.evaluation == 'stochastic')
@@ -181,7 +181,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     stop("'DOF.evaluation' must be 'not_required', 'stochastic' or 'exact'.")
   }
   
-  if(lambda.selection.lossfunction == 'unused')
+  if(is.null(lambda.selection.lossfunction))
   {
     optim = c(optim,0)
   }else if(lambda.selection.lossfunction == 'GCV')
@@ -206,7 +206,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
     warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
     optim[1] = 2
   }
-  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1))
+  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1 & is.null(DOF.matrix)))
   {
     warning("This method needs evaluate DOF, selecting 'DOF.evaluation'='stochastic'")
     optim[2] = 1

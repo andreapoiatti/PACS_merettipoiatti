@@ -387,6 +387,10 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     stop("'lambda.selection.lossfunction' has to be 'GCV'.")
   }
   
+  # OPTIMIZATION NOT IMPLEMENTED FOR GAM
+  if(family != 'gaussian'& optim[1]!=0)
+    stop("'lambda.selection.criterion' = 'grid' is the only method implemented for GAM problems")
+  
   # --> General consistency rules
   if(optim[2]!=0 & optim[3]==0)
   {
@@ -399,7 +403,7 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
     optim[1] = 2
   }
-  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1))
+  if((optim[1]==2 & optim[2]==0) || (optim[1]==0 & optim[2]==0 & optim[3]==1 & is.null(DOF.matrix)))
   {
     warning("This method needs evaluate DOF, selecting 'DOF.evaluation'='stochastic'")
     optim[2] = 1
@@ -505,9 +509,6 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
    stop("'family' parameter required.\nCheck if it is one of the following: binomial, exponential, gamma, poisson, gaussian")
   }
 
-  # OPTIMIZATION NOT IMPLEMENTED FOR GAM
-  if(family != 'gaussian'& optim[1]!=0)
-    stop("'lambda.selection.criterion' = 'grid' is the only method implemented for GAM problems")
 
 
   ################## End checking parameters, sizes and conversion #############################
