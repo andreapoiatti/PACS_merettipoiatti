@@ -9,7 +9,7 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                            incidence_matrix = NULL, areal.data.avg = TRUE,
                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                            search = "tree", bary.locations = NULL,
-                           optimization = "grid", DOF_evaluation = "not_required", loss_function = "unused", lambdaS = NULL, lambdaT = NULL, nrealizations = 100, seed = 0, DOF_matrix = NULL, GCV.inflation.factor = 1, stop_criterion_tol = 0.05)
+                           lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 }
 \arguments{
 \item{locations}{A matrix where each row specifies the spatial coordinates \code{x} and \code{y} (and \code{z} if ndim=3) of the corresponding observations in the vector \code{observations}.
@@ -66,44 +66,44 @@ also data at the initial time. IC will be estimated from it}
 \code{element ids}, a vector of element id of the points from the mesh where they are located;
 \code{barycenters}, a vector of barycenter of points from the located element.}
 
-\item{optimization}{This parameter is used to select the optimization method related to smoothing parameter.
+\item{lambda.selection.criterion}{This parameter is used to select the optimization method related to smoothing parameter.
 The following methods are implemented: "grid", "newton", "newton_fd". 
 The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
-The remaining two are optimization methods that automatically select the best penalization according to \code{loss_function} criterion.
+The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
 They implement respectively a pure Newton method and a finite differences Newton method.
-Default value \code{optimization="grid"}}
+Default value \code{lambda.selection.criterion="grid"}}
 
-\item{DOF_evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
-The following possibilities are allowed: "not_required", "exact" and "stochastic"
+\item{DOF.evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
+The following possibilities are allowed: NULL, "exact" and "stochastic"
 In the former case no degree of freedom is computed, while the other two methods enable computation.
 Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
-Default value \code{DOF_evaluation="not_required"}}
+Default value \code{DOF.evaluation=NULL}}
 
-\item{loss_function}{This parameter is used to understand if some loss function has to be evaluated.
-The following possibilities are allowed: "unused" and "GCV" (generalized cross validation)
-In the former case is that of \code{optimization='grid'} pure evaluation, while the second can be employed for optimization methods.
-Default value \code{loss_function="unused"}}
+\item{lambda.selection.lossfunction}{This parameter is used to understand if some loss function has to be evaluated.
+The following possibilities are allowed: NULL and "GCV" (generalized cross validation)
+In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
+Default value \code{lambda.selection.lossfunction=NULL}}
 
 \item{lambdaS}{A scalar or vector of smoothing parameters.}
 
 \item{lambdaT}{A scalar or vector of smoothing parameters.}
 
-\item{nrealizations}{This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+\item{DOF.stochastic.realizations}{This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
-Default value \code{nrealizations=100}.}
+Default value \code{DOF.stochastic.realizations=100}.}
 
-\item{seed}{This parameter is considered only when \code{DOF_evaluation = 'stochastic'}.
+\item{DOF.stochastic.seed}{This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 It is a positive integer that represents user defined seed employed in stochastic GCV computation.
-Default value \code{seed=0}.}
+Default value \code{DOF.stochastic.seed=0}.}
 
-\item{DOF_matrix}{Matrix of degrees of freedom. This parameter can be used if the DOF_matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
+\item{DOF.matrix}{Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
 since the computation of the dof is the most expensive part of GCV.}
 
 \item{GCV.inflation.factor}{Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
 It is advised to set it grather than 1 to avoid overfitting.}
 
-\item{stop_criterion_tol}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-Used only if \code{optimization="newton"} or \code{optimization="newton_fd"}.
+\item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
+Used only if \code{lambda.selection.criterion="newton"} or \code{lambda.selection.criterion="newton_fd"}.
 Default value \code{stop_criteion_tol=0.05}.}
 }
 \value{
