@@ -195,12 +195,16 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
   if(any(lambdaS<=0) || any(lambdaT<=0))
     stop("'lambda' can not be less than or equal to 0")
   
-  if(DOF.evaluation!='not_required' & lambda.selection.lossfunction!='GCV')
+  if(optim[2]!=0 & optim[3]!=1)
   {
     warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
-    lambda.selection.lossfunction = 'GCV'
+    optim[3]=1
   }
-  
+  if(optim[1]==1 & optim[2]!=2)
+  {
+    warning("This method needs evaluate DOF in an 'exact' way, selecting 'DOF.evaluation'='exact'")
+    optim[2] = 2
+  }
   if(!is.null(BC) & optim[1]==1)
   {
     warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")

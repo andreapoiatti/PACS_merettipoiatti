@@ -392,12 +392,16 @@ smooth.FEM<-function(locations = NULL, observations, FEMbasis,
     stop("'lambda.selection.criterion' = 'grid' is the only method implemented for GAM problems")
   
   # --> General consistency rules
-  if(optim[2]!=0 & optim[3]==0)
+  if(optim[2]!=0 & optim[3]!=1)
   {
     warning("Dof are computed, setting 'lambda.selection.lossfunction' to 'GCV'")
     optim[3] = 1
   }
-  
+  if(optim[1]==1 & optim[2]!=2)
+  {
+    warning("This method needs evaluate DOF in an 'exact' way, selecting 'DOF.evaluation'='exact'")
+    optim[2] = 2
+  }
   if(!is.null(BC) & optim[1]==1)
   {
     warning("'newton' 'lambda.selection.criterion' can't be performed with non-NULL boundary conditions, using 'newton_fd' instead")
