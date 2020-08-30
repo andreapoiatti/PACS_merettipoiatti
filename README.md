@@ -18,8 +18,7 @@ Compiled in Win RStudio, Ubuntu using g++ compiler and in macOS: for the precise
 
 /data contains the data to run the tests in /tests.
 
-/tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests.R. It also contains the file test_simulations.R, which contains the same tests but organized in order to be repeated many times, as used in the report to find the boxplopts shown in the test section.
-
+/tests contains the test to be run: smooth.FEM.2D.tests, smooth.FEM.2.5D.tests.R, smooth.FEM.3D.tests.R. 
 ## Installation:
 Two different methods are proposed in order to install the package in the R environment.  
 Download the `.zip` file from the repository, unzip it, and for the installation choose one of the two following methods:  
