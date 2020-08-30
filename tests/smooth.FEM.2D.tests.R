@@ -367,35 +367,6 @@ output_CPP<-smooth.FEM(observations=data,
 plot(output_CPP$fit.FEM)
 
 
-
-#### Test 4.2.1: Forcing term != 0 without GCV 
-# forcing function != 0
-u_func<-function(points)
-{
-  output = array(0, c(1, nrow(points)))
-  for (i in 1:nrow(points))
-    output[,i] = -ifelse((points[i,1]^2+points[i,2]^2)<1,100,0)
-  output
-}
-
-# plot the forcing funcion
-xgrid=seq(from=-3,to=3,by=0.1)
-ygrid=seq(from=-3,to=3,by=0.1)
-image(xgrid,ygrid,matrix(u_func(expand.grid(xgrid,ygrid)),nrow=length(xgrid),ncol=length(ygrid),byrow=FALSE),main='forcing function',asp=1)
-lines(mesh$nodes[1:50,])
-
-PDE_parameters = list(K = K_func, b = b_func, c = c_func, u = u_func)
-
-
-output_CPP<-smooth.FEM(observations=data, 
-                       incidence_matrix = incidence_matrix,
-                       FEMbasis=FEMbasis, 
-                       lambda=lambda,
-                       BC = BC, 
-                       PDE_parameters = PDE_parameters)
-plot(output_CPP$fit.FEM)
-
-
 #### Test 4.2.1: Forcing term != 0 without GCV 
 # forcing function != 0
 u_func<-function(points)
@@ -535,9 +506,6 @@ output_CPP<-smooth.FEM(observations=data,
                        PDE_parameters = PDE_parameters,
                        lambda.selection.criterion='newton_fd', DOF.evaluation='stochastic', lambda.selection.lossfunction='GCV')
 plot(output_CPP$fit.FEM)
-
-
-
 
 
 #### Test 4.3.1: BC != 0      without GCV 
