@@ -9,8 +9,9 @@
 #include "Function_Variadic.h"
 #include "Solution_Builders.h"
 
+// CLASSES
+//! Father class for a scalar function evaluation of a given vector of lambda values computing the minimum fuction value
 /*!
- Father class for a scalar function evaluation of a given vector of lambda values computing the minimum fuction value
  \tparam Tuple image type of the gradient of the function
  \tparam Hessian image type of the Hessian of the function: if the dimension of the image is >1 (and domain >1), problems to store the hessian, it's a tensor
  \tparam Extensions input class if the computations need members already stored in a class
@@ -19,10 +20,13 @@ template <typename Tuple, typename Hessian, typename... Extensions>
 class Vec_evaluation
 {
         protected:
-                 //! Vector of lambda to be evaluated
-                std::vector<Tuple> lambda_vec;
+                std::vector<Tuple> lambda_vec;  //!< Vector of lambda to be evaluated
 
                 //! Constructor
+                /*!
+                \param F_ the function wrapper F performing the evaluation
+                \param lambda_vec_ the lambda_vec, vector of lambdas to be evaluated
+                */
                 Vec_evaluation(Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F_, const std::vector<Tuple> & lambda_vec_):
                 F(F_), lambda_vec(lambda_vec_)
                 {
@@ -31,7 +35,7 @@ class Vec_evaluation
                 };
 
                 // Function to compute particular parameters related to the mimizing solution.
-                /*
+                /*!
                  It does nothing if not implemented. It is not pure virtual in order to be general
                  and leave the possibility of instantiating the object without implementing that function
                 */
@@ -44,7 +48,7 @@ class Vec_evaluation
         public:
                 Function_Wrapper<Tuple, Real, Tuple, Hessian, Extensions...> & F;       //!< F needed to be public, to be able to access to other methods of the class F from outside
 
-                // Main method function
+                //! Main method function
                 /*!
                  \return std::pair<std::vector<Real>, UInt> the vector of evaluations of GCV and the index of the corresponding minimum
                 */
@@ -101,11 +105,15 @@ class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
 
         public:
                 //! Constructor
+                /*!
+                \param F_ the function wrapper F performing the evaluation
+                \param lambda_vec_ the lambda_vec, vector of lambdas to be evaluated
+                */
                 Eval_GCV(Function_Wrapper<Real, Real, Real, Real, Extensions...> & F_, const std::vector<Real> & lambda_vec_):
                         Vec_evaluation<Real, Real, Extensions...>(F_,lambda_vec_) {};
 
                 //! Function to build the output data
-                /*
+                /*!
                  \return output_Data which contains the almost complete output to be returned to R
                 */
                 output_Data  Get_optimization_vectorial(void)
@@ -113,8 +121,8 @@ class Eval_GCV: public Vec_evaluation<Real, Real, Extensions...>
                         std::pair<std::vector<Real>, UInt> p = this->compute_vector();
                         output_Data output=this->F.get_output_full();
                         output.GCV_evals  = p.first;
-                        output.lambda_sol = this->lambda_vec.at(p.second); // Safer use of at instead of []
-                        output.lambda_pos = 1+p.second; // In R numbering
+                        output.lambda_sol = this->lambda_vec.at(p.second);      // Safer use of at instead of []
+                        output.lambda_pos = 1+p.second;                         // In R numbering
                         output.lambda_vec = this->lambda_vec;
                         output.GCV_opt    = p.first.at(p.second);
 

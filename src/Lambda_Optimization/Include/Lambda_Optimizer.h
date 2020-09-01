@@ -55,7 +55,7 @@ class Lambda_optimizer<InputCarrier, 1>
                 // UPDATERS
                 //! A pure virtual member used in children classes for updates of internal data
                 /*!
-                 \param lambda, the value of lambda with which to perform the update
+                 \param lambda the value of lambda with which to perform the update
                 */
         virtual void update_parameters(Real lambda) = 0;
 };

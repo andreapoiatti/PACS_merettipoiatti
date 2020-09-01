@@ -5,6 +5,7 @@
 #include <functional>
 #include "../../FdaPDE.h"
 
+// CLASSES
 //! External updater for Lambda Optimizer
 /*!
  This class works as an external updater for a LambdaOptimizer method,
@@ -12,13 +13,13 @@
  The purpose of this structure is mainly keeping at minimum the complexity of
  each update by performing just what is needed from time to time.
  \tparam LambdaOptim LambdaOptimizer type on which the update has to be performed
- \tparm T type of the optimization parameter lambda
+ \tparam T type of the optimization parameter lambda
 */
 template <typename LambdaOptim, typename T>
 class GOF_updater
 {
         private:
-                // PARAMETERS FOR THE UPDATES
+                // -- PARAMETERS FOR THE UPDATES --
                 //! std::vector of lambdas to keep track of the last lambdas used [position means degree of derivative]
                 std::vector<T> last_lambda_derivatives;
                 //! std::vector storing the updaters to be called [position means degree of derivative]
@@ -26,12 +27,12 @@ class GOF_updater
                 //! pointer collecting the lambda optimizer on which the updates have to be performed
                 LambdaOptim * start_ptr = nullptr;
 
-                // PRIVATE MEMBERS
+                // -- PRIVATE MEMBERS --
                 //! Function that selectively updates just the essential terms for the needed task
                 /*!
                  This functions calls all the updaters on the given pointer from start to finish
-                 [e.g. start==1, finish==2 means: call first and second update to prepare
-                 Lambda Optimizer for first and second derivative for computation]
+                 [e.g. start==1, finish==2 means: call first and second updater to prepare
+                 Lambda Optimizer for first and second derivative computation]
                  \param start first updater to be called, increase sequentially from this
                  \param finish last updater to be called (included)
                  \param lambda the actual value of lambda to be used for the computation
@@ -58,7 +59,7 @@ class GOF_updater
                 }
 
         public:
-                // CONSTRUCTORS
+                // -- CONSTRUCTORS --
                 //! Default constructor
                 GOF_updater(void) = default;
 
@@ -71,7 +72,7 @@ class GOF_updater
                         last_lambda_derivatives = first_lambdas;
                 }
 
-                // PUBLIC UPDATER
+                // -- PUBLIC UPDATER --
                 //! Public function that selectively updates just the essential terms for the needed task
                 /*!
                  This functions calls all the updaters on the given pointer up to finish
