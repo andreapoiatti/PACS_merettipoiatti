@@ -94,7 +94,7 @@ class Carrier: public Extensions...
                  \param R0p_ pointer to R0 matrix
                  \param psip_ pointer to Psi matrix
                  \param psi_tp_ pointer to Psi^T matrix
-                 \parma rhsp_ pointer to the right hand side of system matrix
+                 \param rhsp_ pointer to the right hand side of system matrix
                  \param bc_values_ pointer to the values of boundary conditions
                  \param bc_indicesp_ pointer to the indices of the boundary conditions
                 */
@@ -194,12 +194,13 @@ class Carrier: public Extensions...
                  \param b the right hand side of the system to be solved via system matrix
                  \param lambda the optimization parameter with which to build the system matrix
                  \return the solution of the system
+                 \note specific for spatial case
                 */
                 inline MatrixXr apply_to_b(const MatrixXr & b, Real lambda)
                 {
                         this->opt_data->set_current_lambdaS(lambda); // set the lambda value
                         return this->model->apply_to_b(b);
-                } //specific for spatial case
+                }
 
                 //! Method to the system given a lambda [right hand side is the usual of the problem]
                 /*!
@@ -252,7 +253,7 @@ class Areal
 
                 //! Universal setter of the class: fills all areal parameters
                 /*!
-                 \param n_regions integer, the number of regions
+                 \param n_regions_ integer, the number of regions
                  \param Ap_ pointer to the areal data
                 */
                 inline void set_all_areal(UInt n_regions_, const VectorXr * Ap_)
@@ -279,7 +280,7 @@ class Areal
 class Forced
 {
         private:
-                const VectorXr * up;    //! Pointer to the forcing term
+                const VectorXr * up;    //!< Pointer to the forcing term
 
         public:
                 // CONSTRUCTORS
@@ -308,6 +309,13 @@ class Forced
                 inline void set_up(const VectorXr * up_) {this->up = up_;}      //!< Setter of up \param up_ new up
 };
 
+//! Temporal extension for Carrier
+/*!
+ This class contains all the information needed by optimization methods dealing
+ with spatio-temporal data, its structure is parallel to that of the Carrier
+ \sa Carrier
+ \todo TO BE IMPLEMENTED
+*/
 class Temporal
 {
         // [[ TO BE IMPLEMENTED]]
@@ -328,7 +336,7 @@ class CarrierBuilder
 {
         private:
                 //! Method to fill the backbone of Carrier structure via its global setter
-                /*
+                /*!
                   \tparam Extensions... further information that has to be included into the Carrier
                   \param car a Carrier type object to undergo the general setter
                   \param data DataHandler from which to build the Carrier
@@ -345,7 +353,7 @@ class CarrierBuilder
                 }
 
                 //! Method to fill the eventual Areal part of an areal carrier
-                /*
+                /*!
                   \tparam Extensions... further information that has to be included into the Carrier
                   \param car a Carrier type object to undergo the areal setter
                   \param data DataHandler from which to build the areal Carrier
@@ -359,7 +367,7 @@ class CarrierBuilder
                 }
 
                 //! Method to fill the eventual Forced part of a forced carrier
-                /*
+                /*!
                   \tparam Extensions... further information that has to be included into the Carrier
                   \param car a Carrier type object to undergo the forced setter
                   \param data DataHandler from which to build the forced Carrier
@@ -374,14 +382,14 @@ class CarrierBuilder
 
         public:
                 //! Plain pointwise Carrier static builder
-                /*
+                /*!
                   \param data DataHandler from which to build the Carrier
                   \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
                   \param optimizationData optimization data to store in the Carrier
                   \return the built Carrier
                 */
                 static Carrier<DataHandler> build_plain_carrier(const DataHandler & data, MixedFERegressionBase<DataHandler> & mc, OptimizationData & optimizationData)
-                {       //da modificare, non serve copiarli due volte!
+                {
                         Carrier<DataHandler> car;
                         set_plain_data(car, data, mc, optimizationData);
 
@@ -389,7 +397,7 @@ class CarrierBuilder
                 }
 
                 //! Areal Carrier static builder
-                /*
+                /*!
                   \param data DataHandler from which to build the Carrier
                   \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
                   \param optimizationData optimization data to store in the Carrier
@@ -405,7 +413,7 @@ class CarrierBuilder
                 }
 
                 //! Forced pointwise Carrier static builder
-                /*
+                /*!
                   \param data DataHandler from which to build the Carrier
                   \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
                   \param optimizationData optimization data to store in the Carrier
@@ -421,7 +429,7 @@ class CarrierBuilder
                 }
 
                 //! Forced Areal Carrier static builder
-                /*
+                /*!
                   \param data DataHandler from which to build the Carrier
                   \param mc MixedFERegressionBase<DataHandler> from which to build the Carrier
                   \param optimizationData optimization data to store in the Carrier
