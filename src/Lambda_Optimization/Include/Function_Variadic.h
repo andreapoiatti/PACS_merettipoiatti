@@ -9,8 +9,9 @@
 
 // Classes
 
-//! Function wrapper. Stores a function from R^m to R^n. Variadic template to store either from inheritance or directly
-/*!
+//! Function wrapper. Stores a function from R^m to R^n. Variadic template to store either from inheritance or directly. 
+/*
+This class implements a general function, giving the possibility of computing also the first and second derivatives. It is used to simplify the code to instantiate it, since by Variadic Templates it has the same instantiation whichever class it derives from. The class from which possibly inherits need to have the members compute_f, compute_fp, compute_fs, which are wrapped in this class.
  \tparam Dtype domain type of the function
  \tparam Ctype image type of the function
  \tparam Tuple image type of the gradient of the function
