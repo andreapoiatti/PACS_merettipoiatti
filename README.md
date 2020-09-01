@@ -24,7 +24,7 @@ Two different methods are proposed in order to install the package in the R envi
 Download the `.zip` file from the repository, unzip it, and for the installation choose one of the two following methods:  
 
 - R console:
-        ```install.packages("/path/to/PACS_merettpoiatti-master", type='source', repos=NULL)```
+        ```install.packages("/path/to/PACS_merettipoiatti-master", type='source', repos=NULL)```
 
 - From the Terminal: 
         ```$ R CMD build <path to folder>}```     
