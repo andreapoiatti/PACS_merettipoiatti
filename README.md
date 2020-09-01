@@ -27,8 +27,8 @@ Download the `.zip` file from the repository, unzip it, and for the installation
         ```install.packages("/path/to/PACS_merettipoiatti-master", type='source', repos=NULL)```
 
 - From the Terminal: 
-        ```$ R CMD build <path to folder>}```     
-        ```$ R CMD INSTALL <path name of the R library tree>}```
+        ```$ R CMD build <path to folder to be installed>```     
+        ```$ R CMD INSTALL -l <path name of the R library tree> <path to folder to be installed>```
 
 see the installation section in the report for more information.
 ## Remarks:
