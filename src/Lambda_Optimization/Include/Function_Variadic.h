@@ -52,7 +52,7 @@ This class implements a general function, giving the possibility of computing al
                 // -- OPEATORS --
                 //! Function version of a std::function () operator, use SFINAE to differentiate from the two possibilities of instantiation (derived or not)
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Ctype>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Ctype>::type //is_void<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_f(U lambda)
                 {
                         return g(lambda);
@@ -68,7 +68,7 @@ This class implements a general function, giving the possibility of computing al
 
                 //! Evaluation of first derivative, if derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Tuple>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Tuple>::type //is_void<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_first_derivative(U lambda)
                 {
                         return dg(lambda);
@@ -84,7 +84,7 @@ This class implements a general function, giving the possibility of computing al
 
                 //! Evaluation of second derivative, if derived
                 template <typename U>
-                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Hessian>::type //is_enum<U> is always false for us, used to make the deduction argument and SFINAE work
+                typename std::enable_if<sizeof...(Extensions)==0 || std::is_void<U>::value, Hessian>::type //is_void<U> is always false for us, used to make the deduction argument and SFINAE work
                 evaluate_second_derivative(U lambda)
                 {
                         return ddg(lambda);
