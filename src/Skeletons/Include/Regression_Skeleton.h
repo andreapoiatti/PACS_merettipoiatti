@@ -142,7 +142,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 template<typename EvaluationType, typename CarrierType>
 std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & optim, CarrierType & carrier)
 {
-	// Build wraper and newton method
+	// Build wrapper and newton method
 	Function_Wrapper<Real, Real, Real, Real, EvaluationType> Fun(optim);
 	typedef Function_Wrapper<Real, Real, Real, Real, EvaluationType> FunWr;
 
@@ -170,7 +170,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
                 output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
-		// Solution_Builders::GCV_grid_sol(solution, output_vec);
+	
 	}
 	else // 'not_required' optimization can't enter here!! [checked in R code]
 	{
