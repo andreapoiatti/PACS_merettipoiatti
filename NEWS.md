@@ -2,7 +2,7 @@
 
 ## New features
 
-1)Optimization methods (Newton's methods) to find best smoothing parameter through GCV minimization
+1) Optimization methods (Newton's methods) to find best smoothing parameter through GCV minimization
 2) smooth regression for non-gaussian data (GLM model)
 
 # fdaPDE 1.1-0
