@@ -17,9 +17,10 @@ class Opt_method_factory
 {
 	public:
         	//! A method that takes as parameter a string and builds a pointer to the right object
-		/* \param validation a string code to decide which pointer to create
-		 * \param F a function from which to create the pointer
-		 * \return a pointer to the validated optimization method
+		/*!
+		 \param validation a string code to decide which pointer to create
+		 \param F a function from which to create the pointer
+		 \return a pointer to the validated optimization method
 		*/
         	static std::unique_ptr<Opt_methods<Tuple,Hessian,EvaluationType>> create_Opt_method(const std::string & validation, Function & F)
                 {

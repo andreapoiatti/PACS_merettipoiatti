@@ -67,7 +67,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                rans[j] = output.rmse[j];
         }
 
-        // Add predicetd variance of error
+        // Add predicted variance of error
         SET_VECTOR_ELT(result, 3, Rf_allocVector(REALSXP, 1));
         rans= REAL(VECTOR_ELT(result, 3));
         rans[0] = output.sigma_hat_sq;
@@ -111,7 +111,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                rans[j] = output.dof[j];
         }
 
-        // Add the vecor of lambdas
+        // Add the vector of lambdas
         UInt size_lambda = output.lambda_vec.size();
         SET_VECTOR_ELT(result, 11, Rf_allocVector(REALSXP, size_lambda));
         rans = REAL(VECTOR_ELT(result, 11));
@@ -179,7 +179,7 @@ SEXP Solution_Builders::build_solution_plain_regression(const MatrixXr & solutio
                         rans9[i + num_tree_nodes*j] = mesh.getTree().gettreenode(i).getbox().get()[j];
         }
 
-        // Send baryenter information to R
+        // Send barycenter information to R
         SET_VECTOR_ELT(result, 20, Rf_allocVector(INTSXP, elementIds.rows())); //element id of the locations point (vector)
         int *rans10 = INTEGER(VECTOR_ELT(result, 20));
         for(UInt i = 0; i < elementIds.rows(); i++)

@@ -11,7 +11,6 @@
 */
 void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rseed, SEXP RDOF_matrix, SEXP Rtune, SEXP Rsct)
 {
-        // op
         UInt criterion = INTEGER(Roptim)[0]; // Decipher the Roptim sequence of numbers, first criterion
         if(criterion == 2)
         {
@@ -79,7 +78,7 @@ void OptimizationData::builder_utility(SEXP Roptim, SEXP Rnrealizations, SEXP Rs
 /*!
  \param Rlambda the vector of lambdas to be set passed by the user
  \param vect the vector of lambdas to be filled with Rlambda
- \param the size of vect, to be stored
+ \param size the size of vect, to be stored
 */
 void OptimizationData::fill_lambda(SEXP Rlambda, std::vector<Real> & vect, UInt & size)
 {

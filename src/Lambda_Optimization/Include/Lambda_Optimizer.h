@@ -109,7 +109,8 @@ class GCV_Family<InputCarrier, 1>: Lambda_optimizer<InputCarrier, 1>
                 // Degrees of freedom
                 Real            dof = 0.0;              //!< tr(S) + q, degrees of freedom of the model
                 Real            dor = 0.0;              //!< s - dof, degrees of freedom of the residuals
-                UInt            use_index = -1;
+
+                UInt            use_index = -1;         //!< Index of the DOF_matrix to be used, if non empty
 
                 // SETTERS of the putput data
         virtual void compute_z_hat(Real lambda) = 0;    //!< Utility to compute the size of predicted value in the locations

@@ -94,7 +94,7 @@ std::pair<MatrixXr, output_Data> optimizer_method_selection(CarrierType & carrie
 		Rprintf("Pure evaluation\n");
 		GCV_Stochastic<CarrierType, 1> optim(carrier);
 
-		timer Time_partial;
+		timer Time_partial; // Of the sole optimization
 		Time_partial.start();
 		// Rprintf("WARNING: start taking time\n");
 
@@ -149,7 +149,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 	const OptimizationData * optr = carrier.get_opt_data();
 	if(optr->get_criterion() == "grid")
 	{
-		timer Time_partial;
+		timer Time_partial; // Of the sole optimization
 		Time_partial.start();
 		// Rprintf("WARNING: start taking time\n");
 
@@ -170,7 +170,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
                 output.betas = carrier.get_model()->getBeta();
 
                 return {solution, output};
-	
+
 	}
 	else // 'not_required' optimization can't enter here!! [checked in R code]
 	{
@@ -188,7 +188,7 @@ std::pair<MatrixXr, output_Data> optimizer_strategy_selection(EvaluationType & o
 			lambda = -1.0;
 		}
 
-		timer Time_partial;
+		timer Time_partial; // Of the sole optimization
 		Time_partial.start();
 		// Rprintf("WARNING: start taking time\n");
 

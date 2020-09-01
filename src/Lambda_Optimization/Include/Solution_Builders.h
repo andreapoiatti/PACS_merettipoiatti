@@ -25,17 +25,17 @@ struct output_Data
         std::vector<Real>       lambda_vec      = {-1};    //!< Vector of explored lambda with with the optimization iterative method or grid
         Real                    GCV_opt         = -1;      //!< GCV optimal comptued in the vector of lambdas
         int                     termination     = -2;      //!< Reason of termination of the iterative optimization method (reached tolerance or max number of iterations)
-        MatrixXv                betas;                     //!< beta coefficients of the optimal solution
+        MatrixXv                betas;                     //!< Regression coefficients of the optimal solution
 };
 
-//! Unique namespac to manage the output
+//! Unique namespace to manage the output
 namespace Solution_Builders
 {
         //! Function to build the output of regression problems
-        /*
+        /*!
          \tparam InputHandler type of data used
-         \tparam ORDER order of the finite elemnts in mesh
-         \tparam mydim dimension of elemnts in mesh
+         \tparam ORDER order of the finite elements in mesh
+         \tparam mydim dimension of elements in mesh
          \tparam ndim dimension of space in mesh
          \param solution matrix collecting the output of apply function
          \param output output_Data struct coming from a Lambda_Optimizer type class
