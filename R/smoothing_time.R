@@ -45,23 +45,21 @@ NULL
 #'  \code{locations}, location points which are same as the given locations options. (checks whether both locations are the same);
 #'  \code{element ids}, a vector of element id of the points from the mesh where they are located;
 #'  \code{barycenters}, a vector of barycenter of points from the located element.
-#' @param lambda.selection.criterion This parameter is used to select the optimization method related to smoothing parameter.
-#' The following methods are implemented: "grid", "newton", "newton_fd". 
-#' The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
-#' The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
-#' They implement respectively a pure Newton method and a finite differences Newton method.
-#' Default value \code{lambda.selection.criterion="grid"}
-#' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed
-#' The following possibilities are allowed: NULL, "exact" and "stochastic"
+#' @param lambda.selection.criterion This parameter is used to select the optimization method related to smoothing parameter \code{lambda}.
+#' The following methods are implemented: 'grid', further optimization methods are yet to come. 
+#' The 'grid' is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
+#' Default value \code{lambda.selection.criterion='grid'}
+#' @param DOF.evaluation This parameter is used to identify if and how degrees of freedom computation has to be performed.
+#' The following possibilities are allowed: NULL, 'exact' and 'stochastic'
 #' In the former case no degree of freedom is computed, while the other two methods enable computation.
-#' Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
+#' Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but is highly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
 #' Default value \code{DOF.evaluation=NULL}
 #' @param lambda.selection.lossfunction This parameter is used to understand if some loss function has to be evaluated.
-#' The following possibilities are allowed: NULL and "GCV" (generalized cross validation)
-#' In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
+#' The following possibilities are allowed: NULL and 'GCV' (generalized cross validation)
+#' The former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
 #' Default value \code{lambda.selection.lossfunction=NULL}
-#' @param lambdaS A scalar or vector of smoothing parameters.
-#' @param lambdaT A scalar or vector of smoothing parameters.
+#' @param lambdaS A scalar or vector of spatial smoothing parameters.
+#' @param lambdaT A scalar or vector of temporal smoothing parameters.
 #' @param DOF.stochastic.realizations This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 #' It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
 #' Default value \code{DOF.stochastic.realizations=100}.
@@ -69,12 +67,12 @@ NULL
 #' It is a positive integer that represents user defined seed employed in stochastic GCV computation.
 #' Default value \code{DOF.stochastic.seed=0}.
 #' @param DOF.matrix Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambdaS} and \code{lambdaT} is available from precedent computation. This allows to save time
-#' since the computation of the dof is the most expensive part of GCV.
-#' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
+#' since the computation of the DOFs is the most expensive part of GCV.
+#' @param GCV.inflation.factor Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.0}.
 #' It is advised to set it grather than 1 to avoid overfitting.
 #' @param lambda.optimization.tolerance Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-#' Used only if \code{lambda.selection.criterion="newton"} or \code{lambda.selection.criterion="newton_fd"}.
-#' Default value \code{stop_criteion_tol=0.05}.
+#' Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}, thus ot implemented yet.
+#' Default value \code{lambda.optimization.tolerance=0.05}.
 #' @return A list with the following variables:
 #' \item{\code{fit.FEM.time}}{A \code{FEM.time} object that represents the fitted spatio-temporal field.}
 #' \item{\code{PDEmisfit.FEM.time}}{A \code{FEM.time} object that represents the misfit of the penalized PDE.}

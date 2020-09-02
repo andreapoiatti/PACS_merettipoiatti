@@ -92,25 +92,25 @@ Default value \code{threshold.FPIRLS = 0.0002020}.}
 \item{max.steps.FPIRLS}{This parameter is used to limit the maximum number of iteration.
 Default value \code{max.steps.FPIRLS=15}.}
 
-\item{lambda.selection.criterion}{This parameter is used to select the optimization method related to the smoothing parameter.
-The following methods are implemented: "grid", "newton", "newton_fd".
+\item{lambda.selection.criterion}{This parameter is used to select the optimization method related to the smoothing parameter \code{lambda}.
+The following methods are implemented: 'grid', 'newton', 'newton_fd'.
 The former is a pure evaluation method, therefore a vector of \code{lambda} testing penalizations must be provided.
 The remaining two are optimization methods that automatically select the best penalization according to \code{lambda.selection.lossfunction} criterion.
 They implement respectively a pure Newton method and a finite differences Newton method.
-Default value \code{lambda.selection.criterion="grid"}}
+Default value \code{lambda.selection.criterion='grid'}}
 
-\item{DOF.evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed
-The following possibilities are allowed: NULL, "exact" and "stochastic"
+\item{DOF.evaluation}{This parameter is used to identify if and how degrees of freedom computation has to be performed.
+The following possibilities are allowed: NULL, 'exact' and 'stochastic'
 In the former case no degree of freedom is computed, while the other two methods enable computation.
-Stochastic computation of dof may be slightly less accurate than its deterministic counterpart, but is higly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
+Stochastic computation of DOFs may be slightly less accurate than its deterministic counterpart, but is highly suggested for meshes of more than 5000 nodes, being fairly less time consuming.
 Default value \code{DOF.evaluation=NULL}}
 
 \item{lambda.selection.lossfunction}{This parameter is used to understand if some loss function has to be evaluated.
-The following possibilities are allowed: NULL and "GCV" (generalized cross validation)
-In the former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
+The following possibilities are allowed: NULL and 'GCV' (generalized cross validation)
+The former case is that of \code{lambda.selection.criterion='grid'} pure evaluation, while the second can be employed for optimization methods.
 Default value \code{lambda.selection.lossfunction=NULL}}
 
-\item{lambda}{a vector of penalization factors to be provided for evaluation if \code{lambda.selection.criterion="grid"}, an optional initialization otherwise}
+\item{lambda}{a vector of spatial smoothing parameters to be provided for evaluation if \code{lambda.selection.criterion='grid'}, an optional initialization otherwise}
 
 \item{DOF.stochastic.realizations}{This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 It is a positive integer that represents the number of uniform random variables used in stochastic GCV computation.
@@ -118,17 +118,17 @@ Default value \code{DOF.stochastic.realizations=100}.}
 
 \item{DOF.stochastic.seed}{This parameter is considered only when \code{DOF.evaluation = 'stochastic'}.
 It is a positive integer that represents user defined seed employed in stochastic GCV computation.
-Default value \code{DOF.stochastic.seed=0}.}
+Default value \code{DOF.stochastic.seed = 0} means random.}
 
 \item{DOF.matrix}{Matrix of degrees of freedom. This parameter can be used if the DOF.matrix corresponding to \code{lambda} is available from precedent computation. This allows to save time
-since the computation of the dof is the most expensive part of GCV.}
+since the computation of the DOFs is the most expensive part of GCV.}
 
-\item{GCV.inflation.factor}{Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.8}.
+\item{GCV.inflation.factor}{Tuning parameter used for the estimation of GCV. Default value \code{GCV.inflation.factor = 1.0} or \code{1.8} in GAM.
 It is advised to set it grather than 1 to avoid overfitting.}
 
 \item{lambda.optimization.tolerance}{Tolerance parameter, a double between 0 and 1 that fixes how much precision is required by the optimization method: the smaller the parameter, the higher the accuracy.
-Used only if \code{lambda.selection.criterion="newton"} or \code{lambda.selection.criterion="newton_fd"}.
-Default value \code{stop_criteion_tol=0.05}.}
+Used only if \code{lambda.selection.criterion='newton'} or \code{lambda.selection.criterion='newton_fd'}.
+Default value \code{lambda.optimization.tolerance=0.05}.}
 }
 \value{
 A list with the following variables in \code{family="gaussian"} case:
@@ -136,7 +136,7 @@ A list with the following variables in \code{family="gaussian"} case:
    \item{\code{fit.FEM}}{A \code{FEM} object that represents the fitted spatial field.}
    \item{\code{PDEmisfit.FEM}}{A \code{FEM} object that represents the Laplacian of the estimated spatial field.}
    \item{\code{solution}}{A list, note that all terms are matrices or row vectors: the \code{j}th column represents the vector of related to \code{lambda[j]} if \code{lambda.selection.criterion="grid"} and \code{lambda.selection.lossfunction=NULL}.
-         In all the other cases is returned just the column related to the best penalization parameter
+         In all the other cases is returned just the column related to the best smoothing parameter
          \item{\code{f}}{Matrix, estimate of function f, first half of solution vector}
          \item{\code{g}}{Matrix, second half of solution vector}
          \item{\code{z_hat}}{Matrix, prediction of the output in the locations}
@@ -149,7 +149,7 @@ A list with the following variables in \code{family="gaussian"} case:
          \item{\code{lambda_position}}{integer, postion in \code{lambda_vector} of best lambda acording to \code{lambda.selection.lossfunction}, -1 if \code{lambda.selection.lossfunction=NULL}}
          \item{\code{GCV}}{numeric value of GCV in correspondence of the optimum}
          \item{\code{optimization_details}}{list containing further information about the optimization method used and the nature of its termination, eventual number of iterations}
-         \item{\code{dof}}{numeric vector, value of dof for all the penalizations it has been computed, empty if not computed}
+         \item{\code{dof}}{numeric vector, value of DOFs for all the penalizations it has been computed, empty if not computed}
          \item{\code{lambda_vector}}{numeric value of the penalization factors passed by the user or found in the iterations of the optimization method}
          \item{\code{GCV_vector}}{numeric vector, value of GCV for all the penalizations it has been computed}
          }
