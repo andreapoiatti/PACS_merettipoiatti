@@ -85,14 +85,13 @@ NULL
 #' \item{\code{ICestimated}}{If FLAG_PARABOLIC is \code{TRUE} and IC is \code{NULL}, a list containing a \code{FEM} object with the initial conditions, the value of the smoothing parameter lambda returning the lowest GCV and, in presence of covariates, the estimated beta coefficients}
 #' \item{\code{bary.locations}}{A barycenter information of the given locations if the locations are not mesh nodes.}
 #' @description Space-time regression  with differential regularization. Space-varying covariates can be included in the model. The technique accurately handle data distributed over irregularly shaped domains. Moreover, various conditions can be imposed at the domain boundaries.
-#' @usage smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
-#'                            covariates = NULL, PDE_parameters = NULL,  BC = NULL,
-#'                            incidence_matrix = NULL, areal.data.avg = TRUE,
-#'                            FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
-#'                            search = "tree", bary.locations = NULL,
-#'                            lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
-#' @export
-
+#' @usagesmooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations, FEMbasis, time_mesh=NULL,
+#'          covariates = NULL, PDE_parameters = NULL,  BC = NULL,
+#'          incidence_matrix = NULL, areal.data.avg = TRUE,
+#'          FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
+#'          search = "tree", bary.locations = NULL,
+#'          lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
+#'          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 #' @references Sangalli, L.M., Ramsay, J.O. & Ramsay, T.O., 2013. Spatial spline regression models. Journal of the Royal Statistical Society. Series B: Statistical Methodology, 75(4), pp. 681-703.
 #' @examples
 #' library(fdaPDE)
@@ -125,7 +124,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
                           incidence_matrix = NULL, areal.data.avg = TRUE,
                           FLAG_MASS = FALSE, FLAG_PARABOLIC = FALSE, IC = NULL,
                           search = "tree", bary.locations = NULL,
-                          lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL, lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
+                          lambda.selection.criterion = "grid", DOF.evaluation = NULL, lambda.selection.lossfunction = NULL,
+                          lambdaS = NULL, lambdaT = NULL, DOF.stochastic.realizations = 100, DOF.stochastic.seed = 0, DOF.matrix = NULL, GCV.inflation.factor = 1, lambda.optimization.tolerance = 0.05)
 {
   if(class(FEMbasis$mesh) == "mesh.2D")
   {
