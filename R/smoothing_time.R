@@ -446,8 +446,8 @@ smooth.FEM.time<-function(locations = NULL, time_locations = NULL, observations,
 
   # Prepare return list
   reslist = NULL
-
-  if(lambda.selection.lossfunction == 'GCV')
+  
+  if(!is.null(lambda.selection.lossfunction))
   {
     stderr=sqrt(GCV_*(length(observations)-dof)/length(observations))
     reslist=list(fit.FEM.time = fit.FEM.time, PDEmisfit.FEM.time = PDEmisfit.FEM.time,
